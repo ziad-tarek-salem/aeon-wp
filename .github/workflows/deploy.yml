@@ -1,0 +1,40 @@
+name: Deploy theme
+
+# Push to `main` → deploy the AEON theme to the production WordPress host via
+# FTPS. CODE ONLY — never the database, uploads, or other site content.
+#
+# Before this runs, add three repo secrets
+# (Settings → Secrets and variables → Actions):
+#   FTP_HOST     = <your host, e.g. ftp.example.com or an IP>
+#   FTP_USER     = <your FTP username>
+#   FTP_PASSWORD = <your FTP password>
+# and set `server-dir` below to match your host's wp-content/themes path.
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}   # allows manual "Run workflow" from the Actions tab
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Scoped to the theme folder so the sync never touches (or deletes)
+      # plugins, uploads, or other content on the server.
+      - name: Deploy theme (aeon)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./app/wp-content/themes/aeon/
+          # TODO: replace with your host's real path (placeholder shown):
+          server-dir: /public_html/wp-content/themes/aeon/
+
+# After each deploy, purge any host/page cache, and if rewrite rules changed,
+# re-save Settings → Permalinks once.

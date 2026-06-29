@@ -1,0 +1,25 @@
+# Normalize line endings: store text as LF in the repo and in release zips.
+# (WordPress theme zips with CRLF/backslash paths break extraction on Linux.)
+* text=auto eol=lf
+
+# Shell scripts must stay LF; PowerShell scripts stay CRLF.
+*.sh   text eol=lf
+*.ps1  text eol=crlf
+
+# Binary assets — never touched by line-ending normalization.
+*.jpeg binary
+*.jpg  binary
+*.png  binary
+*.gif  binary
+*.ico  binary
+*.woff  binary
+*.woff2 binary
+*.zip  binary
+*.phar binary
+
+# Keep vendored/minified libraries and tooling out of GitHub language stats.
+app/wp-content/themes/aeon/assets/js/lib/**   linguist-vendored
+app/wp-content/themes/aeon/assets/css/lib/**  linguist-vendored
+*.min.js   linguist-vendored
+*.min.css  linguist-vendored
+wp-cli.phar linguist-vendored

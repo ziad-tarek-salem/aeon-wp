@@ -1,0 +1,23 @@
+# OS / editor / logs
+.DS_Store
+Thumbs.db
+*.log
+
+# Node (if QA/build tooling is added later)
+node_modules/
+
+# Packaging output (regenerate with tools/package-theme.*)
+/dist/
+
+# Local environment
+.env
+
+# WordPress core, wp-config, third-party plugins/themes, uploads, backups —
+# track ONLY our custom theme under app/. Everything else in the local WP
+# install stays on disk to run the site, but is never committed.
+/app/*
+!/app/wp-content
+/app/wp-content/*
+!/app/wp-content/themes
+/app/wp-content/themes/*
+!/app/wp-content/themes/aeon

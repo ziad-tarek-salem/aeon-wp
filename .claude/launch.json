@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "wp",
+      "runtimeExecutable": "C:\\laragon\\bin\\php\\php-8.3.30-Win32-vs16-x64\\php.exe",
+      "runtimeArgs": ["C:\\laragon\\www\\aeon-wp\\wp-cli.phar", "server", "--path=app", "--host=127.0.0.1", "--port=8089"],
+      "port": 8089
+    }
+  ]
+}
