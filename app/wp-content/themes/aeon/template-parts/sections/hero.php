@@ -14,20 +14,26 @@
 		<span class="hero__ring hero__ring--1"></span>
 		<span class="hero__ring hero__ring--2"></span>
 		<span class="hero__ring hero__ring--3"></span>
+		<span class="hero__ring hero__ring--4"></span>
+		<span class="hero__ring hero__ring--5"></span>
 		<span class="hero__grid"></span>
 		<span class="hero__grid hero__grid--2"></span>
 		<span class="hero__grid hero__grid--3"></span>
+		<span class="hero__grid hero__grid--4"></span>
 		<span class="hero__stroke hero__stroke--1"></span>
 		<span class="hero__stroke hero__stroke--2"></span>
 		<span class="hero__plus hero__plus--1"></span>
 		<span class="hero__plus hero__plus--2"></span>
 		<span class="hero__plus hero__plus--3"></span>
+		<span class="hero__plus hero__plus--4"></span>
 		<span class="hero__spark hero__spark--1"></span>
 		<span class="hero__spark hero__spark--2"></span>
 		<span class="hero__spark hero__spark--3"></span>
 		<span class="hero__spark hero__spark--4"></span>
 		<span class="hero__spark hero__spark--5"></span>
 		<span class="hero__spark hero__spark--6"></span>
+		<span class="hero__spark hero__spark--7"></span>
+		<span class="hero__spark hero__spark--8"></span>
 		<span class="hero__swoosh"></span>
 	</div>
 

@@ -11,8 +11,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Set <html dir> and lang from the active language.
+ *
+ * Front-end only: wp-admin also builds its <html> tag via language_attributes(),
+ * and the site is Arabic-first, so without this guard the whole admin would be
+ * forced into RTL (with English text) on every screen.
  */
 function aeon_language_attributes( $output ) {
+	if ( is_admin() ) {
+		return $output;
+	}
 	$lang = aeon_lang();
 	$dir  = aeon_dir();
 	$locale = 'ar' === $lang ? 'ar' : 'en-US';
