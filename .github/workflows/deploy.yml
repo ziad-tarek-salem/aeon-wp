@@ -45,11 +45,12 @@ jobs:
           protocol: ftps
           port: 21
           local-dir: ./app/wp-content/themes/aeon/
-          # uaeaeon.com is the PRIMARY domain → docroot is /public_html/
-          # (confirmed via File Manager). mostarstar.com is the addon domain at
-          # /domains/mostarstar.com/. If a first run can't find this path, try it
-          # WITHOUT the leading slash (relative to the FTP home).
-          server-dir: /public_html/wp-content/themes/aeon/
+          # uaeaeon.com is an ADDON/secondary domain on the u171546863 account,
+          # so its live docroot is /domains/uaeaeon.com/public_html/ — NOT the
+          # account's primary /public_html/. Verified 2026-06-30: a deploy to
+          # /public_html/ CREATED a fresh themes/aeon folder there and never
+          # changed the live uaeaeon.com CSS, proving the live root is elsewhere.
+          server-dir: /domains/uaeaeon.com/public_html/wp-content/themes/aeon/
 
 # After each deploy, purge any host/page cache, and if rewrite rules changed,
 # re-save Settings → Permalinks once.
