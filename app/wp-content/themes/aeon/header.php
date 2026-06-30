@@ -19,12 +19,6 @@
 
 <a class="skip-link screen-reader-text" href="#main"><?php aeon_e( 'skip_to_content' ); ?></a>
 
-<div class="aeon-preloader" aria-hidden="true">
-	<div class="aeon-preloader__mark">
-		<span>AE</span><span class="dot"></span><span class="o-orange">N</span>
-	</div>
-</div>
-
 <div class="aeon-progress" aria-hidden="true"><span></span></div>
 
 <header class="site-header" id="site-header" data-header>
@@ -53,9 +47,19 @@
 		</nav>
 
 		<div class="site-header__actions">
-			<a class="lang-switch" href="<?php echo aeon_switch_url(); ?>" aria-label="Switch language">
-				<?php aeon_e( 'lang_switch' ); ?>
-			</a>
+			<?php
+			/**
+			 * Language switcher is temporarily hidden. Flip AEON_SHOW_LANG_SWITCH to
+			 * true (or define the constant) to bring the EN/AR button back — markup
+			 * and behaviour are kept fully intact.
+			 */
+			$aeon_show_lang = defined( 'AEON_SHOW_LANG_SWITCH' ) ? AEON_SHOW_LANG_SWITCH : false;
+			?>
+			<?php if ( $aeon_show_lang ) : ?>
+				<a class="lang-switch" href="<?php echo aeon_switch_url(); ?>" aria-label="Switch language">
+					<?php aeon_e( 'lang_switch' ); ?>
+				</a>
+			<?php endif; ?>
 			<a class="btn btn--primary btn--sm header-cta" href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">
 				<span><?php aeon_e( 'cta_request' ); ?></span>
 			</a>
@@ -79,7 +83,9 @@
 		) );
 		?>
 		<a class="btn btn--primary btn--block" href="<?php echo esc_url( home_url( '/contact/' ) ); ?>"><?php aeon_e( 'cta_request' ); ?></a>
-		<a class="mobile-menu__lang" href="<?php echo aeon_switch_url(); ?>"><?php echo aeon_is_rtl() ? 'English' : 'العربية'; ?></a>
+		<?php if ( $aeon_show_lang ) : // Hidden alongside the header switcher — see AEON_SHOW_LANG_SWITCH above. ?>
+			<a class="mobile-menu__lang" href="<?php echo aeon_switch_url(); ?>"><?php echo aeon_is_rtl() ? 'English' : 'العربية'; ?></a>
+		<?php endif; ?>
 	</div>
 </div>
 

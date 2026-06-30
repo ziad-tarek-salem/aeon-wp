@@ -179,23 +179,9 @@ h1, h2, h3, h4 { line-height: 1.18; font-weight: 800; color: var(--ink); }
 .mobile-menu__list a:hover { color: var(--violet); }
 .mobile-menu__lang { font-weight: 700; color: var(--violet); }
 
-/* ---------- Progress bar + preloader ---------- */
+/* ---------- Progress bar ---------- */
 .aeon-progress { position: fixed; inset-block-start: 0; inset-inline-start: 0; width: 100%; height: 3px; z-index: 950; pointer-events: none; }
 .aeon-progress span { display: block; height: 100%; width: 0; background: var(--grad-brand); }
-
-.aeon-preloader {
-	position: fixed; inset: 0; z-index: 9999; background: var(--white);
-	display: grid; place-items: center; transition: opacity .6s, visibility .6s;
-}
-.aeon-preloader.is-done { opacity: 0; visibility: hidden; }
-.aeon-preloader__mark { display: flex; align-items: center; gap: 6px; font-family: var(--font-en); font-weight: 800; font-size: 3rem; letter-spacing: -2px; }
-.aeon-preloader__mark span:first-child { color: var(--purple); }
-.aeon-preloader__mark .o-orange { color: var(--orange); }
-.aeon-preloader__mark .dot {
-	width: 16px; height: 16px; border-radius: 50%; background: var(--grad-orange);
-	animation: aeonPulse 1s var(--ease) infinite;
-}
-@keyframes aeonPulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: .5; } }
 
 /* ---------- Hero ---------- */
 .hero {
@@ -450,19 +436,61 @@ h1, h2, h3, h4 { line-height: 1.18; font-weight: 800; color: var(--ink); }
 .work-filter.is-active { background: var(--grad-brand); color: #fff; border-color: transparent; }
 .work-card.is-hidden { display: none; }
 
-/* ---------- Testimonials ---------- */
-.testimonials__slider { padding-block: 16px 56px; padding-inline: clamp(20px, 5vw, 40px); max-width: 1280px; margin-inline: auto; overflow: hidden; }
-.tst-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 40px 34px; height: 100%; box-shadow: var(--shadow-sm); position: relative; }
-.tst-card__quote { position: absolute; inset-block-start: 14px; inset-inline-end: 26px; font-family: Georgia, serif; font-size: 5rem; line-height: 1; color: var(--surface-2); }
-.tst-card__text { font-size: 1.08rem; color: var(--ink-2); line-height: 1.75; position: relative; z-index: 1; }
-.tst-card__author { display: flex; align-items: center; gap: 14px; margin-block-start: 26px; }
-.tst-card__avatar { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; }
-.tst-card__avatar--ph { display: grid; place-items: center; background: var(--grad-brand); color: #fff; font-weight: 800; font-size: 1.3rem; }
-.tst-card__meta { display: flex; flex-direction: column; }
-.tst-card__meta strong { font-weight: 700; }
-.tst-card__meta small { color: var(--muted); }
-.swiper-pagination-bullet { background: var(--violet); }
-.swiper-pagination-bullet-active { background: var(--orange); width: 22px; border-radius: 6px; }
+/* ---------- Testimonials slider ---------- */
+.testimonials { position: relative; overflow: hidden; }
+.testimonials__slider { position: relative; max-width: 1240px; margin-inline: auto; padding-block: 24px 8px; padding-inline: clamp(16px, 5vw, 40px); }
+/* Let the active slide's neighbours peek beyond the viewport edges. */
+.testimonials__viewport { overflow: visible; }
+.testimonials__viewport .swiper-wrapper { align-items: stretch; }
+
+.testimonials .swiper-slide {
+	width: min(440px, 86vw); height: auto;
+	opacity: .4; transform: scale(.9);
+	transition: opacity .55s var(--ease), transform .55s var(--ease);
+}
+.testimonials .swiper-slide-active { opacity: 1; transform: scale(1); }
+
+.tst-card {
+	position: relative; height: 100%; display: flex; flex-direction: column;
+	background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-lg);
+	padding: 46px 38px 34px; box-shadow: var(--shadow-sm); overflow: hidden;
+	transition: box-shadow .55s var(--ease), border-color .55s var(--ease), transform .55s var(--ease);
+}
+/* Brand accent bar sweeps in on the centred card. */
+.tst-card::before {
+	content: ''; position: absolute; inset-block-start: 0; inset-inline: 0; height: 4px;
+	background: var(--grad-brand); transform: scaleX(0); transform-origin: inline-start;
+	transition: transform .6s var(--ease);
+}
+.testimonials .swiper-slide-active .tst-card { box-shadow: var(--shadow-lg); border-color: transparent; }
+.testimonials .swiper-slide-active .tst-card::before { transform: scaleX(1); }
+
+.tst-card__quote { width: 46px; height: 46px; margin-block-end: 18px; color: var(--orange); opacity: .9; }
+.tst-card__quote svg { width: 100%; height: 100%; }
+.tst-card__text { flex: 1 1 auto; font-size: 1.08rem; color: var(--ink-2); line-height: 1.8; }
+.tst-card__author { display: flex; align-items: center; gap: 14px; margin-block-start: 28px; padding-block-start: 22px; border-block-start: 1px solid var(--line); }
+.tst-card__avatar { width: 54px; height: 54px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.tst-card__avatar--ph { display: grid; place-items: center; background: var(--grad-brand); color: #fff; font-weight: 800; font-size: 1.35rem; }
+.tst-card__meta { display: flex; flex-direction: column; gap: 2px; }
+.tst-card__meta strong { font-weight: 700; font-size: 1.02rem; }
+.tst-card__meta small { color: var(--muted); font-size: .9rem; }
+
+/* Controls: arrows flanking the pagination dots. */
+.testimonials__controls { display: flex; align-items: center; justify-content: center; gap: 22px; margin-block-start: 36px; }
+.testimonials__nav {
+	display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%;
+	background: var(--white); border: 1.5px solid var(--line); color: var(--ink-2); cursor: pointer;
+	transition: background .35s var(--ease), color .35s var(--ease), border-color .35s var(--ease), transform .35s var(--ease), box-shadow .35s var(--ease);
+}
+.testimonials__nav svg { width: 22px; height: 22px; }
+.testimonials__nav:hover { background: var(--grad-brand); color: #fff; border-color: transparent; transform: translateY(-2px); box-shadow: var(--shadow-purple); }
+.testimonials__nav.swiper-button-disabled { opacity: .35; pointer-events: none; }
+/* Mirror the chevrons in RTL so they always point the travelled direction. */
+.aeon-rtl .testimonials__nav svg { transform: scaleX(-1); }
+
+.testimonials__pagination { position: static; display: flex; align-items: center; justify-content: center; gap: 8px; width: auto; }
+.testimonials__pagination .swiper-pagination-bullet { width: 9px; height: 9px; margin: 0 !important; background: var(--surface-2); opacity: 1; transition: width .35s var(--ease), background .35s var(--ease); }
+.testimonials__pagination .swiper-pagination-bullet-active { width: 26px; border-radius: 6px; background: var(--grad-brand); }
 
 /* ---------- Partners marquee ---------- */
 .partners { padding-block: 36px; border-block: 1px solid var(--line); background: var(--surface); overflow: hidden; }
@@ -505,7 +533,10 @@ h1, h2, h3, h4 { line-height: 1.18; font-weight: 800; color: var(--ink); }
 	outline: none; border-color: var(--violet); background: #fff; box-shadow: 0 0 0 4px rgba(126,34,206,.1);
 }
 .field textarea { resize: vertical; }
-.hp-field { position: absolute !important; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+/* Honeypot: hidden via clipping, not an off-screen offset. `left:-9999px` pushes
+   the field outside the layout, which in an RTL document creates ~9999px of
+   horizontal overflow and blanks the page on mobile. Clipping avoids that. */
+.hp-field { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; opacity: 0; }
 .form-status { margin-block-start: 14px; font-weight: 600; text-align: center; min-height: 1.4em; }
 .form-status.is-success { color: #1f9d55; }
 .form-status.is-error { color: #d23c3c; }
@@ -593,7 +624,8 @@ h1, h2, h3, h4 { line-height: 1.18; font-weight: 800; color: var(--ink); }
 
 /* ---------- WhatsApp FAB ---------- */
 .whatsapp-fab {
-	position: fixed; inset-block-end: 26px; inset-inline-end: 26px; z-index: 800;
+	/* Pinned to the physical right edge regardless of text direction (RTL/LTR). */
+	position: fixed; bottom: 26px; right: 26px; left: auto; z-index: 800;
 	width: 58px; height: 58px; border-radius: 50%; background: #25d366; color: #fff;
 	display: grid; place-items: center; box-shadow: 0 12px 30px rgba(37,211,102,.45);
 	transition: transform .35s var(--ease); animation: fabIn .6s var(--ease) .8s both;

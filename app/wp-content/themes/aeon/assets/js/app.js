@@ -10,17 +10,6 @@
 	var $ = function (sel, ctx) { return (ctx || document).querySelector(sel); };
 	var $$ = function (sel, ctx) { return Array.prototype.slice.call((ctx || document).querySelectorAll(sel)); };
 
-	/* ---------- Preloader ---------- */
-	function initPreloader() {
-		var pre = $('.aeon-preloader');
-		if (!pre) return;
-		window.addEventListener('load', function () {
-			setTimeout(function () { pre.classList.add('is-done'); }, 350);
-		});
-		// Safety: never trap the page.
-		setTimeout(function () { pre.classList.add('is-done'); }, 2500);
-	}
-
 	/* ---------- Smooth scroll (Lenis) ---------- */
 	var lenis = null;
 	function initSmoothScroll() {
@@ -153,14 +142,27 @@
 	function initSwipers() {
 		if (typeof window.Swiper === 'undefined') return;
 		$$('[data-swiper="testimonials"]').forEach(function (el) {
+			var slider = el.closest('.testimonials__slider') || el.parentNode;
+			var count = el.querySelectorAll('.swiper-slide').length;
+			// Loop needs enough slides to fill the centred view without gaps.
+			var canLoop = count > 3;
 			new window.Swiper(el, {
-				slidesPerView: 1,
-				spaceBetween: 24,
+				slidesPerView: 'auto',
+				centeredSlides: true,
+				spaceBetween: 28,
 				grabCursor: true,
-				loop: true,
-				autoplay: reduceMotion ? false : { delay: 5000, disableOnInteraction: false },
-				pagination: { el: el.querySelector('.swiper-pagination'), clickable: true },
-				breakpoints: { 768: { slidesPerView: 2 }, 1100: { slidesPerView: 3 } }
+				loop: canLoop,
+				speed: 600,
+				watchSlidesProgress: true,
+				autoplay: reduceMotion ? false : { delay: 5500, disableOnInteraction: false },
+				pagination: {
+					el: slider.querySelector('.swiper-pagination'),
+					clickable: true
+				},
+				navigation: {
+					nextEl: slider.querySelector('.testimonials__nav--next'),
+					prevEl: slider.querySelector('.testimonials__nav--prev')
+				}
 			});
 		});
 	}
@@ -257,7 +259,6 @@
 	/* ---------- Boot ---------- */
 	function boot() {
 		if (hasGSAP && window.ScrollTrigger) { window.gsap.registerPlugin(window.ScrollTrigger); }
-		initPreloader();
 		initSmoothScroll();
 		initHeader();
 		initMobileMenu();
