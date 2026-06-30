@@ -27,7 +27,12 @@ function aeon_handle_contact() {
 		wp_send_json_error( array( 'message' => aeon_t( 'form_required' ) ), 400 );
 	}
 
-	$to      = aeon_opt( 'aeon_email', get_option( 'admin_email' ) );
+	/**
+	 * Destination for contact-form leads. Decoupled from the public contact
+	 * address ( aeon_email ) so inquiries always reach the sales inbox.
+	 * Filterable for staging/overrides.
+	 */
+	$to      = apply_filters( 'aeon_lead_recipient', 'sales@uaeaeon.com' );
 	$subject = sprintf( '[%s] New inquiry from %s', get_bloginfo( 'name' ), $name );
 	$body    = "Name: {$name}\n";
 	$body   .= "Email: {$email}\n";
@@ -35,8 +40,12 @@ function aeon_handle_contact() {
 	$body   .= "Service: {$service}\n\n";
 	$body   .= "Message:\n{$message}\n";
 
+	// Send "From" the site's own domain (SPF/DMARC-aligned) and route replies
+	// back to the person who submitted the form.
+	$from_domain = preg_replace( '/^www\./', '', (string) wp_parse_url( home_url(), PHP_URL_HOST ) );
 	$headers = array(
 		'Content-Type: text/plain; charset=UTF-8',
+		'From: ' . get_bloginfo( 'name' ) . ' <no-reply@' . $from_domain . '>',
 		'Reply-To: ' . $name . ' <' . $email . '>',
 	);
 
