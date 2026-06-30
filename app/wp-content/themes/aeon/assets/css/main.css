@@ -297,8 +297,7 @@ h1, h2, h3, h4 { line-height: 1.18; font-weight: 800; color: var(--ink); }
 .hero__spark--4 { width: 14px; height: 14px; background: var(--grad-purple); inset-block-start: 16%; inset-inline-end: 17%; opacity: .45; animation: heroFloat 9s var(--ease) infinite alternate-reverse; }
 .hero__spark--5 { width: 11px; height: 11px; inset-block-start: 32%; inset-inline-start: 6%; box-shadow: 0 6px 16px rgba(147,51,234,.28); background: var(--grad-purple); opacity: .5; animation: heroFloat 8.5s var(--ease) infinite alternate; }
 .hero__spark--6 { width: 10px; height: 10px; inset-block-end: 22%; inset-inline-start: 22%; opacity: .45; animation: heroFloat 6.5s var(--ease) infinite alternate-reverse; }
-/* Mirrors of spark--1 / spark--4 on the content side */
-.hero__spark--7 { width: 16px; height: 16px; background: var(--grad-purple); inset-block-start: 26%; inset-inline-start: 30%; opacity: .55; box-shadow: 0 6px 16px rgba(147,51,234,.3); animation: heroFloat 6s var(--ease) infinite alternate-reverse; }
+/* Mirror of spark--4 on the content side (spark--7 removed: it overlapped the hero title) */
 .hero__spark--8 { width: 14px; height: 14px; background: var(--grad-purple); inset-block-start: 16%; inset-inline-start: 17%; opacity: .45; animation: heroFloat 9s var(--ease) infinite alternate; }
 
 @keyframes heroFloat { from { transform: translateY(0); } to { transform: translateY(-18px); } }

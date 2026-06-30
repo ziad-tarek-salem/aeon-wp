@@ -84,8 +84,12 @@ $socials = aeon_social_links();
 	</div>
 </footer>
 
-<?php if ( aeon_opt( 'aeon_whatsapp' ) ) : ?>
-	<a class="whatsapp-fab" href="https://wa.me/<?php echo esc_attr( aeon_opt( 'aeon_whatsapp' ) ); ?>" target="_blank" rel="noopener" aria-label="WhatsApp">
+<?php
+// Prefer the dedicated WhatsApp field; otherwise derive from the Customizer phone.
+// Falls back to the registered default so the button is always visible.
+$aeon_wa = preg_replace( '/\D+/', '', (string) ( aeon_opt( 'aeon_whatsapp' ) ?: aeon_opt( 'aeon_phone', '+971 50 000 0000' ) ) );
+if ( $aeon_wa ) : ?>
+	<a class="whatsapp-fab" href="https://wa.me/<?php echo esc_attr( $aeon_wa ); ?>" target="_blank" rel="noopener" aria-label="WhatsApp">
 		<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15l-1.4 5 5.1-1.3A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.7-.8s-.4-.1-.6.1-.6.8-.8 1-.3.2-.5.1a6.5 6.5 0 0 1-1.9-1.2 7.2 7.2 0 0 1-1.4-1.7c-.1-.2 0-.4.1-.5l.4-.4.2-.4a.5.5 0 0 0 0-.4l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.9 11.9 0 0 0 4.6 4c.6.3 1.1.4 1.5.6.6.2 1.2.2 1.6.1.5-.1 1.4-.6 1.6-1.1s.2-1 .2-1.1z"/></svg>
 	</a>
 <?php endif; ?>

@@ -32,7 +32,6 @@
 		<span class="hero__spark hero__spark--4"></span>
 		<span class="hero__spark hero__spark--5"></span>
 		<span class="hero__spark hero__spark--6"></span>
-		<span class="hero__spark hero__spark--7"></span>
 		<span class="hero__spark hero__spark--8"></span>
 		<span class="hero__swoosh"></span>
 	</div>
