@@ -3,17 +3,24 @@ name: Deploy theme
 # Push to `main` → deploy the AEON theme to the production WordPress host via
 # FTPS. CODE ONLY — never the database, uploads, or other site content.
 #
-# Before this runs, add three repo secrets
-# (Settings → Secrets and variables → Actions):
-#   FTP_HOST     = <your host, e.g. ftp.example.com or an IP>
-#   FTP_USER     = <your FTP username>
-#   FTP_PASSWORD = <your FTP password>
-# and set `server-dir` below to match your host's wp-content/themes path.
+# Requires 3 GitHub repo secrets (Settings → Secrets and variables → Actions):
+#   FTP_HOST     = 91.108.101.28
+#   FTP_USER     = u171546863     # the MAIN Hostinger account (shared with mostarstar.com)
+#   FTP_PASSWORD = <the u171546863 FTP password from hPanel → Files → FTP Accounts>
+#
+# IMPORTANT: authenticate as the main account `u171546863` — NOT a per-domain
+# login like `u171546863.uaeaeon.com` (that one returns "530 Login incorrect").
+# This is the same account/password MostarStar's deploy uses.
 
 on:
   push:
     branches: [ main ]
   workflow_dispatch: {}   # allows manual "Run workflow" from the Actions tab
+
+# Least privilege: this job only needs to read the repo to check it out.
+# It never writes back to GitHub, so deny everything else by default.
+permissions:
+  contents: read
 
 # Never let two deploys overlap (a second push waits for the first to finish).
 concurrency:
@@ -38,10 +45,10 @@ jobs:
           protocol: ftps
           port: 21
           local-dir: ./app/wp-content/themes/aeon/
-          # Hostinger path when uaeaeon.com is the PRIMARY domain on the plan.
-          # If it is an ADDON/secondary domain, change this to:
-          #   /domains/uaeaeon.com/public_html/wp-content/themes/aeon/
-          # Confirm in hPanel → File Manager before the first deploy.
+          # uaeaeon.com is the PRIMARY domain → docroot is /public_html/
+          # (confirmed via File Manager). mostarstar.com is the addon domain at
+          # /domains/mostarstar.com/. If a first run can't find this path, try it
+          # WITHOUT the leading slash (relative to the FTP home).
           server-dir: /public_html/wp-content/themes/aeon/
 
 # After each deploy, purge any host/page cache, and if rewrite rules changed,
