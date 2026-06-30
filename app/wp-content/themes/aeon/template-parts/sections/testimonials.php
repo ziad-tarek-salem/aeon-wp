@@ -4,20 +4,19 @@
  *
  * @package AEON
  */
-$tst_q = new WP_Query( array( 'post_type' => 'testimonial', 'posts_per_page' => 9 ) );
+$review_terms = aeon_section_terms( 'aeon_review' );
 
 $items = array();
-if ( $tst_q->have_posts() ) {
-	while ( $tst_q->have_posts() ) {
-		$tst_q->the_post();
+if ( $review_terms ) {
+	foreach ( $review_terms as $review ) {
+		$img_id = (int) get_term_meta( $review->term_id, '_aeon_image', true );
 		$items[] = array(
-			'quote' => get_the_content(),
-			'name'  => get_the_title(),
-			'role'  => get_post_meta( get_the_ID(), '_aeon_role', true ),
-			'img'   => get_the_post_thumbnail_url( get_the_ID(), 'thumbnail' ),
+			'quote' => $review->description,
+			'name'  => $review->name,
+			'role'  => get_term_meta( $review->term_id, '_aeon_role', true ),
+			'img'   => $img_id ? wp_get_attachment_image_url( $img_id, 'thumbnail' ) : '',
 		);
 	}
-	wp_reset_postdata();
 } else {
 	$ar = aeon_is_rtl();
 	$items = array(

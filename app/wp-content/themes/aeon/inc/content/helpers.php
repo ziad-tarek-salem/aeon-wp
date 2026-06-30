@@ -1,0 +1,67 @@
+<?php
+/**
+ * Shared helpers for the editable content sections.
+ *
+ * @package AEON
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Icon keys (from aeon_icon()) offered in the icon picker, with Arabic labels.
+ *
+ * @return array<string,string> key => Arabic label.
+ */
+function aeon_icon_choices() {
+	return array(
+		'camera'    => 'كاميرا / تصوير',
+		'pen'       => 'قلم / تصميم',
+		'video'     => 'فيديو / مونتاج',
+		'megaphone' => 'تسويق',
+		'social'    => 'سوشيال ميديا',
+		'target'    => 'هدف',
+		'globe'     => 'الويب',
+		'chart'     => 'تحليلات',
+		'bulb'      => 'فكرة',
+		'team'      => 'فريق',
+		'shield'    => 'درع / ثقة',
+	);
+}
+
+/**
+ * Guard a post meta-box save: verify nonce, skip autosave, check capability.
+ *
+ * @param int    $post_id Post being saved.
+ * @param string $nonce   Nonce field name in $_POST.
+ * @param string $action  Nonce action.
+ * @return bool True when it is safe to persist meta.
+ */
+function aeon_can_save_meta( $post_id, $nonce, $action ) {
+	if ( ! isset( $_POST[ $nonce ] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST[ $nonce ] ) ), $action ) ) {
+		return false;
+	}
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+		return false;
+	}
+	return current_user_can( 'edit_post', $post_id );
+}
+
+/**
+ * Ordered terms for a section taxonomy (creation order, like mostarstar).
+ *
+ * @param string $taxonomy Taxonomy slug.
+ * @param int    $limit    Max terms (0 = all).
+ * @return WP_Term[]
+ */
+function aeon_section_terms( $taxonomy, $limit = 0 ) {
+	$terms = get_terms( array(
+		'taxonomy'   => $taxonomy,
+		'hide_empty' => false,
+		'orderby'    => 'term_id',
+		'order'      => 'ASC',
+		'number'     => $limit,
+	) );
+	return ( $terms && ! is_wp_error( $terms ) ) ? $terms : array();
+}

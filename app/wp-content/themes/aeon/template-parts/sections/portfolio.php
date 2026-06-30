@@ -4,9 +4,13 @@
  *
  * @package AEON
  */
+// Homepage preview: the 6 featured projects (full list lives at /work/). Order
+// by the editor's "ترتيب" value, newest first within the same order — so a
+// newly added project surfaces immediately.
 $work_q = new WP_Query( array(
 	'post_type'      => 'portfolio',
 	'posts_per_page' => 6,
+	'orderby'        => array( 'menu_order' => 'ASC', 'date' => 'DESC' ),
 ) );
 ?>
 <section class="work section" id="work">
@@ -20,7 +24,13 @@ $work_q = new WP_Query( array(
 		<div class="work__grid stagger" data-reveal>
 			<?php if ( $work_q->have_posts() ) : ?>
 				<?php $i = 0; while ( $work_q->have_posts() ) : $work_q->the_post(); $i++; ?>
-					<a class="work-card <?php echo ( 1 === $i || 4 === $i ) ? 'work-card--wide' : ''; ?>" href="<?php the_permalink(); ?>">
+					<?php
+					// Wide when the editor ticked "بطاقة عريضة"; otherwise keep the
+					// original 1st/4th rhythm so ungoverned items still look right.
+					$work_wide = get_post_meta( get_the_ID(), '_aeon_wide', true );
+					$work_wide = ( '1' === $work_wide ) || ( '' === $work_wide && ( 1 === $i || 4 === $i ) );
+					?>
+					<a class="work-card <?php echo $work_wide ? 'work-card--wide' : ''; ?>" href="<?php the_permalink(); ?>">
 						<div class="work-card__media">
 							<?php if ( has_post_thumbnail() ) : ?>
 								<?php the_post_thumbnail( 'aeon-card' ); ?>
