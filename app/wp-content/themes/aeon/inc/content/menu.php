@@ -23,6 +23,7 @@ function aeon_content_submenus() {
 		'edit-tags.php?taxonomy=aeon_statistic'  => 'الإحصائيات',
 		'edit.php?post_type=portfolio'           => 'أعمالنا',
 		'edit-tags.php?taxonomy=aeon_review'     => 'آراء العملاء',
+		'edit-tags.php?taxonomy=aeon_branch'     => 'الفروع والمواقع',
 	);
 }
 

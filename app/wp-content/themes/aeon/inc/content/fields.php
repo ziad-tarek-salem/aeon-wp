@@ -87,6 +87,14 @@ function aeon_field_control( $key, $f, $value, $id ) {
 			);
 			break;
 
+		case 'decimal':
+			// Allows fractional and negative values (e.g. GPS coordinates).
+			printf(
+				'<input type="number" id="%1$s" name="%2$s" value="%3$s" step="any" inputmode="decimal" placeholder="%4$s">',
+				esc_attr( $id ), $name, esc_attr( $value ), $ph
+			);
+			break;
+
 		case 'select':
 			echo '<select id="' . esc_attr( $id ) . '" name="' . $name . '">';
 			foreach ( $f['options'] as $val => $opt_label ) {
@@ -153,6 +161,11 @@ function aeon_save_fields( $fields, $term_id ) {
 		switch ( $f['type'] ) {
 			case 'number':
 				update_term_meta( $term_id, $meta, (string) absint( $raw ) );
+				break;
+			case 'decimal':
+				$raw = trim( $raw );
+				// Keep the exact numeric string (preserves coordinate precision); drop anything non-numeric.
+				update_term_meta( $term_id, $meta, is_numeric( $raw ) ? $raw : '' );
 				break;
 			case 'select':
 				update_term_meta( $term_id, $meta, array_key_exists( $raw, $f['options'] ) ? $raw : '' );

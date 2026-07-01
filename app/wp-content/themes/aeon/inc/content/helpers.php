@@ -65,3 +65,33 @@ function aeon_section_terms( $taxonomy, $limit = 0 ) {
 	) );
 	return ( $terms && ! is_wp_error( $terms ) ) ? $terms : array();
 }
+
+/**
+ * Branch locations for the footer, normalised and ready to render.
+ *
+ * Each branch is an `aeon_branch` term: name = branch name, description = the
+ * address/description, plus `_aeon_lat` / `_aeon_lng` meta. A Google Maps link
+ * is built only when both coordinates are present.
+ *
+ * @return array<int,array{name:string,desc:string,lat:string,lng:string,maps_url:string}>
+ */
+function aeon_branch_locations() {
+	$out = array();
+	foreach ( aeon_section_terms( 'aeon_branch' ) as $term ) {
+		$lat        = (string) get_term_meta( $term->term_id, '_aeon_lat', true );
+		$lng        = (string) get_term_meta( $term->term_id, '_aeon_lng', true );
+		$has_coords = is_numeric( $lat ) && is_numeric( $lng );
+
+		$out[] = array(
+			'name'     => $term->name,
+			'desc'     => $term->description,
+			'lat'      => $lat,
+			'lng'      => $lng,
+			// api=1 search URL opens the exact point in Google Maps on web + app.
+			'maps_url' => $has_coords
+				? 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode( $lat . ',' . $lng )
+				: '',
+		);
+	}
+	return $out;
+}

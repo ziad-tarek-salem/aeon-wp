@@ -229,6 +229,8 @@ function aeon_strings() {
 		'footer_subscribe'  => array( 'ar' => 'اشتراك', 'en' => 'Subscribe' ),
 		'footer_rights'     => array( 'ar' => 'جميع الحقوق محفوظة.', 'en' => 'All rights reserved.' ),
 		'footer_uae'        => array( 'ar' => 'بفخر من الإمارات العربية المتحدة', 'en' => 'Proudly based in the UAE' ),
+		'footer_locations'  => array( 'ar' => 'فروعنا ومواقعنا', 'en' => 'Our Locations' ),
+		'open_in_maps'      => array( 'ar' => 'افتح الموقع على خرائط جوجل', 'en' => 'Open in Google Maps' ),
 
 		// 404 / misc.
 		'e404_title'        => array( 'ar' => 'الصفحة غير موجودة', 'en' => 'Page Not Found' ),

@@ -76,6 +76,8 @@ $socials = aeon_social_links();
 
 	</div>
 
+	<?php get_template_part( 'template-parts/components/footer-locations' ); ?>
+
 	<div class="site-footer__bottom">
 		<div class="container site-footer__bottom-inner">
 			<p>&copy; <?php echo esc_html( date_i18n( 'Y' ) ); ?> <?php bloginfo( 'name' ); ?>. <?php aeon_e( 'footer_rights' ); ?></p>

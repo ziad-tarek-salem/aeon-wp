@@ -132,6 +132,31 @@ function aeon_sections_config() {
 			),
 		),
 
+		'aeon_branch' => array(
+			'menu'          => 'الفروع والمواقع',
+			'icon'          => 'dashicons-location',
+			'labels'        => array(
+				'name'          => 'الفروع والمواقع',
+				'singular_name' => 'فرع',
+				'add_new_item'  => 'إضافة فرع جديد',
+				'edit_item'     => 'تعديل الفرع',
+				'update_item'   => 'تحديث الفرع',
+				'new_item_name' => 'اسم الفرع',
+				'search_items'  => 'بحث في الفروع',
+				'not_found'     => 'لا توجد فروع بعد',
+				'back_to_items' => '→ كل الفروع',
+			),
+			'name_label'    => 'اسم الفرع',
+			'name_hint'     => 'اسم الفرع كما سيظهر في الموقع (مثال: فرع دبي).',
+			'show_desc'     => true,
+			'desc_label'    => 'الوصف / العنوان',
+			'desc_hint'     => 'وصف مختصر أو عنوان الفرع، يظهر في تذييل الموقع.',
+			'fields'        => array(
+				'lat' => array( 'type' => 'decimal', 'label' => 'خط العرض (Latitude)', 'hint' => 'إحداثي خط العرض من خرائط جوجل. مثال: 25.204849', 'placeholder' => 'مثال: 25.204849' ),
+				'lng' => array( 'type' => 'decimal', 'label' => 'خط الطول (Longitude)', 'hint' => 'إحداثي خط الطول من خرائط جوجل. للحصول على الإحداثيات: افتح خرائط جوجل، اضغط بزر الفأرة الأيمن على الموقع، ثم انسخ الرقمين الظاهرين.', 'placeholder' => 'مثال: 55.270783' ),
+			),
+		),
+
 	);
 
 	return $config;

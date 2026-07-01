@@ -622,6 +622,28 @@ h1, h2, h3, h4 { line-height: 1.18; font-weight: 800; color: var(--ink); }
 .site-footer__bottom-inner { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: .9rem; }
 .footer-tagline { color: var(--orange-light); }
 
+/* ---------- Footer locations / branches ---------- */
+.footer-locations { border-block-start: 1px solid rgba(255,255,255,.1); padding-block: clamp(34px, 4vw, 48px); }
+.footer-locations__title { display: flex; align-items: center; gap: 10px; color: #fff; font-size: 1.1rem; margin-block-end: 24px; }
+.footer-locations__title .aeon-icon { width: 20px; height: 20px; color: var(--orange); flex-shrink: 0; }
+.footer-locations__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
+.loc-card {
+	display: flex; align-items: flex-start; justify-content: space-between; gap: 14px;
+	background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.09); border-radius: var(--radius);
+	padding: 18px 20px; transition: background .3s var(--ease), border-color .3s var(--ease), transform .3s var(--ease);
+}
+.loc-card:hover { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.18); transform: translateY(-2px); }
+.loc-card__text { min-width: 0; }
+.loc-card__name { display: block; color: #fff; font-size: 1rem; font-weight: 700; margin-block-end: 6px; }
+.loc-card__desc { font-size: .92rem; line-height: 1.6; color: rgba(255,255,255,.66); margin: 0; }
+.loc-card__pin {
+	flex-shrink: 0; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
+	background: rgba(255,255,255,.08); color: #fff;
+	transition: background .3s var(--ease), color .3s var(--ease), transform .3s var(--ease), box-shadow .3s var(--ease);
+}
+.loc-card__pin svg { width: 22px; height: 22px; }
+.loc-card__pin:hover { background: var(--grad-brand); color: #fff; transform: scale(1.08); box-shadow: var(--shadow-purple); }
+
 /* ---------- WhatsApp FAB ---------- */
 .whatsapp-fab {
 	/* Pinned to the physical right edge regardless of text direction (RTL/LTR). */
