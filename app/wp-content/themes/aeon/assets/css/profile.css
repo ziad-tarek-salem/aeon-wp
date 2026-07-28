@@ -1,0 +1,772 @@
+/* =================================================================
+   AEON — company-profile brand layer.
+
+   Loaded after main.css. Holds the visual language lifted from the
+   printed company profile (dash-dot title rules, corner ribbons,
+   dotted clusters, the recurring proof strip) plus the sections that
+   are built straight from the deck: campaign platforms, the p38
+   results card, the portfolio teaser and the /work/ chapters.
+
+   Decorative corner motifs use PHYSICAL offsets on purpose: the
+   profile always places purple top-right and orange bottom-left, so
+   they should not mirror between Arabic and English. Everything that
+   carries content uses logical properties and mirrors normally.
+   ================================================================= */
+
+/* ---------- 1. Profile primitives ---------- */
+
+/* Dash-dot rule flanking a title: •——— عنوان ———• */
+.rule-heading {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 18px;
+	text-align: center;
+}
+
+.rule-heading__line {
+	/* Keep a visible rule even when the title is long: the heading text is
+	   allowed to wrap before these collapse. */
+	flex: 1 1 40px;
+	min-inline-size: 34px;
+	max-inline-size: 170px;
+	height: 2px;
+	background: var(--orange);
+	border-radius: 2px;
+	position: relative;
+	opacity: .85;
+}
+
+.rule-heading__line::after {
+	content: "";
+	position: absolute;
+	inset-block-start: 50%;
+	inline-size: 7px;
+	block-size: 7px;
+	border-radius: 50%;
+	background: var(--orange);
+	transform: translateY(-50%);
+}
+
+.rule-heading__line--start::after { inset-inline-start: -3px; }
+.rule-heading__line--end::after   { inset-inline-end: -3px; }
+
+.rule-heading__text {
+	flex: 0 1 auto;
+	min-inline-size: 0;
+	margin: 0;
+	line-height: 1.3;
+}
+
+/* On the deck the accent word is orange, the rest deep purple. */
+.rule-heading__text .accent,
+.title-accent { color: var(--orange); }
+
+@media (max-width: 640px) {
+	.rule-heading { gap: 10px; }
+	.rule-heading__line { min-inline-size: 18px; max-inline-size: 46px; }
+}
+
+/* The four-item proof strip repeated under reels, motion and results. */
+.proof-strip {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 8px;
+	margin-block-start: 40px;
+	padding: 18px 20px;
+	border-radius: var(--radius);
+	background: var(--white);
+	box-shadow: var(--shadow-sm);
+	border: 1px solid var(--line);
+}
+
+.proof-strip--plain {
+	background: transparent;
+	box-shadow: none;
+	border: 0;
+}
+
+.proof-strip__item {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	text-align: center;
+	font-weight: 700;
+	font-size: .95rem;
+	color: var(--ink-2);
+	padding-inline: 10px;
+}
+
+.proof-strip__item + .proof-strip__item { border-inline-start: 1px solid var(--line); }
+
+.proof-strip__item svg {
+	inline-size: 26px;
+	block-size: 26px;
+	flex: none;
+}
+
+.section--dark .proof-strip {
+	background: rgba(255, 255, 255, .05);
+	border-color: rgba(255, 255, 255, .12);
+	box-shadow: none;
+}
+
+.section--dark .proof-strip__item { color: #efeaff; }
+.section--dark .proof-strip__item + .proof-strip__item { border-inline-start-color: rgba(255, 255, 255, .14); }
+
+@media (max-width: 900px) {
+	.proof-strip { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+	.proof-strip__item:nth-child(odd) { border-inline-start: 0; }
+}
+
+@media (max-width: 460px) {
+	.proof-strip { grid-template-columns: 1fr; }
+	.proof-strip__item + .proof-strip__item { border-inline-start: 0; border-block-start: 1px solid var(--line); padding-block-start: 12px; }
+}
+
+/* Branch pill row, repeated at the foot of several profile pages. */
+.branch-chips {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	margin-block-start: 34px;
+}
+
+.branch-chips__note {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	font-weight: 800;
+	color: var(--purple);
+	font-size: .95rem;
+}
+
+.branch-chips__note svg { inline-size: 26px; block-size: 26px; }
+
+.branch-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 9px 16px;
+	border-radius: 999px;
+	background: var(--white);
+	border: 1px solid var(--line);
+	box-shadow: var(--shadow-sm);
+	font-weight: 800;
+	font-size: .92rem;
+	color: var(--purple);
+	transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+}
+
+a.branch-chip:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.branch-chip svg { inline-size: 18px; block-size: 18px; color: var(--orange); }
+
+.section--dark .branch-chip {
+	background: rgba(255, 255, 255, .07);
+	border-color: rgba(255, 255, 255, .14);
+	color: #fff;
+	box-shadow: none;
+}
+
+/* The header uses the wordmark-only variant (the sticky bar is too short for
+   the tagline); the footer carries the full lockup, as the profile does. */
+.footer-logo { height: 56px; }
+
+/* ---------- 2. Homepage rhythm ---------- */
+
+/* With the partners marquee gone, the hero runs straight into Our Services.
+   Tighten the seam from the Services side only — the hero keeps its original
+   padding, full-height centring and scroll cue untouched. */
+.hero + .section { padding-block-start: clamp(20px, 2.2vw, 32px); }
+
+/* ---------- 3. Typography, tuned to the deck ---------- */
+
+/* The profile sets Arabic display type very heavy and tight. The hero is
+   deliberately excluded — it keeps its original pre-profile styling. */
+.aeon-lang-ar .section-title,
+.aeon-lang-ar .rule-heading__text { font-weight: 900; letter-spacing: -.005em; }
+
+.aeon-lang-ar .section-title { line-height: 1.28; }
+
+/* ---------- 4. Ad-campaign platforms ---------- */
+
+.campaigns { position: relative; }
+
+.campaigns__grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 24px;
+	margin-block-start: 40px;
+}
+
+.campaign-card {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	border-radius: var(--radius);
+	overflow: hidden;
+	background: var(--white);
+	border: 1px solid var(--line);
+	box-shadow: var(--shadow-sm);
+	transition: transform .35s var(--ease), box-shadow .35s var(--ease);
+}
+
+.campaign-card:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
+
+.campaign-card__media {
+	aspect-ratio: 16 / 9;
+	overflow: hidden;
+	background: var(--surface);
+}
+
+.campaign-card__media img { inline-size: 100%; block-size: 100%; object-fit: cover; }
+
+.campaign-card__body { padding: 20px 22px 24px; }
+
+.campaign-card__title {
+	font-size: 1.08rem;
+	margin-block-end: 6px;
+	color: var(--purple);
+}
+
+.campaign-card__text { color: var(--muted); font-size: .95rem; }
+
+/* ---------- 5. Results card (profile p38) ---------- */
+
+.results__panel {
+	display: grid;
+	grid-template-columns: minmax(280px, 360px) 1fr;
+	gap: 30px;
+	align-items: start;
+	margin-block-start: 40px;
+}
+
+.analytics-card {
+	background: var(--white);
+	border-radius: var(--radius);
+	padding: 22px;
+	box-shadow: var(--shadow);
+	color: var(--ink);
+}
+
+.analytics-card__bar {
+	display: flex;
+	gap: 6px;
+	margin-block-end: 18px;
+}
+
+.analytics-card__bar span {
+	height: 5px;
+	border-radius: 3px;
+	flex: 1;
+	background: var(--surface-2);
+}
+
+.analytics-card__bar span:first-child { background: var(--orange); flex: 0 0 34%; }
+.analytics-card__bar span:last-child  { background: var(--violet); flex: 0 0 26%; }
+
+.analytics-card__metrics {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 10px;
+}
+
+.analytics-metric {
+	background: var(--surface);
+	border-radius: var(--radius-sm);
+	padding: 12px 14px;
+	border: 1px solid var(--line);
+}
+
+.analytics-metric__label {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	font-size: .78rem;
+	color: var(--muted);
+	margin-block-end: 4px;
+}
+
+.analytics-metric__label svg { inline-size: 15px; block-size: 15px; flex: none; color: var(--violet); }
+
+.analytics-metric__value {
+	font-weight: 800;
+	font-size: 1.18rem;
+	color: var(--ink);
+	line-height: 1.2;
+}
+
+.analytics-card__donut-wrap {
+	margin-block-start: 18px;
+	padding-block-start: 16px;
+	border-block-start: 1px solid var(--line);
+}
+
+.analytics-card__donut-title { font-weight: 800; font-size: .98rem; }
+.analytics-card__donut-sub { font-size: .78rem; color: var(--muted); margin-block-end: 14px; }
+
+.analytics-card__donut-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+}
+
+.donut {
+	inline-size: 96px;
+	block-size: 96px;
+	border-radius: 50%;
+	flex: none;
+	background: conic-gradient(var(--violet) 0 100%, var(--orange) 0);
+	-webkit-mask: radial-gradient(circle, transparent 54%, #000 55%);
+	        mask: radial-gradient(circle, transparent 54%, #000 55%);
+}
+
+.donut-key { display: grid; gap: 8px; }
+
+.donut-key__item { display: flex; align-items: center; gap: 8px; font-size: .84rem; }
+
+.donut-key__dot {
+	inline-size: 10px;
+	block-size: 10px;
+	border-radius: 50%;
+	flex: none;
+}
+
+.donut-key__dot--a { background: var(--violet); }
+.donut-key__dot--b { background: var(--orange); }
+.donut-key__pct { font-weight: 800; }
+
+/* Reel proof cards with their view counts. */
+.reel-grid {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 18px;
+}
+
+.reel-card {
+	position: relative;
+	border-radius: var(--radius-sm);
+	overflow: visible;
+}
+
+.reel-card__media {
+	position: relative;
+	border-radius: var(--radius-sm);
+	overflow: hidden;
+	aspect-ratio: 9 / 16;
+	background: var(--surface-2);
+	box-shadow: var(--shadow-sm);
+}
+
+.reel-card__media img { inline-size: 100%; block-size: 100%; object-fit: cover; }
+
+.reel-card__play {
+	position: absolute;
+	inset-block-end: -18px;
+	inset-inline-start: 50%;
+	transform: translateX(-50%);
+	inline-size: 40px;
+	block-size: 40px;
+	border-radius: 50%;
+	display: grid;
+	place-items: center;
+	background: var(--grad-purple);
+	box-shadow: var(--shadow-purple);
+	color: #fff;
+}
+
+.reel-card:nth-child(even) .reel-card__play { background: var(--grad-orange); box-shadow: var(--shadow-orange); }
+
+.reel-card__play svg { inline-size: 15px; block-size: 15px; margin-inline-start: 2px; }
+
+.reel-card__views {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	margin-block-start: 28px;
+	font-weight: 800;
+	font-size: .9rem;
+}
+
+.section--dark .reel-card__views { color: #efeaff; }
+.reel-card__views svg { inline-size: 16px; block-size: 16px; opacity: .8; }
+
+@media (max-width: 1040px) {
+	.results__panel { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 720px) {
+	.reel-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+	.analytics-card__metrics { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ---------- 6. Portfolio teaser (homepage overview) ---------- */
+
+.teaser__grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+	gap: 22px;
+	margin-block-start: 40px;
+}
+
+.teaser-card {
+	position: relative;
+	display: block;
+	border-radius: var(--radius);
+	overflow: hidden;
+	box-shadow: var(--shadow-sm);
+	background: var(--surface);
+	transition: transform .35s var(--ease), box-shadow .35s var(--ease);
+}
+
+.teaser-card:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
+
+.teaser-card__stack {
+	display: grid;
+	grid-template-columns: 2fr 1fr;
+	grid-template-rows: 1fr 1fr;
+	gap: 3px;
+	aspect-ratio: 4 / 3;
+}
+
+.teaser-card__stack img { inline-size: 100%; block-size: 100%; object-fit: cover; }
+.teaser-card__stack img:first-child { grid-row: span 2; }
+
+/* Chapters with fewer than three samples show one full-bleed image. */
+.teaser-card__stack--single { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+.teaser-card__stack--single img { grid-row: auto; }
+.teaser-card__stack--single img ~ img { display: none; }
+
+.teaser-card__bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 15px 18px;
+	background: var(--white);
+}
+
+.teaser-card__title { font-size: 1.02rem; font-weight: 800; color: var(--purple); }
+
+.teaser-card__count {
+	font-size: .8rem;
+	font-weight: 700;
+	color: var(--white);
+	background: var(--grad-orange);
+	padding: 3px 10px;
+	border-radius: 999px;
+}
+
+.teaser__more { display: flex; justify-content: center; margin-block-start: 38px; }
+
+/* ---------- 7. Clients heading (profile p7–9) ---------- */
+
+.clients__proud {
+	text-align: center;
+	font-size: clamp(1.5rem, 3.2vw, 2.3rem);
+	font-weight: 900;
+	color: var(--purple);
+	line-height: 1.3;
+}
+
+.clients__proud .accent { color: var(--orange); }
+
+.clients__region {
+	text-align: center;
+	color: var(--muted);
+	font-weight: 700;
+	letter-spacing: .04em;
+	margin-block-start: 6px;
+}
+
+/* ---------- 8. /work/ chapters ---------- */
+
+.chapter { position: relative; padding-block: clamp(58px, 8vw, 96px); }
+.chapter:nth-child(even) { background: var(--surface); }
+
+.chapter__head { margin-block-end: 34px; }
+
+/* 8a. Web-design chapter (profile p10). */
+.webblock {
+	display: grid;
+	grid-template-columns: minmax(280px, 460px) 1fr;
+	gap: 40px;
+	align-items: center;
+}
+
+.webblock__text p { color: var(--ink-2); margin-block: 14px 22px; }
+
+.webblock__lead {
+	font-weight: 800;
+	color: var(--purple);
+	font-size: 1.1rem;
+}
+
+.webblock__features {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 26px;
+	margin-block-start: 30px;
+	padding-block-start: 24px;
+	border-block-start: 1px solid var(--line);
+}
+
+.webfeature { display: flex; align-items: center; gap: 11px; }
+.webfeature svg { inline-size: 30px; block-size: 30px; flex: none; color: var(--violet); }
+.webfeature__t { font-weight: 800; font-size: .95rem; line-height: 1.35; }
+.webfeature__d { color: var(--muted); font-size: .84rem; }
+
+.webblock__media {
+	border-radius: var(--radius-lg);
+	overflow: hidden;
+	box-shadow: var(--shadow-lg);
+}
+
+.webblock__media img { inline-size: 100%; height: auto; }
+
+@media (max-width: 900px) {
+	.webblock { grid-template-columns: 1fr; gap: 28px; }
+}
+
+/* 8b. Photography chapter side labels (profile p11–16). */
+.photoblock {
+	display: grid;
+	grid-template-columns: minmax(190px, 235px) 1fr;
+	gap: 34px;
+	align-items: start;
+}
+
+.photolabels { display: grid; gap: 20px; }
+
+.photolabel { display: flex; align-items: flex-start; gap: 13px; }
+
+.photolabel__icon {
+	inline-size: 42px;
+	block-size: 42px;
+	border-radius: 12px;
+	display: grid;
+	place-items: center;
+	background: var(--surface-2);
+	border: 1px solid var(--line);
+	flex: none;
+	color: var(--violet);
+}
+
+.photolabel__icon svg { inline-size: 22px; block-size: 22px; }
+.photolabel__t { font-weight: 800; font-size: 1rem; line-height: 1.3; }
+.photolabel__d { color: var(--orange); font-size: .8rem; font-weight: 600; }
+
+.photo-mosaic {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 14px;
+}
+
+.photo-mosaic img {
+	inline-size: 100%;
+	block-size: 100%;
+	object-fit: cover;
+	border-radius: var(--radius-sm);
+	box-shadow: var(--shadow-sm);
+	aspect-ratio: 4 / 3;
+}
+
+.photo-mosaic > *:nth-child(1),
+.photo-mosaic > *:nth-child(6) { grid-column: span 2; }
+
+.chapter__tagline {
+	margin-block-start: 30px;
+	text-align: center;
+	font-weight: 800;
+	color: var(--ink-2);
+}
+
+.chapter__tagline .accent { color: var(--orange); }
+
+@media (max-width: 860px) {
+	.photoblock { grid-template-columns: 1fr; gap: 26px; }
+	.photolabels { grid-template-columns: repeat(2, 1fr); }
+	.photo-mosaic { grid-template-columns: repeat(2, 1fr); }
+	.photo-mosaic > *:nth-child(1),
+	.photo-mosaic > *:nth-child(6) { grid-column: span 2; }
+}
+
+/* 8c. Vertical galleries for reels and motion. */
+.vgrid {
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+	gap: 18px;
+}
+
+.vgrid__item {
+	position: relative;
+	border-radius: var(--radius-sm);
+	overflow: hidden;
+	aspect-ratio: 9 / 16;
+	box-shadow: var(--shadow-sm);
+	background: var(--surface-2);
+	border: 3px solid transparent;
+	transition: transform .3s var(--ease);
+}
+
+.vgrid__item:nth-child(odd)  { border-color: rgba(126, 34, 206, .5); }
+.vgrid__item:nth-child(even) { border-color: rgba(243, 111, 33, .5); }
+.vgrid__item:hover { transform: translateY(-5px); }
+.vgrid__item img { inline-size: 100%; block-size: 100%; object-fit: cover; }
+
+@media (max-width: 1000px) { .vgrid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 620px)  { .vgrid { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
+
+/* 8d. Social chapter, grouped by the deck's industry chips. */
+.industry-group + .industry-group { margin-block-start: 46px; }
+
+.industry-group__head {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	margin-block-end: 18px;
+}
+
+.industry-group__chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 9px;
+	padding: 9px 20px;
+	border-radius: 10px;
+	background: var(--grad-purple);
+	color: #fff;
+	font-weight: 800;
+	font-size: .95rem;
+	box-shadow: var(--shadow-purple);
+}
+
+.industry-group__chip svg { inline-size: 19px; block-size: 19px; }
+.industry-group__rule { flex: 1; height: 2px; background: var(--line); border-radius: 2px; }
+
+.social-row {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 18px;
+}
+
+.social-row__item {
+	border-radius: var(--radius-sm);
+	overflow: hidden;
+	box-shadow: var(--shadow-sm);
+	aspect-ratio: 4 / 5;
+	background: var(--surface-2);
+	transition: transform .3s var(--ease);
+}
+
+.social-row__item:hover { transform: translateY(-4px); }
+.social-row__item img { inline-size: 100%; block-size: 100%; object-fit: cover; }
+
+@media (max-width: 640px) { .social-row { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
+
+/* ---------- 9. Mobile scale ----------
+   Counterpart to the mobile-scale layer at the end of main.css. It has to live
+   here for anything this file also sets — profile.css loads last, so a rule of
+   equal specificity in main.css would lose (`.footer-logo` and
+   `.clients__proud` are both re-declared above). Same two tiers, same ratios:
+   type down ~12-18%, padding ~35%, icon boxes ~20%. */
+
+@media (max-width: 860px) {
+
+	/* Profile primitives */
+	.proof-strip { margin-block-start: 26px; padding: 14px; }
+	.proof-strip__item { font-size: .86rem; padding-inline: 6px; gap: 8px; }
+	.proof-strip__item svg { inline-size: 21px; block-size: 21px; }
+	.branch-chips { gap: 8px; margin-block-start: 24px; }
+	.branch-chips__note { font-size: .86rem; gap: 8px; }
+	.branch-chips__note svg { inline-size: 21px; block-size: 21px; }
+	.branch-chip { padding: 7px 13px; font-size: .84rem; }
+	.branch-chip svg { inline-size: 16px; block-size: 16px; }
+
+	/* main.css cannot reach these two — see the note above. */
+	.footer-logo { height: 44px; margin-block-end: 14px; }
+	.clients__proud { font-size: clamp(1.25rem, 3vw, 1.7rem); }
+	.clients__region { font-size: .9rem; }
+
+	.hero + .section { padding-block-start: 18px; }
+	.aeon-lang-ar .section-title { line-height: 1.24; }
+
+	/* Campaigns */
+	.campaigns__grid { gap: 16px; margin-block-start: 26px; }
+	.campaign-card__body { padding: 15px 16px 18px; }
+	.campaign-card__title { font-size: 1rem; }
+	.campaign-card__text { font-size: .88rem; }
+
+	/* Results panel */
+	.results__panel { gap: 20px; margin-block-start: 26px; }
+	.analytics-card { padding: 16px; }
+	.analytics-card__bar { margin-block-end: 14px; }
+	.analytics-metric { padding: 10px 11px; }
+	.analytics-metric__value { font-size: 1.05rem; }
+	.analytics-card__donut-wrap { margin-block-start: 14px; padding-block-start: 13px; }
+	.analytics-card__donut-title { font-size: .92rem; }
+	.donut { inline-size: 78px; block-size: 78px; }
+	.reel-grid { gap: 12px; }
+	.reel-card__play { inline-size: 34px; block-size: 34px; inset-block-end: -15px; }
+	.reel-card__play svg { inline-size: 13px; block-size: 13px; }
+	.reel-card__views { margin-block-start: 22px; font-size: .84rem; }
+
+	/* Portfolio teaser */
+	.teaser__grid { gap: 16px; margin-block-start: 26px; }
+	.teaser-card__bar { padding: 12px 14px; }
+	.teaser-card__title { font-size: .94rem; }
+	.teaser-card__count { font-size: .74rem; }
+	.teaser__more { margin-block-start: 26px; }
+
+	/* /work/ chapters */
+	.chapter { padding-block: 38px; }
+	.chapter__head { margin-block-end: 24px; }
+	.chapter__tagline { margin-block-start: 22px; font-size: .95rem; }
+	.webblock { gap: 22px; }
+	.webblock__lead { font-size: 1rem; }
+	.webblock__text p { margin-block: 11px 18px; }
+	.webblock__features { gap: 18px; margin-block-start: 22px; padding-block-start: 18px; }
+	.webfeature svg { inline-size: 25px; block-size: 25px; }
+	.webfeature__t { font-size: .88rem; }
+	.webfeature__d { font-size: .78rem; }
+	.photoblock { gap: 20px; }
+	.photolabels { gap: 14px; }
+	.photolabel { gap: 11px; }
+	.photolabel__icon { inline-size: 36px; block-size: 36px; border-radius: 10px; }
+	.photolabel__icon svg { inline-size: 19px; block-size: 19px; }
+	.photolabel__t { font-size: .92rem; }
+	.photolabel__d { font-size: .76rem; }
+	.photo-mosaic { gap: 10px; }
+	.industry-group + .industry-group { margin-block-start: 30px; }
+	.industry-group__head { gap: 10px; margin-block-end: 14px; }
+	.industry-group__chip { padding: 7px 15px; font-size: .86rem; }
+	.industry-group__chip svg { inline-size: 17px; block-size: 17px; }
+	.vgrid { gap: 12px; }
+}
+
+@media (max-width: 640px) {
+	.chapter { padding-block: 30px; }
+	.rule-heading { gap: 9px; }
+	.proof-strip { margin-block-start: 20px; }
+	.branch-chips { margin-block-start: 20px; }
+}
+
+/* ---------- 10. Motion preferences ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+	.campaign-card,
+	.teaser-card,
+	.vgrid__item,
+	.social-row__item,
+	.branch-chip { transition: none; }
+
+	.campaign-card:hover,
+	.teaser-card:hover,
+	.vgrid__item:hover,
+	.social-row__item:hover,
+	a.branch-chip:hover { transform: none; }
+}

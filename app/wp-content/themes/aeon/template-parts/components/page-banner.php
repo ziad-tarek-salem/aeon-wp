@@ -11,8 +11,8 @@ $subtitle = isset( $args['subtitle'] ) ? $args['subtitle'] : '';
 <section class="page-banner">
 	<div class="page-banner__bg" aria-hidden="true">
 		<span class="hero__orb hero__orb--1"></span>
-		<span class="dot-grid dot-grid--banner"></span>
 	</div>
+	<?php aeon_soft_bg(); ?>
 	<div class="container page-banner__inner">
 		<nav class="breadcrumb" aria-label="Breadcrumb">
 			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php aeon_e( 'nav_home' ); ?></a>

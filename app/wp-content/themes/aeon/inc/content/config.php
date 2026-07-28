@@ -19,6 +19,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * The three-tier icon control shared by every section that shows an icon:
+ * pick from the brand set, upload a file, or paste a URL. Resolution order is
+ * upload → URL → picked key (see aeon_card_icon()).
+ *
+ * @param string $pick_hint Hint shown under the picker.
+ * @return array<string,array> Field configs keyed by meta suffix.
+ */
+function aeon_icon_fields( $pick_hint = 'اختر أيقونة من مجموعة الهوية. تُستخدم ما لم ترفع أيقونة مخصّصة بالأسفل.' ) {
+	return array(
+		'icon'     => array( 'type' => 'duoicon', 'label' => 'الأيقونة', 'hint' => $pick_hint ),
+		'iconfile' => array(
+			'type'  => 'image',
+			'label' => 'أيقونة مخصّصة (رفع ملف)',
+			'hint'  => 'ارفع ملف SVG أو PNG شفاف. يحلّ محل الأيقونة المختارة بالأعلى. المقاس المثالي 96×96 بكسل.',
+			'mime'  => 'svg-image',
+		),
+		'iconurl'  => array(
+			'type'        => 'url',
+			'label'       => 'أو رابط أيقونة مباشر',
+			'hint'        => 'رابط مباشر لملف SVG أو PNG. يُستخدم فقط عند عدم رفع ملف بالأعلى.',
+			'placeholder' => 'https://example.com/icon.svg',
+		),
+	);
+}
+
+/**
  * The section taxonomies, in display order.
  *
  * @return array<string,array>
@@ -50,9 +76,47 @@ function aeon_sections_config() {
 			'show_desc'     => true,
 			'desc_label'    => 'الوصف',
 			'desc_hint'     => 'وصف مختصر يظهر أسفل العنوان داخل البطاقة.',
-			'fields'        => array(
-				'icon' => array( 'type' => 'icon', 'label' => 'الأيقونة', 'hint' => 'اختر أيقونة تمثّل الخدمة.' ),
+			'fields'        => aeon_icon_fields( 'اختر أيقونة تمثّل الخدمة. تُستخدم ما لم ترفع أيقونة مخصّصة بالأسفل.' ),
+		),
+
+		'aeon_expertise' => array(
+			'menu'          => 'نقاط الخبرة',
+			'icon'          => 'dashicons-yes-alt',
+			'labels'        => array(
+				'name'          => 'نقاط الخبرة',
+				'singular_name' => 'نقطة خبرة',
+				'add_new_item'  => 'إضافة نقطة خبرة',
+				'edit_item'     => 'تعديل النقطة',
+				'update_item'   => 'تحديث النقطة',
+				'new_item_name' => 'نص النقطة',
+				'search_items'  => 'بحث',
+				'not_found'     => 'لا توجد نقاط بعد',
+				'back_to_items' => '→ كل النقاط',
 			),
+			'name_label'    => 'نص النقطة',
+			'name_hint'     => 'الجملة التي تظهر بجانب الأيقونة في قسم «نبذة عن خبراتنا».',
+			'show_desc'     => false,
+			'fields'        => aeon_icon_fields( 'اختر أيقونة تمثّل نقطة الخبرة.' ),
+		),
+
+		'aeon_capability' => array(
+			'menu'          => 'الشريط السفلي (مميزاتنا)',
+			'icon'          => 'dashicons-star-filled',
+			'labels'        => array(
+				'name'          => 'مميزاتنا',
+				'singular_name' => 'ميزة',
+				'add_new_item'  => 'إضافة ميزة',
+				'edit_item'     => 'تعديل الميزة',
+				'update_item'   => 'تحديث الميزة',
+				'new_item_name' => 'نص الميزة',
+				'search_items'  => 'بحث',
+				'not_found'     => 'لا توجد مميزات بعد',
+				'back_to_items' => '→ كل المميزات',
+			),
+			'name_label'    => 'نص الميزة',
+			'name_hint'     => 'يظهر في الشريط البنفسجي أسفل قسم «نبذة عن خبراتنا».',
+			'show_desc'     => false,
+			'fields'        => aeon_icon_fields( 'اختر أيقونة تمثّل الميزة.' ),
 		),
 
 		'aeon_why' => array(
@@ -79,6 +143,75 @@ function aeon_sections_config() {
 			),
 		),
 
+		'aeon_value' => array(
+			'menu'          => 'رسالتنا وقيمنا',
+			'icon'          => 'dashicons-heart',
+			'labels'        => array(
+				'name'          => 'القيم',
+				'singular_name' => 'قيمة',
+				'add_new_item'  => 'إضافة قيمة جديدة',
+				'edit_item'     => 'تعديل القيمة',
+				'update_item'   => 'تحديث القيمة',
+				'new_item_name' => 'العنوان',
+				'search_items'  => 'بحث',
+				'not_found'     => 'لا توجد قيم بعد',
+				'back_to_items' => '→ كل القيم',
+			),
+			'name_label'    => 'العنوان',
+			'name_hint'     => 'اسم القيمة (مثال: النتائج).',
+			'show_desc'     => true,
+			'desc_label'    => 'الوصف',
+			'desc_hint'     => 'نص مختصر يظهر أسفل العنوان داخل البطاقة.',
+			'fields'        => array(
+				'icon' => array( 'type' => 'icon', 'label' => 'الأيقونة', 'hint' => 'اختر أيقونة تمثّل القيمة.' ),
+			),
+		),
+
+		'aeon_event' => array(
+			'menu'          => 'المشاركات والفعاليات',
+			'icon'          => 'dashicons-groups',
+			'labels'        => array(
+				'name'          => 'المشاركات والفعاليات',
+				'singular_name' => 'مشاركة',
+				'add_new_item'  => 'إضافة مشاركة جديدة',
+				'edit_item'     => 'تعديل المشاركة',
+				'update_item'   => 'تحديث المشاركة',
+				'new_item_name' => 'وصف المشاركة',
+				'search_items'  => 'بحث',
+				'not_found'     => 'لا توجد مشاركات بعد',
+				'back_to_items' => '→ كل المشاركات',
+			),
+			'name_label'    => 'وصف المشاركة',
+			'name_hint'     => 'جملة تصف المشاركة أو الفعالية (تظهر أسفل الصورة).',
+			'show_desc'     => false,
+			'fields'        => array_merge(
+				array(
+					'image' => array( 'type' => 'image', 'label' => 'صورة المشاركة', 'hint' => 'صورة الفعالية (اختياري — تُستخدم صورة افتراضية عند تركها فارغة).' ),
+				),
+				aeon_icon_fields( 'اختر أيقونة تظهر فوق الصورة. تُستخدم أيقونة افتراضية مناسبة عند تركها فارغة.' )
+			),
+		),
+
+		'aeon_industry' => array(
+			'menu'          => 'القطاعات التي نخدمها',
+			'icon'          => 'dashicons-category',
+			'labels'        => array(
+				'name'          => 'القطاعات',
+				'singular_name' => 'قطاع',
+				'add_new_item'  => 'إضافة قطاع جديد',
+				'edit_item'     => 'تعديل القطاع',
+				'update_item'   => 'تحديث القطاع',
+				'new_item_name' => 'اسم القطاع',
+				'search_items'  => 'بحث',
+				'not_found'     => 'لا توجد قطاعات بعد',
+				'back_to_items' => '→ كل القطاعات',
+			),
+			'name_label'    => 'اسم القطاع',
+			'name_hint'     => 'القطاع كما يظهر في البروفايل (مثال: مطاعم، عطور، عقارات).',
+			'show_desc'     => false,
+			'fields'        => aeon_icon_fields( 'اختر أيقونة تمثّل القطاع.' ),
+		),
+
 		'aeon_statistic' => array(
 			'menu'          => 'الإحصائيات',
 			'icon'          => 'dashicons-chart-bar',
@@ -96,14 +229,17 @@ function aeon_sections_config() {
 			'name_label'    => 'النص التوضيحي',
 			'name_hint'     => 'النص الذي يظهر أسفل الرقم (مثال: مشروع مكتمل).',
 			'show_desc'     => false,
-			'fields'        => array(
-				'number' => array( 'type' => 'number', 'label' => 'الرقم', 'hint' => 'الرقم الذي يَعُدّ إليه العدّاد.', 'placeholder' => 'مثال: 200' ),
-				'suffix' => array(
-					'type'    => 'select',
-					'label'   => 'الرمز',
-					'hint'    => 'رمز يظهر بعد الرقم مباشرة.',
-					'options' => array( '' => 'بدون', '+' => '+ (زائد)', '%' => '٪ (نسبة مئوية)' ),
+			'fields'        => array_merge(
+				array(
+					'number' => array( 'type' => 'number', 'label' => 'الرقم', 'hint' => 'الرقم الذي يَعُدّ إليه العدّاد.', 'placeholder' => 'مثال: 200' ),
+					'suffix' => array(
+						'type'    => 'select',
+						'label'   => 'الرمز',
+						'hint'    => 'رمز يظهر بعد الرقم مباشرة.',
+						'options' => array( '' => 'بدون', '+' => '+ (زائد)', '%' => '٪ (نسبة مئوية)' ),
+					),
 				),
+				aeon_icon_fields( 'اختر أيقونة تظهر أعلى الرقم.' )
 			),
 		),
 
@@ -151,9 +287,12 @@ function aeon_sections_config() {
 			'show_desc'     => true,
 			'desc_label'    => 'الوصف / العنوان',
 			'desc_hint'     => 'وصف مختصر أو عنوان الفرع، يظهر في تذييل الموقع.',
-			'fields'        => array(
-				'lat' => array( 'type' => 'decimal', 'label' => 'خط العرض (Latitude)', 'hint' => 'إحداثي خط العرض من خرائط جوجل. مثال: 25.204849', 'placeholder' => 'مثال: 25.204849' ),
-				'lng' => array( 'type' => 'decimal', 'label' => 'خط الطول (Longitude)', 'hint' => 'إحداثي خط الطول من خرائط جوجل. للحصول على الإحداثيات: افتح خرائط جوجل، اضغط بزر الفأرة الأيمن على الموقع، ثم انسخ الرقمين الظاهرين.', 'placeholder' => 'مثال: 55.270783' ),
+			'fields'        => array_merge(
+				array(
+					'lat' => array( 'type' => 'decimal', 'label' => 'خط العرض (Latitude)', 'hint' => 'إحداثي خط العرض من خرائط جوجل. مثال: 25.204849', 'placeholder' => 'مثال: 25.204849' ),
+					'lng' => array( 'type' => 'decimal', 'label' => 'خط الطول (Longitude)', 'hint' => 'إحداثي خط الطول من خرائط جوجل. للحصول على الإحداثيات: افتح خرائط جوجل، اضغط بزر الفأرة الأيمن على الموقع، ثم انسخ الرقمين الظاهرين.', 'placeholder' => 'مثال: 55.270783' ),
+				),
+				aeon_icon_fields( 'أيقونة الفرع. الافتراضي علامة الموقع.' )
 			),
 		),
 

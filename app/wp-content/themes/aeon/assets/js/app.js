@@ -20,15 +20,29 @@
 		if (hasGSAP && window.ScrollTrigger) {
 			lenis.on('scroll', window.ScrollTrigger.update);
 		}
-		// Anchor links go through Lenis.
-		$$('a[href^="#"]').forEach(function (a) {
-			var id = a.getAttribute('href');
-			if (id.length < 2) return;
+		// Anchor links go through Lenis — both bare "#id" links and the one-page
+		// menu's full URLs ("https://site/#contact") when they point at a section
+		// of the page we are already on.
+		$$('a[href*="#"]').forEach(function (a) {
+			var url;
+			try { url = new URL(a.href, window.location.href); } catch (err) { return; }
+			if (url.hash.length < 2) return;
+			if (url.host !== window.location.host || url.pathname !== window.location.pathname) return;
 			a.addEventListener('click', function (e) {
-				var target = document.getElementById(id.slice(1));
-				if (target) { e.preventDefault(); lenis.scrollTo(target, { offset: -80 }); }
+				var target = document.getElementById(decodeURIComponent(url.hash.slice(1)));
+				if (!target) return;
+				e.preventDefault();
+				lenis.scrollTo(target, { offset: -80 });
+				if (window.history && history.replaceState) { history.replaceState(null, '', url.hash); }
 			});
 		});
+		// Honour a hash arriving from another page (e.g. /services/#service-web).
+		if (window.location.hash.length > 1) {
+			var landing = document.getElementById(window.location.hash.slice(1));
+			if (landing) {
+				setTimeout(function () { lenis.scrollTo(landing, { offset: -80, immediate: true }); }, 60);
+			}
+		}
 	}
 
 	/* ---------- Header on scroll + progress bar ---------- */
@@ -45,6 +59,132 @@
 		}
 		window.addEventListener('scroll', onScroll, { passive: true });
 		onScroll();
+	}
+
+	/* ---------- WhatsApp ---------- */
+	// The link carries no `text` parameter, so the chat always opens empty —
+	// WhatsApp's own default. A bare wa.me link still lands on WhatsApp's
+	// "Open app / Continue to WhatsApp Web" page on desktop, so desktop browsers
+	// are pointed straight at the web client instead. Phones keep the wa.me deep
+	// link, which opens the app directly. The markup keeps the wa.me href, so
+	// this is pure enhancement — it degrades to the standard link without JS.
+	//
+	// The dialog is a real modal: it dims the page, traps focus and locks scroll.
+	// It shows itself once per browsing session (sessionStorage) rather than on
+	// every page load, so moving between pages does not reopen it; the floating
+	// button reopens it on demand.
+	var WA_SEEN = 'aeonWaSeen';
+	var WA_DELAY = 1200;
+
+	function initWhatsApp() {
+		var fab = $('[data-wa-toggle]');
+		var modal = $('[data-wa-modal]');
+		if (!fab || !modal) return;
+		var popup = $('.wa-popup', modal);
+		var link = $('[data-wa-link]', modal);
+		if (!popup || !link) return;
+
+		var number = (link.getAttribute('href') || '').replace(/\D+/g, '');
+		if (!number) return;
+
+		// A bare wa.me link lands on WhatsApp's "Open app / Continue to WhatsApp
+		// Web" page on desktop. Point desktop browsers straight at the web client;
+		// phones keep wa.me, which deep-links into the app. No `text` parameter
+		// either way, so the chat opens empty — WhatsApp's own default.
+		var touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+		var mobileUA = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+		if (!touch && !mobileUA) {
+			link.setAttribute('href', 'https://web.whatsapp.com/send?phone=' + number);
+		}
+
+		// sessionStorage throws in some privacy modes — never let that break the
+		// dialog. Failing to read just means it opens again, which is harmless.
+		function seen(write) {
+			try {
+				if (write) { sessionStorage.setItem(WA_SEEN, '1'); return true; }
+				return sessionStorage.getItem(WA_SEEN) === '1';
+			} catch (err) { return false; }
+		}
+
+		var lastFocus = null;
+
+		function isOpen() { return modal.classList.contains('is-open'); }
+
+		function open() {
+			if (isOpen()) return;
+			lastFocus = document.activeElement;
+			modal.hidden = false;
+			// Flush styles synchronously so the transition runs from the hidden
+			// state. A rAF callback would do the same, but it is throttled in
+			// background tabs — which would leave the panel open yet invisible.
+			void modal.offsetWidth;
+			modal.classList.add('is-open');
+			fab.setAttribute('aria-expanded', 'true');
+
+			// Hold the page still. Lenis owns the scroll when it is running;
+			// the body class covers reduced-motion and no-library cases. Pad for
+			// the vanished scrollbar so the layout does not jump sideways.
+			var bar = window.innerWidth - document.documentElement.clientWidth;
+			if (bar > 0) document.body.style.paddingRight = bar + 'px';
+			document.body.classList.add('wa-lock');
+			if (lenis) lenis.stop();
+
+			link.focus();
+		}
+
+		function close(refocus) {
+			if (!isOpen()) return;
+			modal.classList.remove('is-open');
+			fab.setAttribute('aria-expanded', 'false');
+			document.body.classList.remove('wa-lock');
+			document.body.style.paddingRight = '';
+			if (lenis) lenis.start();
+			// Keep it in the DOM until the fade finishes, then take it back out
+			// of the accessibility tree.
+			setTimeout(function () { if (!isOpen()) modal.hidden = true; }, 450);
+			// Never leave focus stranded inside the panel we just hid. On the
+			// automatic open the previous element is <body>, and focusing that is
+			// a no-op — so fall back to the button, which owns the dialog anyway.
+			if (refocus) {
+				var back = (lastFocus && lastFocus.isConnected && lastFocus !== document.body) ? lastFocus : fab;
+				back.focus();
+			}
+		}
+
+		// The button stays a real wa.me link for the no-JS case; here it opens
+		// the dialog instead.
+		fab.addEventListener('click', function (e) {
+			e.preventDefault();
+			if (isOpen()) { close(false); } else { open(); }
+		});
+
+		// Backdrop and close button share the hook, so a click outside the panel
+		// dismisses it the way a modal should.
+		$$('[data-wa-close]', modal).forEach(function (el) {
+			el.addEventListener('click', function () { close(true); });
+		});
+
+		// Tapping through to WhatsApp should leave a clean page behind.
+		link.addEventListener('click', function () { close(false); });
+
+		document.addEventListener('keydown', function (e) {
+			if (!isOpen()) return;
+			if (e.key === 'Escape') { close(true); return; }
+			if (e.key !== 'Tab') return;
+			// Focus trap: the dialog is modal, so Tab must not reach the page.
+			var items = $$('a[href], button:not([disabled])', popup).filter(function (el) {
+				return el.offsetWidth || el.offsetHeight || el.getClientRects().length;
+			});
+			if (!items.length) return;
+			var first = items[0];
+			var last = items[items.length - 1];
+			if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+			else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+		});
+
+		if (!seen()) {
+			setTimeout(function () { seen(true); open(); }, WA_DELAY);
+		}
 	}
 
 	/* ---------- Mobile menu ---------- */
@@ -187,6 +327,65 @@
 		});
 	}
 
+	/* ---------- Portfolio showcase (filter + lightbox) ---------- */
+	function initShowcase() {
+		var section = $('#showcase');
+		if (!section) return;
+		var filters = $$('.showcase__filter', section);
+		var items = $$('.showcase-item', section);
+
+		filters.forEach(function (btn) {
+			btn.addEventListener('click', function () {
+				filters.forEach(function (b) { b.classList.remove('is-active'); });
+				btn.classList.add('is-active');
+				var f = btn.getAttribute('data-filter');
+				items.forEach(function (item) {
+					var show = f === 'all' || item.getAttribute('data-cat') === f;
+					item.classList.toggle('is-hidden', !show);
+				});
+				if (lenis) lenis.resize();
+			});
+		});
+
+		var lb = $('[data-showcase-lightbox]', section);
+		if (!lb) return;
+		var lbImg = $('[data-lb-img]', lb);
+		var lbCap = $('[data-lb-caption]', lb);
+		var current = -1;
+
+		function visible() { return items.filter(function (it) { return !it.classList.contains('is-hidden'); }); }
+		function render(item) {
+			lbImg.src = item.getAttribute('data-full');
+			lbImg.alt = item.getAttribute('data-caption') || '';
+			lbCap.textContent = item.getAttribute('data-caption') || '';
+		}
+		function open(item) {
+			current = visible().indexOf(item);
+			render(item);
+			lb.hidden = false;
+			document.body.style.overflow = 'hidden';
+		}
+		function close() { lb.hidden = true; document.body.style.overflow = ''; }
+		function step(dir) {
+			var vis = visible();
+			if (!vis.length) return;
+			current = (current + dir + vis.length) % vis.length;
+			render(vis[current]);
+		}
+
+		items.forEach(function (item) { item.addEventListener('click', function () { open(item); }); });
+		$('[data-lb-close]', lb).addEventListener('click', close);
+		$('[data-lb-prev]', lb).addEventListener('click', function () { step(-1); });
+		$('[data-lb-next]', lb).addEventListener('click', function () { step(1); });
+		lb.addEventListener('click', function (e) { if (e.target === lb) close(); });
+		document.addEventListener('keydown', function (e) {
+			if (lb.hidden) return;
+			if (e.key === 'Escape') { close(); }
+			else if (e.key === 'ArrowRight') { step(1); }
+			else if (e.key === 'ArrowLeft') { step(-1); }
+		});
+	}
+
 	/* ---------- Magnetic buttons ---------- */
 	function initMagnetic() {
 		if (reduceMotion || window.matchMedia('(pointer: coarse)').matches) return;
@@ -261,12 +460,14 @@
 		if (hasGSAP && window.ScrollTrigger) { window.gsap.registerPlugin(window.ScrollTrigger); }
 		initSmoothScroll();
 		initHeader();
+		initWhatsApp();
 		initMobileMenu();
 		initReveal();
 		initHero();
 		initCounters();
 		initSwipers();
 		initWorkFilters();
+		initShowcase();
 		initMagnetic();
 		initContactForm();
 	}

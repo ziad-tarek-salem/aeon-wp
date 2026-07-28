@@ -1,60 +1,63 @@
 <?php
 /**
- * Portfolio archive — filterable grid.
+ * Work archive — the company profile's five portfolio chapters at full
+ * fidelity: websites (p10), photography (p11–16), reels (p17–19), motion
+ * (p20–21) and social-media design grouped by industry chip (p22–37).
+ *
+ * Projects the client adds from the dashboard are listed first; the profile
+ * chapters below are always available as the baseline showcase.
  *
  * @package AEON
  */
 get_header();
+
 get_template_part( 'template-parts/components/page-banner', null, array(
-	'title'    => aeon_t( 'work_title' ),
-	'subtitle' => aeon_t( 'work_sub' ),
+	'title'    => aeon_t( 'work_page_title' ),
+	'subtitle' => aeon_t( 'work_page_sub' ),
 ) );
 
-$cats = get_terms( array( 'taxonomy' => 'work_category', 'hide_empty' => true ) );
-?>
-<section class="work section">
-	<div class="container">
+$aeon_gallery = aeon_profile_gallery();
 
-		<?php if ( $cats && ! is_wp_error( $cats ) ) : ?>
-			<div class="work-filters" data-work-filters data-reveal>
-				<button class="work-filter is-active" data-filter="*"><?php aeon_e( 'work_all' ); ?></button>
-				<?php foreach ( $cats as $c ) : ?>
-					<button class="work-filter" data-filter="cat-<?php echo esc_attr( $c->slug ); ?>"><?php echo esc_html( $c->name ); ?></button>
-				<?php endforeach; ?>
-			</div>
-		<?php endif; ?>
+/**
+ * Gallery items for one profile chapter.
+ *
+ * @param array  $gallery Result of aeon_profile_gallery().
+ * @param string $slug    Chapter slug.
+ * @return string[]
+ */
+$aeon_chapter_items = static function ( $gallery, $slug ) {
+	return isset( $gallery[ $slug ]['items'] ) ? $gallery[ $slug ]['items'] : array();
+};
 
-		<div class="work__grid work__grid--archive stagger" data-work-grid data-reveal>
-			<?php if ( have_posts() ) : ?>
-				<?php while ( have_posts() ) : the_post();
-					$terms = get_the_terms( get_the_ID(), 'work_category' );
-					$classes = '';
-					if ( $terms && ! is_wp_error( $terms ) ) {
-						foreach ( $terms as $t ) {
-							$classes .= ' cat-' . $t->slug;
-						}
-					}
-					?>
-					<a class="work-card<?php echo esc_attr( $classes ); ?>" href="<?php the_permalink(); ?>">
-						<div class="work-card__media">
-							<?php echo has_post_thumbnail() ? get_the_post_thumbnail( null, 'aeon-card' ) : '<img src="' . esc_url( AEON_URI . '/assets/images/services-grid.jpeg' ) . '" alt="" loading="lazy">'; ?>
-						</div>
-						<div class="work-card__overlay">
-							<?php if ( $terms && ! is_wp_error( $terms ) ) : ?>
-								<span class="work-card__cat"><?php echo esc_html( $terms[0]->name ); ?></span>
-							<?php endif; ?>
-							<h3 class="work-card__title"><?php the_title(); ?></h3>
-							<span class="work-card__view"><?php aeon_e( 'work_view' ); ?> <?php echo aeon_icon( 'arrow' ); ?></span>
-						</div>
-					</a>
-				<?php endwhile; ?>
-			<?php else : ?>
-				<p class="empty-state"><?php aeon_e( 'work_empty' ); ?></p>
-			<?php endif; ?>
-		</div>
+// Dashboard-managed projects, when the client has added any.
+if ( have_posts() ) {
+	get_template_part( 'template-parts/work/chapter-projects' );
+}
 
-		<?php the_posts_pagination( array( 'mid_size' => 1, 'prev_text' => '‹', 'next_text' => '›' ) ); ?>
-	</div>
-</section>
-<?php
+get_template_part( 'template-parts/work/chapter-web', null, array(
+	'items' => $aeon_chapter_items( $aeon_gallery, 'web' ),
+) );
+
+get_template_part( 'template-parts/work/chapter-photography', null, array(
+	'items' => array_slice( $aeon_chapter_items( $aeon_gallery, 'photography' ), 0, 12 ),
+) );
+
+get_template_part( 'template-parts/work/chapter-vertical', null, array(
+	'slug'    => 'reels',
+	'title_1' => 'reels_title_1',
+	'title_2' => 'reels_title_2',
+	'sub'     => 'reels_sub',
+	'items'   => $aeon_chapter_items( $aeon_gallery, 'reels' ),
+) );
+
+get_template_part( 'template-parts/work/chapter-vertical', null, array(
+	'slug'    => 'motion',
+	'title_1' => 'motion_title_1',
+	'title_2' => 'motion_title_2',
+	'sub'     => 'motion_sub',
+	'items'   => $aeon_chapter_items( $aeon_gallery, 'motion' ),
+) );
+
+get_template_part( 'template-parts/work/chapter-social' );
+
 get_footer();

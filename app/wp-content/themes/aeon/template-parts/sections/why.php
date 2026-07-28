@@ -6,7 +6,7 @@
  */
 ?>
 <section class="why section section--dark" id="why">
-	<div class="why__bg" aria-hidden="true"><span class="dot-grid dot-grid--why"></span></div>
+	<?php aeon_soft_bg(); ?>
 	<div class="container">
 		<header class="section-head section-head--center" data-reveal>
 			<p class="eyebrow eyebrow--light"><?php aeon_e( 'why_eyebrow' ); ?></p>

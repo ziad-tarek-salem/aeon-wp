@@ -12,12 +12,12 @@ get_template_part( 'template-parts/components/page-banner', null, array(
 ?>
 
 <section class="about about--page section">
+	<?php aeon_soft_bg(); ?>
 	<div class="container about__inner">
 		<div class="about__media" data-reveal>
 			<div class="about__media-frame">
-				<img src="<?php echo esc_url( AEON_URI . '/assets/images/brand-1.jpeg' ); ?>" alt="<?php echo esc_attr( aeon_t( 'about_title' ) ); ?>" loading="lazy">
+				<img src="<?php echo esc_url( aeon_image_url( 'about_page', 'large' ) ); ?>" alt="<?php echo esc_attr( aeon_t( 'about_title' ) ); ?>" loading="lazy">
 			</div>
-			<span class="dot-grid dot-grid--about" aria-hidden="true"></span>
 		</div>
 		<div class="about__content" data-reveal>
 			<p class="eyebrow"><?php aeon_e( 'about_eyebrow' ); ?></p>
@@ -51,6 +51,7 @@ get_template_part( 'template-parts/components/page-banner', null, array(
 
 <?php
 get_template_part( 'template-parts/sections/stats' );
-get_template_part( 'template-parts/sections/why' );
-get_template_part( 'template-parts/sections/testimonials' );
+get_template_part( 'template-parts/sections/values' );
+get_template_part( 'template-parts/sections/events' );
+get_template_part( 'template-parts/sections/office' );
 get_footer();

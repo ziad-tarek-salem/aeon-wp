@@ -115,13 +115,34 @@ function aeon_field_control( $key, $f, $value, $id ) {
 			echo '</div>';
 			break;
 
+		case 'duoicon':
+			// Same picker, rendered with the two-tone brand set the front end uses.
+			echo '<div class="aeon-icon-grid aeon-icon-grid--duo">';
+			foreach ( aeon_duo_icon_choices() as $ik => $il ) {
+				printf(
+					'<label class="aeon-icon-opt%5$s" title="%3$s"><input type="radio" name="%4$s" value="%1$s" %2$s>%6$s<span>%3$s</span></label>',
+					esc_attr( $ik ), checked( $value, $ik, false ), esc_attr( $il ), $name,
+					( $value === $ik ? ' is-selected' : '' ), aeon_duo_icon( $ik )
+				);
+			}
+			echo '</div>';
+			break;
+
+		case 'url':
+			printf(
+				'<input type="url" class="aeon-url" id="%1$s" name="%2$s" value="%3$s" placeholder="%4$s" dir="ltr">',
+				esc_attr( $id ), $name, esc_attr( $value ), $ph
+			);
+			break;
+
 		case 'image':
-			$aid = (int) $value;
-			$url = $aid ? wp_get_attachment_image_url( $aid, 'thumbnail' ) : '';
-			echo '<div class="aeon-image-wrap">';
+			$aid  = (int) $value;
+			$url  = $aid ? wp_get_attachment_image_url( $aid, 'thumbnail' ) : '';
+			$mime = isset( $f['mime'] ) ? $f['mime'] : 'image';
+			echo '<div class="aeon-image-wrap" data-mime="' . esc_attr( $mime ) . '">';
 			echo '<input type="hidden" class="aeon-image-id" name="' . $name . '" value="' . esc_attr( $aid ) . '">';
 			echo '<div class="aeon-image-preview">' . ( $url ? '<img src="' . esc_url( $url ) . '" alt="">' : '' ) . '</div>';
-			echo '<button type="button" class="button aeon-image-pick">اختيار صورة</button> ';
+			echo '<button type="button" class="button aeon-image-pick">اختيار ملف</button> ';
 			echo '<button type="button" class="button aeon-image-clear"' . ( $aid ? '' : ' style="display:none"' ) . '>إزالة</button>';
 			echo '</div>';
 			break;
@@ -171,7 +192,17 @@ function aeon_save_fields( $fields, $term_id ) {
 				update_term_meta( $term_id, $meta, array_key_exists( $raw, $f['options'] ) ? $raw : '' );
 				break;
 			case 'icon':
+			case 'duoicon':
 				update_term_meta( $term_id, $meta, sanitize_key( $raw ) );
+				break;
+			case 'url':
+				$raw = trim( $raw );
+				if ( '' === $raw ) {
+					delete_term_meta( $term_id, $meta );
+				} else {
+					// esc_url_raw drops anything that is not an http(s) URL.
+					update_term_meta( $term_id, $meta, esc_url_raw( $raw, array( 'http', 'https' ) ) );
+				}
 				break;
 			case 'image':
 				$aid = (int) $raw;
@@ -227,7 +258,15 @@ function aeon_fields_admin_assets( $hook ) {
 		.aeon-icon-opt.is-selected{border-color:#2271b1;box-shadow:0 0 0 1px #2271b1;background:#f0f6fc;}
 		.aeon-icon-opt input{position:absolute;opacity:0;pointer-events:none;}
 		.aeon-icon-opt .aeon-icon{width:26px;height:26px;color:#1d2327;}
-		.aeon-image-preview img{max-width:120px;height:auto;border-radius:8px;display:block;margin:.4em 0;}
+		/* Two-tone brand icons: identical tinting to the front end. */
+		.aeon-icon-grid--duo{grid-template-columns:repeat(auto-fill,minmax(96px,1fr));max-width:640px;}
+		.aeon-duo{--ico-a:#6D28D9;--ico-b:#F36F21;display:block;width:34px;height:34px;}
+		.aeon-duo .da{fill:var(--ico-a);}
+		.aeon-duo .db{fill:var(--ico-b);}
+		.aeon-duo .sa{stroke:var(--ico-a);fill:none;}
+		.aeon-duo .sb{stroke:var(--ico-b);fill:none;}
+		.aeon-image-preview img{max-width:96px;height:auto;border-radius:8px;display:block;margin:.4em 0;background:#f6f7f7;padding:6px;}
+		.aeon-url{width:100%;max-width:520px;}
 		.term-slug-wrap{display:none;}
 		' . $hide_desc . '
 		body.rtl .aeon-field input[type=text],body.rtl .aeon-field input[type=number]{text-align:right;}
@@ -244,12 +283,13 @@ jQuery(function($){
     $g.find('.aeon-icon-opt').removeClass('is-selected');
     $(this).closest('.aeon-icon-opt').addClass('is-selected');
   });
-  // Media picker.
+  // Media picker. Icon fields (data-mime="svg-image") also accept SVG.
   var frame;
   $(document).on('click','.aeon-image-pick',function(e){
     e.preventDefault();
     var $w=$(this).closest('.aeon-image-wrap');
-    frame=wp.media({title:'اختيار صورة',button:{text:'استخدام الصورة'},library:{type:'image'},multiple:false});
+    var lib=($w.data('mime')==='svg-image')?{type:['image','image/svg+xml']}:{type:'image'};
+    frame=wp.media({title:'اختيار ملف',button:{text:'استخدام هذا الملف'},library:lib,multiple:false});
     frame.on('select',function(){
       var a=frame.state().get('selection').first().toJSON();
       var url=(a.sizes&&a.sizes.thumbnail)?a.sizes.thumbnail.url:a.url;
@@ -268,6 +308,8 @@ jQuery(function($){
   $(document).ajaxComplete(function(e,xhr,s){
     if(s && s.data && s.data.indexOf('action=add-tag')!==-1){
       $('#addtag .aeon-icon-grid input:checked').prop('checked',false).trigger('change');
+      $('#addtag .aeon-icon-opt').removeClass('is-selected');
+      $('#addtag .aeon-url').val('');
       var $w=$('#addtag .aeon-image-wrap');
       $w.find('.aeon-image-id').val(''); $w.find('.aeon-image-preview').empty(); $w.find('.aeon-image-clear').hide();
     }

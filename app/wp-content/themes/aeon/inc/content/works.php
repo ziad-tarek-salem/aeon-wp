@@ -81,13 +81,26 @@ add_action( 'add_meta_boxes', 'aeon_portfolio_meta_box' );
 
 function aeon_portfolio_meta_cb( $post ) {
 	wp_nonce_field( 'aeon_work_meta', 'aeon_work_nonce' );
-	$wide = get_post_meta( $post->ID, '_aeon_wide', true );
+	$wide     = get_post_meta( $post->ID, '_aeon_wide', true );
+	$industry = (string) get_post_meta( $post->ID, '_aeon_industry', true );
 	?>
 	<p style="text-align:right">
 		<label>
 			<input type="checkbox" name="aeon_wide" value="1" <?php checked( $wide, '1' ); ?>>
 			بطاقة عريضة (تمتد على عمودين)
 		</label>
+	</p>
+	<p style="text-align:right">
+		<label for="aeon_industry" style="display:block;font-weight:600;margin-bottom:4px">القطاع</label>
+		<select name="aeon_industry" id="aeon_industry" style="width:100%">
+			<option value="">— بدون —</option>
+			<?php foreach ( aeon_section_terms( 'aeon_industry' ) as $term ) : ?>
+				<option value="<?php echo esc_attr( $term->slug ); ?>" <?php selected( $industry, $term->slug ); ?>>
+					<?php echo esc_html( $term->name ); ?>
+				</option>
+			<?php endforeach; ?>
+		</select>
+		<span class="description">يظهر كوسم أعلى مجموعة الأعمال في صفحة أعمالنا.</span>
 	</p>
 	<?php
 }
@@ -100,5 +113,10 @@ function aeon_save_portfolio_meta( $post_id ) {
 		return;
 	}
 	update_post_meta( $post_id, '_aeon_wide', isset( $_POST['aeon_wide'] ) ? '1' : '' );
+	update_post_meta(
+		$post_id,
+		'_aeon_industry',
+		isset( $_POST['aeon_industry'] ) ? sanitize_key( wp_unslash( $_POST['aeon_industry'] ) ) : ''
+	);
 }
 add_action( 'save_post_portfolio', 'aeon_save_portfolio_meta' );

@@ -82,15 +82,18 @@ function aeon_branch_locations() {
 		$lng        = (string) get_term_meta( $term->term_id, '_aeon_lng', true );
 		$has_coords = is_numeric( $lat ) && is_numeric( $lng );
 
-		$out[] = array(
-			'name'     => $term->name,
-			'desc'     => $term->description,
-			'lat'      => $lat,
-			'lng'      => $lng,
-			// api=1 search URL opens the exact point in Google Maps on web + app.
-			'maps_url' => $has_coords
-				? 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode( $lat . ',' . $lng )
-				: '',
+		$out[] = array_merge(
+			array(
+				'name'     => $term->name,
+				'desc'     => $term->description,
+				'lat'      => $lat,
+				'lng'      => $lng,
+				// api=1 search URL opens the exact point in Google Maps on web + app.
+				'maps_url' => $has_coords
+					? 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode( $lat . ',' . $lng )
+					: '',
+			),
+			aeon_term_icon( $term->term_id, 'pin' )
 		);
 	}
 	return $out;

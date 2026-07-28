@@ -35,7 +35,7 @@ $work_q = new WP_Query( array(
 							<?php if ( has_post_thumbnail() ) : ?>
 								<?php the_post_thumbnail( 'aeon-card' ); ?>
 							<?php else : ?>
-								<img src="<?php echo esc_url( AEON_URI . '/assets/images/services-grid.jpeg' ); ?>" alt="<?php the_title_attribute(); ?>" loading="lazy">
+								<img src="<?php echo esc_url( aeon_image_url( 'services_grid', 'large' ) ); ?>" alt="<?php the_title_attribute(); ?>" loading="lazy">
 							<?php endif; ?>
 						</div>
 						<div class="work-card__overlay">

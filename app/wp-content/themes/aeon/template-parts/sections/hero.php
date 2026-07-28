@@ -48,7 +48,7 @@
 		<p class="hero__sub" data-hero-el><?php aeon_e( 'hero_sub' ); ?></p>
 
 		<div class="hero__actions" data-hero-el>
-			<a class="btn btn--primary btn--lg magnetic" href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">
+			<a class="btn btn--primary btn--lg magnetic" href="<?php echo esc_url( aeon_contact_url() ); ?>">
 				<span><?php aeon_e( 'hero_cta_primary' ); ?></span>
 				<?php echo aeon_icon( 'arrow' ); ?>
 			</a>

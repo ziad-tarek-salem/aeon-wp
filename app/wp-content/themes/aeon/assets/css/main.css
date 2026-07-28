@@ -98,6 +98,30 @@ h1, h2, h3, h4 { line-height: 1.18; font-weight: 800; color: var(--ink); }
 }
 .skip-link:focus { inset-block-start: 16px; }
 
+/* ---------- Duotone brand icons ----------
+   Two-tone filled icons (see inc/brand-icons.php). Both tones are CSS custom
+   properties, so one rule on an ancestor re-tints a whole icon — that is how the
+   service cards flip to white-on-gradient when hovered. `--ico-*` inherits, so a
+   custom uploaded SVG that uses currentColor picks up the primary tone too.
+   Sizing is always inherited from the container, never hard-coded here, which
+   keeps the set responsive wherever it is dropped in. */
+.aeon-duo {
+	--ico-a: var(--violet);
+	--ico-b: var(--orange);
+	/* Explicit default rather than 100% — an unsized parent must not let the
+	   icon grow without bound. Container rules below override per context. */
+	display: block; width: 32px; height: 32px; color: var(--ico-a);
+	flex-shrink: 0;
+}
+.aeon-duo .da { fill: var(--ico-a); }
+.aeon-duo .db { fill: var(--ico-b); }
+.aeon-duo .sa { stroke: var(--ico-a); fill: none; }
+.aeon-duo .sb { stroke: var(--ico-b); fill: none; }
+/* Uploaded / linked icons: fit the same box without distortion. */
+.aeon-duo--custom { object-fit: contain; }
+/* Icons are decorative shapes — never let them stretch text selection or drag. */
+.aeon-duo, .aeon-duo--custom { -webkit-user-select: none; user-select: none; }
+
 /* ---------- Buttons ---------- */
 .btn {
 	display: inline-flex; align-items: center; gap: 10px;
@@ -135,7 +159,11 @@ h1, h2, h3, h4 { line-height: 1.18; font-weight: 800; color: var(--ink); }
 	padding-block: 8px;
 }
 .site-header__inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
-.brand-link img, .site-header__brand .custom-logo { height: 40px; width: auto; transition: height .4s; }
+/* `max-width: none` breaks a circular constraint: the brand is a flex item sized
+   by its content, and the global `img { max-width: 100% }` would size the logo
+   from that same (still unresolved) width — collapsing it to 0px. */
+.site-header__brand { flex-shrink: 0; }
+.brand-link img, .site-header__brand .custom-logo { height: 40px; width: auto; max-width: none; transition: height .4s; }
 .site-header.is-scrolled .brand-link img, .site-header.is-scrolled .custom-logo { height: 34px; }
 .site-header__brand .custom-logo-link { display: inline-flex; align-items: center; line-height: 0; }
 
@@ -328,11 +356,44 @@ h1, h2, h3, h4 { line-height: 1.18; font-weight: 800; color: var(--ink); }
 .section-head--center .section-sub { margin-inline: auto; }
 .section-cta { text-align: center; margin-block-start: 40px; }
 
-/* ---------- Dot grid motif ---------- */
-.dot-grid { position: absolute; width: 110px; height: 110px; background-image: radial-gradient(currentColor 1.5px, transparent 1.5px); background-size: 16px 16px; opacity: .25; }
-.dot-grid--about { color: var(--orange); inset-block-end: -24px; inset-inline-end: -24px; }
-.dot-grid--why { color: #fff; inset-block-start: 40px; inset-inline-end: 6%; opacity: .12; width: 160px; height: 160px; }
-.dot-grid--banner { color: var(--violet); inset-block-start: 30px; inset-inline-end: 8%; opacity: .2; }
+/* ---------- Soft section accents ---------- */
+/* The hero's background language — blurred brand orbs, a thin ring and a spark —
+   reused across every section in place of the old dotted grids and corner
+   ribbons. Quieter than the hero so it never competes with the content. */
+.soft-bg { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+.soft-bg > span { position: absolute; display: block; }
+.soft-bg__orb { border-radius: 50%; filter: blur(70px); }
+.soft-bg__orb--1 {
+	width: min(420px, 38vw); aspect-ratio: 1;
+	background: radial-gradient(circle, rgba(147,51,234,.28), transparent 70%);
+	inset-block-start: -14%; inset-inline-end: -8%;
+}
+.soft-bg__orb--2 {
+	width: min(360px, 32vw); aspect-ratio: 1;
+	background: radial-gradient(circle, rgba(243,111,33,.22), transparent 70%);
+	inset-block-end: -18%; inset-inline-start: -6%;
+}
+.soft-bg__ring {
+	width: 210px; aspect-ratio: 1; border-radius: 50%;
+	border: 1.5px solid rgba(126,34,206,.12);
+	inset-block-start: 16%; inset-inline-start: 7%;
+}
+.soft-bg__spark {
+	width: 12px; aspect-ratio: 1; border-radius: 50%;
+	background: var(--grad-orange); opacity: .45;
+	box-shadow: 0 6px 16px rgba(243,111,33,.28);
+	inset-block-end: 22%; inset-inline-end: 12%;
+}
+/* Content sits above the accents. */
+.soft-bg ~ .container, .soft-bg ~ .page-banner__inner { position: relative; z-index: 1; }
+/* Dark bands: the orbs need to read as light, not as haze. */
+.section--dark .soft-bg__orb--1 { background: radial-gradient(circle, rgba(167,90,255,.34), transparent 70%); }
+.section--dark .soft-bg__orb--2 { background: radial-gradient(circle, rgba(243,111,33,.20), transparent 70%); }
+.section--dark .soft-bg__ring { border-color: rgba(255,255,255,.10); }
+@media (max-width: 780px) {
+	/* Keep the orbs, drop the small details that just add paint cost. */
+	.soft-bg__ring, .soft-bg__spark { display: none; }
+}
 
 /* ---------- About ---------- */
 .about__inner { display: grid; grid-template-columns: 1fr 1.1fr; gap: clamp(32px, 6vw, 80px); align-items: center; }
@@ -370,13 +431,22 @@ h1, h2, h3, h4 { line-height: 1.18; font-weight: 800; color: var(--ink); }
 .service-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-lg); border-color: transparent; }
 .service-card:hover::before { transform: scaleX(1); }
 .service-card__icon {
-	display: inline-grid; place-items: center; width: 60px; height: 60px; border-radius: 16px;
+	display: inline-grid; place-items: center; width: 64px; height: 64px; border-radius: 18px;
 	background: linear-gradient(135deg, rgba(147,51,234,.12), rgba(243,111,33,.12)); color: var(--violet);
 	margin-block-end: 20px; transition: background .4s, color .4s, transform .4s var(--ease);
 }
 .service-card__icon img { border-radius: 10px; }
 .service-card__icon .aeon-icon { width: 30px; height: 30px; }
+/* Two-tone brand icons sit a touch larger than the old line glyphs. */
+.service-card__icon .aeon-duo { width: 36px; height: 36px; }
 .service-card:hover .service-card__icon { background: var(--grad-brand); color: #fff; transform: rotate(-6deg) scale(1.05); }
+/* On the hover gradient the icon re-tints to white + a warm highlight. */
+.service-card:hover .service-card__icon .aeon-duo { --ico-a: #fff; --ico-b: #FFD2AE; }
+/* An uploaded/linked icon is an <img>, so CSS cannot re-tint it — it would sit
+   unreadable on the brand gradient. Keep the soft tile for those cards instead. */
+.service-card:hover .service-card__icon:has(.aeon-duo--custom) {
+	background: linear-gradient(135deg, rgba(147,51,234,.2), rgba(243,111,33,.2));
+}
 .service-card__title { font-size: 1.2rem; margin-block-end: 10px; }
 .service-card__desc { color: var(--muted); font-size: .96rem; line-height: 1.65; }
 .service-card__more { display: inline-flex; align-items: center; gap: 6px; margin-block-start: 16px; font-weight: 700; font-size: .9rem; color: var(--orange); }
@@ -385,7 +455,6 @@ h1, h2, h3, h4 { line-height: 1.18; font-weight: 800; color: var(--ink); }
 
 /* ---------- Why (dark) ---------- */
 .section--dark { background: linear-gradient(160deg, #1a1330 0%, #2a1a4a 60%, #3a1f55 100%); overflow: hidden; }
-.why__bg { position: absolute; inset: 0; pointer-events: none; }
 .why__grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; }
 .why-card {
 	background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); border-radius: var(--radius);
@@ -404,6 +473,8 @@ h1, h2, h3, h4 { line-height: 1.18; font-weight: 800; color: var(--ink); }
 .stat { text-align: center; padding: 30px 18px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); position: relative; }
 .stat::after { content: ""; position: absolute; inset-block-end: 0; inset-inline: 20%; height: 3px; background: var(--grad-brand); border-radius: 3px; opacity: 0; transition: opacity .4s; }
 .stat:hover::after { opacity: 1; }
+.stat__icon { display: grid; place-items: center; margin-block-end: 12px; }
+.stat__icon .aeon-duo { width: 40px; height: 40px; }
 .stat__num { display: block; font-family: var(--font-en); font-size: clamp(2.4rem, 5vw, 3.4rem); font-weight: 800; line-height: 1; background: var(--grad-brand); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
 .stat__label { display: block; margin-block-start: 10px; color: var(--muted); font-weight: 600; font-size: .96rem; }
 
@@ -504,35 +575,60 @@ h1, h2, h3, h4 { line-height: 1.18; font-weight: 800; color: var(--ink); }
 .marquee__dot { color: var(--orange); }
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
-/* ---------- CTA band ---------- */
-.cta-band { background: var(--grad-brand); background-size: 180% 180%; position: relative; overflow: hidden; padding-block: clamp(44px, 5vw, 68px); animation: ctaShift 12s var(--ease) infinite alternate; }
-@keyframes ctaShift { from { background-position: 0 0; } to { background-position: 100% 100%; } }
-.cta-band::before { content: ""; position: absolute; inset-block-start: -40%; inset-inline-end: -5%; width: 320px; height: 320px; background: radial-gradient(circle, rgba(255,255,255,.18), transparent 70%); border-radius: 50%; }
-.cta-band__inner { display: flex; align-items: center; justify-content: space-between; gap: 30px; flex-wrap: wrap; position: relative; }
-.cta-band__title { color: #fff; font-size: clamp(1.6rem, 3.4vw, 2.6rem); }
-.cta-band__sub { color: rgba(255,255,255,.85); margin-block-start: 8px; font-size: 1.08rem; }
-
 /* ---------- Contact ---------- */
-.contact__inner { display: grid; grid-template-columns: 1fr 1.15fr; gap: clamp(34px, 6vw, 70px); align-items: start; }
-.contact__details { margin-block-start: 34px; display: flex; flex-direction: column; gap: 18px; }
-.contact__details li { display: flex; gap: 14px; align-items: flex-start; }
-.contact__detail-icon { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; background: var(--surface-2); color: var(--violet); flex-shrink: 0; }
-.contact__detail-icon .aeon-icon { width: 20px; height: 20px; }
-.aeon-rtl .contact__detail-icon .aeon-icon { transform: scaleX(-1); }
-.contact__detail-label { display: block; font-size: .82rem; color: var(--muted); }
-
-.contact-form { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: clamp(24px, 4vw, 40px); box-shadow: var(--shadow); }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-block-end: 18px; }
-.field { display: block; margin-block-end: 18px; }
-.field__label { display: block; font-weight: 600; font-size: .9rem; margin-block-end: 8px; color: var(--ink-2); }
-.field input, .field textarea, .field select {
-	width: 100%; padding: 14px 16px; border: 1.5px solid var(--line); border-radius: var(--radius-sm);
-	background: var(--surface); transition: border-color .3s, box-shadow .3s, background .3s; color: var(--ink);
+/* Intro sits centred against the tall form card rather than pinned to the top,
+   so the two columns balance instead of leaving a void under the details. */
+.contact__inner { display: grid; grid-template-columns: 1fr 1.15fr; gap: clamp(34px, 5vw, 64px); align-items: center; }
+.contact__details { margin-block-start: 30px; display: flex; flex-direction: column; gap: 14px; }
+/* Each detail is its own quiet card — clearer than a bare icon-and-text row. */
+.contact__detail {
+	display: flex; gap: 14px; align-items: center;
+	padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--radius);
+	background: rgba(255,255,255,.7); backdrop-filter: blur(6px);
+	transition: transform .35s var(--ease), box-shadow .35s, border-color .35s;
 }
+.contact__detail:hover { transform: translateY(-3px); box-shadow: var(--shadow-sm); border-color: rgba(147,51,234,.28); }
+.contact__detail-icon {
+	display: inline-grid; place-items: center; width: 46px; height: 46px; border-radius: 14px;
+	background: linear-gradient(135deg, rgba(147,51,234,.12), rgba(243,111,33,.12));
+	color: var(--violet); flex-shrink: 0;
+}
+.contact__detail-icon .aeon-icon { width: 21px; height: 21px; }
+.contact__detail-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.contact__detail-label { font-size: .78rem; font-weight: 600; color: var(--muted); letter-spacing: .2px; }
+.contact__detail-value { font-weight: 700; color: var(--ink); font-size: .97rem; line-height: 1.5; word-break: break-word; }
+a.contact__detail-value:hover { color: var(--violet); }
+
+.contact-form {
+	background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-lg);
+	padding: clamp(24px, 3.4vw, 38px); box-shadow: var(--shadow); position: relative; overflow: hidden;
+}
+/* Brand hairline across the top of the card. */
+.contact-form::before {
+	content: ""; position: absolute; inset-block-start: 0; inset-inline: 0; height: 4px;
+	background: var(--grad-brand);
+}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-block-end: 16px; }
+.field { display: block; margin-block-end: 16px; }
+.field__label { display: block; font-weight: 600; font-size: .86rem; margin-block-end: 7px; color: var(--ink-2); }
+.field input, .field textarea, .field select {
+	width: 100%; padding: 13px 15px; border: 1.5px solid transparent; border-radius: var(--radius-sm);
+	background: var(--surface-2); transition: border-color .3s, box-shadow .3s, background .3s; color: var(--ink);
+	font-size: .95rem;
+}
+.field input:hover, .field textarea:hover, .field select:hover { border-color: var(--line); }
 .field input:focus, .field textarea:focus, .field select:focus {
 	outline: none; border-color: var(--violet); background: #fff; box-shadow: 0 0 0 4px rgba(126,34,206,.1);
 }
-.field textarea { resize: vertical; }
+.field textarea { resize: vertical; min-height: 130px; }
+/* Native select arrow, drawn on the correct side for the document direction. */
+.field select {
+	appearance: none; -webkit-appearance: none;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b6880' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+	background-repeat: no-repeat; background-size: 18px; background-position: right 14px center;
+	padding-inline-end: 40px;
+}
+.aeon-rtl .field select { background-position: left 14px center; }
 /* Honeypot: hidden via clipping, not an off-screen offset. `left:-9999px` pushes
    the field outside the layout, which in an RTL document creates ~9999px of
    horizontal overflow and blanks the page on mobile. Clipping avoids that. */
@@ -600,53 +696,104 @@ h1, h2, h3, h4 { line-height: 1.18; font-weight: 800; color: var(--ink); }
 .pagination .page-numbers:hover, .pagination .current { background: var(--grad-brand); color: #fff; border-color: transparent; }
 
 /* ---------- Footer ---------- */
-.site-footer { background: var(--dark); color: rgba(255,255,255,.7); padding-block: clamp(50px, 7vw, 80px) 0; }
-.site-footer__grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1.3fr; gap: 40px; padding-block-end: 50px; }
-.footer-logo { box-sizing: content-box; height: 40px; width: auto; background: #fff; padding: 10px 18px; border-radius: 12px; margin-block-end: 20px; box-shadow: 0 8px 24px rgba(0,0,0,.18); }
-.footer-about { font-size: .96rem; line-height: 1.7; max-width: 320px; }
-.social-list { display: flex; gap: 10px; margin-block-start: 22px; }
-.social-list a { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 12px; background: rgba(255,255,255,.07); transition: all .3s; }
-.social-list a svg { width: 20px; height: 20px; }
-.social-list a:hover { background: var(--grad-brand); transform: translateY(-3px); color: #fff; }
-.footer-col__title { color: #fff; font-size: 1.1rem; margin-block-end: 20px; }
-.footer-links { display: flex; flex-direction: column; gap: 12px; }
-.footer-links a { transition: color .3s, padding .3s; font-size: .96rem; }
-.footer-links a:hover { color: #fff; padding-inline-start: 6px; }
-.footer-contact { display: flex; flex-direction: column; gap: 14px; }
-.footer-contact li { display: flex; gap: 10px; align-items: flex-start; font-size: .95rem; }
-.footer-contact .aeon-icon { width: 18px; height: 18px; color: var(--orange); flex-shrink: 0; margin-block-start: 3px; }
-.aeon-rtl .footer-contact .aeon-icon { transform: scaleX(-1); }
-.footer-contact a:hover { color: #fff; }
-.footer-uae { margin-block-start: 18px; font-size: .92rem; color: rgba(255,255,255,.55); }
-.site-footer__bottom { border-block-start: 1px solid rgba(255,255,255,.1); padding-block: 24px; }
-.site-footer__bottom-inner { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: .9rem; }
-.footer-tagline { color: var(--orange-light); }
+/* Light and on-brand: the same soft orb backdrop, translucent cards and
+   gradient accents the page sections use, so the footer reads as the closing
+   section rather than a separate dark slab. */
+.site-footer {
+	position: relative; overflow: hidden;
+	/* Brand-tinted ground, a step deeper than any page section, so the footer
+	   reads as its own block while staying inside the palette. */
+	background: linear-gradient(180deg, #f3eefb 0%, #ebe3f7 55%, #e5dcf3 100%);
+	color: var(--muted);
+	padding-block: clamp(52px, 6.5vw, 82px) 0;
+	/* Rounded shoulders + a lift shadow detach it from the section above. */
+	border-start-start-radius: clamp(26px, 3.2vw, 44px);
+	border-start-end-radius: clamp(26px, 3.2vw, 44px);
+	box-shadow: 0 -18px 44px rgba(40, 20, 80, .08);
+	margin-block-start: clamp(20px, 2.6vw, 36px);
+}
+/* Brand hairline across the very top, matching the contact card. */
+.site-footer::before {
+	content: ""; position: absolute; inset-block-start: 0; inset-inline: 0; height: 3px;
+	background: var(--grad-brand); z-index: 1;
+}
+.site-footer__inner { position: relative; z-index: 1; }
+.site-footer__grid { display: grid; grid-template-columns: 1.7fr 1fr 1fr 1.25fr; gap: clamp(28px, 3.5vw, 48px); padding-block-end: clamp(32px, 4vw, 48px); }
+
+.footer-logo { height: 56px; width: auto; margin-block-end: 18px; }
+.footer-about { font-size: .96rem; line-height: 1.8; max-width: 330px; color: var(--muted); }
+
+.social-list { display: flex; gap: 10px; margin-block-start: 22px; flex-wrap: wrap; }
+.social-list a {
+	display: grid; place-items: center; width: 42px; height: 42px; border-radius: 13px;
+	background: var(--white); border: 1px solid rgba(255,255,255,.9); color: var(--violet);
+	box-shadow: var(--shadow-sm);
+	transition: transform .3s var(--ease), box-shadow .3s, color .3s, border-color .3s, background .3s;
+}
+.social-list a svg { width: 19px; height: 19px; }
+.social-list a:hover { background: var(--grad-brand); border-color: transparent; color: #fff; transform: translateY(-3px); box-shadow: var(--shadow-purple); }
+
+/* Column headings carry the same short gradient rule as the section eyebrows. */
+.footer-col__title {
+	position: relative; color: var(--purple); font-size: 1.05rem; font-weight: 800;
+	margin-block-end: 22px; padding-block-end: 12px;
+}
+.footer-col__title::after {
+	content: ""; position: absolute; inset-block-end: 0; inset-inline-start: 0;
+	width: 34px; height: 3px; border-radius: 3px; background: var(--grad-brand);
+}
+
+.footer-links { display: flex; flex-direction: column; gap: 11px; }
+.footer-links a { font-size: .95rem; color: var(--ink-2); transition: color .3s, padding .3s; }
+.footer-links a:hover { color: var(--violet); padding-inline-start: 6px; }
+
+.footer-contact { display: flex; flex-direction: column; gap: 12px; }
+.footer-contact__item { display: flex; gap: 11px; align-items: flex-start; font-size: .94rem; color: var(--ink-2); line-height: 1.6; }
+.footer-contact__icon {
+	display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0;
+	background: var(--white); box-shadow: var(--shadow-sm); color: var(--violet);
+}
+.footer-contact__icon .aeon-icon { width: 17px; height: 17px; }
+.footer-contact a { color: var(--ink-2); transition: color .3s; }
+.footer-contact a:hover { color: var(--violet); }
+/* All the agency's lines, stacked under one icon rather than repeating it. */
+.footer-phones { display: flex; flex-direction: column; gap: 5px; padding-block-start: 4px; }
+.footer-phone { font-variant-numeric: tabular-nums; letter-spacing: .3px; width: fit-content; font-weight: 600; transition: color .3s, padding .3s; }
+.footer-phone:hover { padding-inline-start: 4px; }
+.footer-uae { margin-block-start: 18px; font-size: .9rem; color: var(--muted); }
+
+.site-footer__bottom { border-block-start: 1px solid rgba(91,42,134,.14); padding-block: 22px; }
+.site-footer__bottom-inner { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; font-size: .88rem; color: var(--muted); }
+.footer-tagline { color: var(--orange); font-weight: 700; }
 
 /* ---------- Footer locations / branches ---------- */
-.footer-locations { border-block-start: 1px solid rgba(255,255,255,.1); padding-block: clamp(34px, 4vw, 48px); }
-.footer-locations__title { display: flex; align-items: center; gap: 10px; color: #fff; font-size: 1.1rem; margin-block-end: 24px; }
+.footer-locations { border-block-start: 1px solid rgba(91,42,134,.14); padding-block: clamp(28px, 3.4vw, 42px); }
+.footer-locations__title { display: flex; align-items: center; gap: 10px; color: var(--purple); font-size: 1.05rem; font-weight: 800; margin-block-end: 20px; }
 .footer-locations__title .aeon-icon { width: 20px; height: 20px; color: var(--orange); flex-shrink: 0; }
-.footer-locations__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
+.footer-locations__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
 .loc-card {
-	display: flex; align-items: flex-start; justify-content: space-between; gap: 14px;
-	background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.09); border-radius: var(--radius);
-	padding: 18px 20px; transition: background .3s var(--ease), border-color .3s var(--ease), transform .3s var(--ease);
+	display: flex; align-items: center; justify-content: space-between; gap: 14px;
+	background: rgba(255,255,255,.86); border: 1px solid rgba(255,255,255,.9); border-radius: var(--radius);
+	padding: 16px 18px; backdrop-filter: blur(6px); box-shadow: var(--shadow-sm);
+	transition: background .3s var(--ease), border-color .3s var(--ease), transform .3s var(--ease), box-shadow .3s var(--ease);
 }
-.loc-card:hover { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.18); transform: translateY(-2px); }
+.loc-card:hover { background: var(--white); border-color: rgba(147,51,234,.28); transform: translateY(-3px); box-shadow: var(--shadow-sm); }
 .loc-card__text { min-width: 0; }
-.loc-card__name { display: block; color: #fff; font-size: 1rem; font-weight: 700; margin-block-end: 6px; }
-.loc-card__desc { font-size: .92rem; line-height: 1.6; color: rgba(255,255,255,.66); margin: 0; }
+.loc-card__name { display: block; color: var(--ink); font-size: .98rem; font-weight: 700; margin-block-end: 4px; }
+.loc-card__desc { font-size: .88rem; line-height: 1.6; color: var(--muted); margin: 0; }
 .loc-card__pin {
-	flex-shrink: 0; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
-	background: rgba(255,255,255,.08); color: #fff;
+	flex-shrink: 0; display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%;
+	background: linear-gradient(135deg, rgba(147,51,234,.12), rgba(243,111,33,.12)); color: var(--violet);
 	transition: background .3s var(--ease), color .3s var(--ease), transform .3s var(--ease), box-shadow .3s var(--ease);
 }
-.loc-card__pin svg { width: 22px; height: 22px; }
+.loc-card__pin svg { width: 20px; height: 20px; }
 .loc-card__pin:hover { background: var(--grad-brand); color: #fff; transform: scale(1.08); box-shadow: var(--shadow-purple); }
 
 /* ---------- WhatsApp FAB ---------- */
+/* Pinned to the physical right edge regardless of text direction (RTL/LTR).
+   Deliberately plain: no halo, no icon morph. It is a quiet, permanent way
+   into WhatsApp, and the dialog below is what does the talking. */
 .whatsapp-fab {
-	/* Pinned to the physical right edge regardless of text direction (RTL/LTR). */
 	position: fixed; bottom: 26px; right: 26px; left: auto; z-index: 800;
 	width: 58px; height: 58px; border-radius: 50%; background: #25d366; color: #fff;
 	display: grid; place-items: center; box-shadow: 0 12px 30px rgba(37,211,102,.45);
@@ -655,6 +802,123 @@ h1, h2, h3, h4 { line-height: 1.18; font-weight: 800; color: var(--ink); }
 .whatsapp-fab svg { width: 30px; height: 30px; }
 .whatsapp-fab:hover { transform: scale(1.1) translateY(-2px); }
 @keyframes fabIn { from { transform: scale(0); } to { transform: scale(1); } }
+
+/* ---------- WhatsApp dialog ---------- */
+/* A centred modal over a dimmed page, not a panel tethered to the button.
+   Opens by itself once per visit; the button reopens it afterwards. */
+.wa-modal {
+	position: fixed; inset: 0; z-index: 1000;
+	display: grid; place-items: center; padding: 24px;
+}
+.wa-modal[hidden] { display: none; }
+.wa-modal__backdrop {
+	position: absolute; inset: 0; cursor: pointer;
+	background: rgba(20, 16, 31, .58);
+	backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+	opacity: 0; transition: opacity .4s var(--ease);
+}
+.wa-modal.is-open .wa-modal__backdrop { opacity: 1; }
+/* Scroll lock for the no-Lenis case (reduced motion, or the lib absent). */
+body.wa-lock { overflow: hidden; }
+
+.wa-popup {
+	position: relative; z-index: 1; width: min(390px, 100%);
+	background: var(--white); border-radius: var(--radius-lg);
+	box-shadow: 0 34px 90px rgba(20, 16, 31, .34);
+	overflow: hidden; text-align: center;
+	opacity: 0; transform: translateY(18px) scale(.96);
+	transition: opacity .45s var(--ease), transform .45s var(--ease);
+}
+.wa-modal.is-open .wa-popup { opacity: 1; transform: none; }
+
+/* Brand-gradient cap carrying the lockup, so the panel is unmistakably ours. */
+.wa-popup__head {
+	position: relative; overflow: hidden;
+	background: var(--grad-brand); padding: 30px 26px 24px;
+	display: flex; flex-direction: column; align-items: center; gap: 13px;
+}
+/* The same soft bloom the hero uses, to keep the gradient from reading flat. */
+.wa-popup__head::after {
+	content: ""; position: absolute; inset-block-start: -70%; inset-inline-start: 50%;
+	width: 300px; aspect-ratio: 1; transform: translateX(-50%); pointer-events: none;
+	background: radial-gradient(circle, rgba(255,255,255,.32), transparent 62%);
+}
+.wa-popup__logo {
+	position: relative; z-index: 1; height: 54px; width: auto;
+	background: var(--white); padding: 9px 16px; border-radius: 14px;
+	box-shadow: 0 10px 26px rgba(20,16,31,.20);
+}
+.wa-popup__status {
+	position: relative; z-index: 1; margin: 0;
+	display: inline-flex; align-items: center; gap: 8px;
+	font-size: .8rem; font-weight: 700; color: #fff;
+	background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.28);
+	padding: 5px 14px; border-radius: 100px;
+	backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+}
+.wa-popup__dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 0 0 rgba(74,222,128,.7); animation: waDot 2s ease-out infinite; }
+@keyframes waDot { 70% { box-shadow: 0 0 0 6px rgba(74,222,128,0); } 100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); } }
+
+/* White-on-gradient: legible on the cap without needing its own solid chip. */
+.wa-popup__close {
+	position: absolute; inset-block-start: 12px; inset-inline-end: 12px; z-index: 2;
+	width: 32px; height: 32px; border-radius: 50%; border: 0; cursor: pointer;
+	background: rgba(255,255,255,.20); color: #fff; display: grid; place-items: center;
+	transition: background .3s, transform .35s var(--ease);
+}
+.wa-popup__close svg { width: 15px; height: 15px; }
+.wa-popup__close:hover { background: rgba(255,255,255,.34); transform: rotate(90deg); }
+/* Keeps the 32px look but gives thumbs the recommended 44px target. */
+.wa-popup__close::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; }
+
+.wa-popup__body { padding: 26px 26px 28px; }
+.wa-popup__title { font-size: 1.2rem; font-weight: 800; color: var(--purple); margin: 0 0 8px; line-height: 1.5; }
+.wa-popup__sub { font-size: .93rem; color: var(--muted); line-height: 1.7; margin: 0 0 22px; }
+
+/* CTA: WhatsApp green, with a sheen that sweeps across on hover. */
+.wa-cta {
+	position: relative; overflow: hidden; width: 100%;
+	display: flex; align-items: center; justify-content: center; gap: 10px;
+	padding: 14px 20px; border-radius: 100px;
+	background: linear-gradient(135deg, #1faa53, #25d366);
+	color: #fff; font-weight: 800; font-size: .97rem;
+	box-shadow: 0 14px 28px rgba(37,211,102,.34);
+	transition: transform .3s var(--ease), box-shadow .3s;
+}
+.wa-cta:hover { transform: translateY(-2px); box-shadow: 0 18px 34px rgba(37,211,102,.44); color: #fff; }
+.wa-cta::after {
+	content: ""; position: absolute; inset-block: 0; inset-inline-start: -60%; width: 45%;
+	background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
+	transform: skewX(-20deg); transition: inset-inline-start .6s var(--ease);
+}
+.wa-cta:hover::after { inset-inline-start: 115%; }
+.wa-cta__icon { width: 21px; height: 21px; flex-shrink: 0; }
+
+@media (max-width: 480px) {
+	/* Sit clear of the thumb rail; the dialog keeps a margin off the edges. */
+	.whatsapp-fab { bottom: 18px; right: 18px; width: 54px; height: 54px; }
+	.whatsapp-fab svg { width: 27px; height: 27px; }
+	.wa-modal { padding: 18px; }
+	.wa-popup__head { padding: 24px 20px 20px; gap: 11px; }
+	.wa-popup__logo { height: 46px; padding: 8px 14px; }
+	.wa-popup__body { padding: 22px 20px 24px; }
+	.wa-popup__title { font-size: 1.08rem; }
+	.wa-popup__sub { font-size: .88rem; margin-block-end: 18px; }
+	.wa-cta { padding: 13px 18px; font-size: .92rem; }
+}
+/* Short viewports (landscape phones): let the panel scroll rather than clip. */
+@media (max-height: 520px) {
+	.wa-modal { place-items: start center; overflow-y: auto; padding-block: 16px; }
+	.wa-popup__head { padding-block: 18px 14px; }
+	.wa-popup__logo { height: 40px; }
+	.wa-popup__body { padding-block: 18px 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.wa-popup__dot { animation: none; }
+	.wa-cta::after { display: none; }
+	.wa-popup { transform: none; }
+}
 
 /* ---------- Reveal animations ---------- */
 [data-reveal] { opacity: 0; transform: translateY(40px); transition: opacity .9s var(--ease), transform .9s var(--ease); will-change: opacity, transform; }
@@ -688,19 +952,26 @@ h1, h2, h3, h4 { line-height: 1.18; font-weight: 800; color: var(--ink); }
 	.nav-toggle { display: flex; }
 	.stats__grid { grid-template-columns: repeat(2, 1fr); }
 	.why__grid { grid-template-columns: repeat(2, 1fr); }
-	.cta-band__inner { flex-direction: column; text-align: center; }
+	.site-footer__bottom-inner { justify-content: center; text-align: center; }
 }
 
 @media (max-width: 560px) {
 	.services__grid, .blog__grid, .work__grid--archive { grid-template-columns: 1fr; }
+	/* Card padding and icon sizing for phones live in the mobile-scale layer at
+	   the end of this file, where the service card also turns horizontal. */
 	.work__grid { grid-template-columns: 1fr; }
 	.work-card, .work-card--wide { grid-column: auto; }
 	.why__grid, .about__cards, .form-row { grid-template-columns: 1fr; }
 	.stats__grid { grid-template-columns: 1fr 1fr; gap: 14px; }
 	.about__badge { inset-inline-start: 14px; }
-	.hero { min-height: auto; padding-block: calc(var(--header-h) + 60px) 70px; }
+	/* Hero padding is set in the mobile-scale layer; only the full-height
+	   constraint is dropped here. */
+	.hero { min-height: auto; }
 	.hero__ring, .hero__spark, .hero__grid--2, .hero__grid--3, .hero__grid--4, .hero__stroke, .hero__plus { display: none; }
-	.site-footer__grid { grid-template-columns: 1fr; }
+	/* Brand blurb and the contact column need the full width; the two short link
+	   columns pair up instead of stacking, which saves ~200px of footer height. */
+	.site-footer__grid { grid-template-columns: 1fr 1fr; }
+	.footer-col--brand, .footer-col--contact { grid-column: 1 / -1; }
 }
 
 /* ---------- Reduced motion ---------- */
@@ -709,4 +980,706 @@ h1, h2, h3, h4 { line-height: 1.18; font-weight: 800; color: var(--ink); }
 	[data-reveal] { opacity: 1; transform: none; }
 	.marquee__track { animation: none; }
 	.hero__orb { display: none; }
+}
+
+/* ---------- Service card features (detailed services) ---------- */
+.service-card__features { list-style: none; margin-block: 16px 4px; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+.service-card__features li { display: flex; align-items: flex-start; gap: 9px; font-size: .9rem; line-height: 1.5; color: var(--ink-2); }
+.service-card__features li .aeon-icon { width: 17px; height: 17px; flex-shrink: 0; margin-block-start: 2px; color: var(--orange); stroke-width: 2.4; }
+
+/* ---------- Success partners / client-logo wall ---------- */
+.clients { position: relative; overflow: hidden; }
+.clients__grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 30px 34px; position: relative; align-items: center; }
+.client-logo {
+	display: grid; place-items: center; aspect-ratio: 16/9; padding: 6px;
+}
+.client-logo img {
+	max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain;
+	transition: transform .35s var(--ease);
+}
+.client-logo:hover img { transform: scale(1.06); }
+
+/* Logo marquee (top trust strip) — logos sit directly on the strip */
+.marquee--logos .marquee__track { gap: 52px; }
+.marquee__logo { display: inline-flex; align-items: center; height: 54px; }
+.marquee__logo img { max-height: 54px; width: auto; object-fit: contain; }
+
+@media (max-width: 1024px) {
+	.clients__grid { grid-template-columns: repeat(4, 1fr); }
+}
+@media (max-width: 640px) {
+	/* 60+ logos: three columns ran to 21 rows on a phone. Four keeps the wall
+	   reading as one block of proof rather than a list to scroll through. */
+	.clients__grid { grid-template-columns: repeat(4, 1fr); gap: 10px 8px; }
+	.client-logo { padding: 2px; }
+}
+
+/* ---------- Service card "View Details" button ---------- */
+.service-card { display: flex; flex-direction: column; }
+.service-card__desc { flex: 1 1 auto; }
+.service-card__cta {
+	display: inline-flex; align-items: center; gap: 8px; align-self: flex-start;
+	margin-block-start: 20px; padding: 10px 18px; border-radius: 100px;
+	font-weight: 700; font-size: .9rem; color: var(--violet);
+	background: var(--surface-2); border: 1px solid transparent;
+	transition: background .35s, color .35s, gap .35s var(--ease), box-shadow .35s;
+}
+.service-card__cta .aeon-icon { width: 16px; height: 16px; transition: transform .35s var(--ease); }
+.aeon-rtl .service-card__cta .aeon-icon { transform: scaleX(-1); }
+.service-card:hover .service-card__cta { background: var(--grad-brand); color: #fff; box-shadow: var(--shadow-purple); }
+.service-card:hover .service-card__cta .aeon-icon { transform: translateX(4px); }
+.aeon-rtl .service-card:hover .service-card__cta .aeon-icon { transform: scaleX(-1) translateX(4px); }
+
+/* ---------- Service detail blocks (Services page) ---------- */
+.svc-detail { padding-block: clamp(44px, 5vw, 72px); border-block-end: 1px solid var(--line); scroll-margin-top: 92px; }
+.svc-detail:last-child { border-block-end: 0; }
+.svc-detail__inner { display: grid; grid-template-columns: .82fr 1.18fr; gap: clamp(30px, 5vw, 66px); align-items: center; }
+.svc-detail--rev .svc-detail__visual { order: 2; }
+.svc-detail__visual {
+	position: relative; aspect-ratio: 4/3.4; border-radius: var(--radius-lg); overflow: hidden;
+	display: grid; place-items: center; box-shadow: var(--shadow-purple);
+}
+.svc-detail__visual--a { background: var(--grad-brand); }
+.svc-detail__visual--b { background: var(--grad-purple); }
+.svc-detail__visual--c { background: linear-gradient(135deg, #7E22CE 0%, #5B2A86 55%, #F36F21 130%); }
+.svc-detail__num {
+	position: absolute; inset-block-start: 6%; inset-inline-end: 8%;
+	font-family: var(--font-en); font-size: clamp(4rem, 9vw, 7rem); font-weight: 800;
+	color: rgba(255,255,255,.14); line-height: 1;
+}
+.svc-detail__icon { display: grid; place-items: center; width: 120px; height: 120px; border-radius: 30px; background: rgba(255,255,255,.14); color: #fff; backdrop-filter: blur(4px); }
+.svc-detail__icon .aeon-icon { width: 60px; height: 60px; }
+/* The detail hero sits on a brand gradient — light tones keep both tiers legible. */
+.svc-detail__icon .aeon-duo { width: 68px; height: 68px; --ico-a: #fff; --ico-b: #FFD2AE; }
+.svc-detail__intro { color: var(--muted); font-size: 1.1rem; line-height: 1.85; margin-block: 14px 26px; }
+.svc-detail__subhead { font-size: 1rem; font-weight: 800; color: var(--ink); margin-block: 8px 14px; }
+.svc-detail__chips { list-style: none; padding: 0; margin: 0 0 24px; display: flex; flex-wrap: wrap; gap: 10px; }
+.svc-detail__chips li {
+	display: inline-flex; align-items: center; gap: 7px; padding: 8px 15px; border-radius: 100px;
+	background: var(--surface); border: 1px solid var(--line); font-size: .9rem; font-weight: 600; color: var(--ink-2);
+}
+.svc-detail__chips li .aeon-icon { width: 15px; height: 15px; color: var(--orange); stroke-width: 2.6; }
+.svc-detail__list { list-style: none; padding: 0; margin: 0 0 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; }
+.svc-detail__list li { display: flex; align-items: flex-start; gap: 10px; font-size: .98rem; color: var(--ink-2); line-height: 1.5; }
+.svc-detail__list li .aeon-icon { width: 20px; height: 20px; flex-shrink: 0; margin-block-start: 1px; color: var(--violet); background: var(--surface-2); border-radius: 50%; padding: 3px; stroke-width: 2.6; }
+
+@media (max-width: 860px) {
+	.svc-detail__inner { grid-template-columns: 1fr; gap: 28px; }
+	.svc-detail--rev .svc-detail__visual { order: 0; }
+	/* A fixed height rather than a ratio + max-height: the 16/9 ratio could not
+	   be honoured under the cap, so the box shrank below the column width and
+	   sat flush against the inline-end edge — visibly out of line with the copy
+	   beneath it. Nothing here is a photo, so a plain height is safe. */
+	.svc-detail__visual { aspect-ratio: auto; height: clamp(170px, 26vw, 230px); }
+	.svc-detail__list { grid-template-columns: 1fr; }
+	.svc-detail__icon { width: 68px; height: 68px; border-radius: 18px; }
+	.svc-detail__icon .aeon-duo { width: 38px; height: 38px; }
+	.svc-detail__icon .aeon-icon { width: 34px; height: 34px; }
+}
+
+/* ======================================================================
+   Company-profile alignment: expertise, values, events, showcase,
+   ad-results, office. (Profile pages 2–6, 11–38.)
+   ====================================================================== */
+
+/* ---------- About / Expertise (reframed) ---------- */
+/* `.about__inner` still drives the About *page* template; the home section uses
+   the full-width horizontal stack below so the two layouts can diverge safely. */
+.about__inner { align-items: start; }
+
+/* ---------- About / expertise (home) ---------- */
+/* Sits close under the services grid — roughly half the usual section gap, split
+   between the tail of services and the head of this section. */
+.about--tight { padding-block-start: clamp(16px, 1.8vw, 24px); }
+.services { padding-block-end: clamp(26px, 3vw, 40px); }
+
+.about__title {
+	font-size: clamp(2rem, 3.6vw, 3rem); font-weight: 800; line-height: 1.2;
+	color: var(--purple); margin: 0 0 clamp(24px, 3vw, 38px); text-align: center;
+}
+.about__title-accent { color: var(--orange); }
+
+/* Two columns side by side rather than one long stack — each point keeps a
+   comfortable measure while the block reads half as tall. */
+.about__bullets {
+	list-style: none; padding: 0; margin: 0 0 clamp(30px, 4vw, 48px);
+	display: grid; grid-template-columns: repeat(2, 1fr);
+	gap: clamp(18px, 2.4vw, 30px) clamp(24px, 3.5vw, 52px);
+}
+/* Icon beside its text rather than above it, so each point reads as one line. */
+.about-point { display: flex; align-items: center; gap: 12px; text-align: start; }
+.about-point__icon {
+	display: grid; place-items: center; width: 52px; height: 52px; border-radius: 15px; flex-shrink: 0;
+	background: linear-gradient(135deg, rgba(147,51,234,.12), rgba(243,111,33,.12));
+	transition: transform .35s var(--ease);
+}
+.about-point__icon .aeon-duo { width: 29px; height: 29px; }
+.about-point:hover .about-point__icon { transform: translateY(-3px) scale(1.04); }
+.about-point__text {
+	margin: 0; color: var(--ink-2); font-size: clamp(.88rem, 1vw, .97rem); line-height: 1.75;
+	border-inline-start: 2px solid var(--line); padding-inline-start: 14px;
+}
+
+.about__branches { margin: 0; }
+.about__branches-title { display: flex; align-items: center; gap: 12px; margin: 0 0 18px; }
+.about__branches-title > span { font-weight: 800; color: var(--purple); font-size: 1.05rem; flex-shrink: 0; }
+/* Rules on both sides so the title centres over the full-width branch row. */
+.about__branches-title::before,
+.about__branches-title::after {
+	content: ""; flex: 1 1 auto; height: 2px; border-radius: 2px;
+	background: linear-gradient(90deg, rgba(243,111,33,0), var(--orange));
+}
+.about__branches-title::after { background: linear-gradient(90deg, var(--orange), rgba(243,111,33,0)); }
+.about__branch-list {
+	list-style: none; padding: 0; margin: 0;
+	display: flex; flex-wrap: wrap; justify-content: center; gap: 14px clamp(20px, 4vw, 56px);
+}
+.branch__link {
+	display: flex; align-items: center; gap: 8px;
+	color: var(--ink-2); text-decoration: none; transition: transform .3s var(--ease), color .3s;
+}
+a.branch__link:hover { color: var(--violet); transform: translateY(-3px); }
+.branch__pin { display: grid; place-items: center; }
+.branch__pin .aeon-duo { width: 28px; height: 28px; }
+.branch__name { font-size: .95rem; font-weight: 700; }
+
+/* ---------- Counters row ---------- */
+.about__stats {
+	list-style: none; padding: 0; margin-block: clamp(36px, 5vw, 58px) 0;
+	display: grid; grid-template-columns: repeat(5, 1fr); gap: 18px;
+}
+.about-stat { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; }
+.about-stat__icon { display: grid; place-items: center; margin-block-end: 4px; }
+.about-stat__icon .aeon-duo { width: 42px; height: 42px; }
+.about-stat__num {
+	font-size: clamp(1.7rem, 2.6vw, 2.3rem); font-weight: 800; line-height: 1;
+	background: var(--grad-brand); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.about-stat__label { font-size: .92rem; color: var(--muted); line-height: 1.5; max-width: 15ch; }
+
+/* ---------- Values / Message (dark) ---------- */
+.values__lead { max-width: 860px; margin-inline: auto; text-align: center; }
+.values__lead p { color: rgba(255,255,255,.75); font-size: 1.06rem; line-height: 1.85; margin-block-end: 14px; }
+.values__believe { text-align: center; margin-block: 34px 26px; }
+.values__believe span { display: inline-flex; align-items: center; gap: 14px; font-weight: 800; letter-spacing: 1px; color: var(--orange-light); text-transform: uppercase; font-size: .9rem; }
+.aeon-lang-ar .values__believe span { letter-spacing: 0; }
+.values__believe span::before, .values__believe span::after { content: ""; width: 40px; height: 2px; background: var(--grad-orange); border-radius: 2px; }
+.values__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.value-card {
+	background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); border-radius: var(--radius);
+	padding: 34px 28px; text-align: center; backdrop-filter: blur(6px);
+	transition: transform .4s var(--ease), background .4s, border-color .4s;
+}
+.value-card:hover { transform: translateY(-8px); background: rgba(255,255,255,.09); border-color: rgba(243,111,33,.5); }
+.value-card__icon { display: inline-grid; place-items: center; width: 70px; height: 70px; border-radius: 50%; background: var(--grad-orange); color: #fff; margin-block-end: 20px; box-shadow: var(--shadow-orange); }
+.value-card__icon .aeon-icon { width: 34px; height: 34px; }
+.value-card__title { color: #fff; font-size: 1.3rem; margin-block-end: 10px; }
+.value-card__desc { color: rgba(255,255,255,.68); font-size: .98rem; line-height: 1.7; }
+.values__closer { text-align: center; margin-block-start: 40px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.values__solutions { font-weight: 700; color: rgba(255,255,255,.7); font-size: 1.05rem; }
+.values__circle {
+	display: inline-block; padding: 16px 34px; border-radius: 100px; background: var(--grad-brand);
+	color: #fff; font-weight: 800; font-size: clamp(1.05rem, 2.2vw, 1.35rem); box-shadow: var(--shadow-purple);
+}
+
+/* ---------- Events & participation ---------- */
+.events__grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
+/* The deck lays this row out left-to-right — conferences first on the left,
+   partnerships last on the right. Keep that reading order even in RTL so the
+   row lands exactly as designed; the copy inside each card stays RTL. */
+.aeon-rtl .events__grid { direction: ltr; }
+.aeon-rtl .event-card { direction: rtl; }
+/* Photo inset inside the card, each with its own radius, as in the reference. */
+.event-card {
+	margin: 0; background: var(--white); border: 1px solid var(--line);
+	border-radius: 20px; padding: 7px; box-shadow: var(--shadow-sm);
+	transition: transform .4s var(--ease), box-shadow .4s;
+}
+.event-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+/* The source photos are all 3:4 portrait, so a landscape frame would cut ~40%
+   off the top and bottom. This near-portrait frame keeps the crop to ~14%, and
+   biasing the focal point above centre protects the heads. */
+.event-card__media { aspect-ratio: 20/23; overflow: hidden; border-radius: 14px; }
+.event-card__media img {
+	width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%;
+	transition: transform .6s var(--ease);
+}
+.event-card:hover .event-card__media img { transform: scale(1.06); }
+/* Caption panel: badge sitting clear below the photo, text centred beneath it. */
+.event-card__caption {
+	position: relative; padding: 0 8px 14px; display: flex; flex-direction: column;
+	align-items: center; text-align: center;
+}
+.event-card__icon {
+	display: grid; place-items: center; width: 44px; height: 44px; flex-shrink: 0;
+	border-radius: 50%; margin-block: 12px 10px;
+	background: var(--grad-purple); border: 3px solid var(--white);
+	box-shadow: 0 8px 18px rgba(20,16,31,.20); transition: transform .35s var(--ease);
+}
+.event-card:nth-child(even) .event-card__icon { background: var(--grad-orange); }
+.event-card:hover .event-card__icon { transform: translateY(-3px) scale(1.06); }
+/* On the badge the duotone glyph reads as white with a warm second tone. */
+.event-card__icon .aeon-duo { width: 24px; height: 24px; --ico-a: #fff; --ico-b: #FFD2AE; }
+.event-card__icon img { width: 24px; height: 24px; object-fit: contain; }
+/* Caption copy takes the colour of its badge, as in the deck. */
+.event-card__text {
+	font-size: clamp(.8rem, .92vw, .88rem); font-weight: 700; line-height: 1.75;
+	color: var(--purple); letter-spacing: 0;
+}
+.event-card:nth-child(even) .event-card__text { color: var(--orange); }
+.events__note { display: flex; align-items: center; justify-content: center; gap: 12px; margin-block-start: 36px; font-weight: 800; color: var(--violet); font-size: clamp(1.05rem, 2.2vw, 1.3rem); }
+.events__note .aeon-icon { width: 26px; height: 26px; color: var(--orange); }
+
+/* ---------- Portfolio showcase (filter + masonry + lightbox) ---------- */
+.showcase__filters { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-block-end: 34px; }
+.showcase__filter {
+	padding: 10px 22px; border-radius: 100px; border: 1px solid var(--line); background: var(--white);
+	font-weight: 700; font-size: .92rem; color: var(--ink-2); cursor: pointer;
+	transition: background .3s, color .3s, border-color .3s, transform .3s var(--ease);
+}
+.showcase__filter:hover { transform: translateY(-2px); border-color: var(--violet); color: var(--violet); }
+.showcase__filter.is-active { background: var(--grad-brand); color: #fff; border-color: transparent; }
+.showcase__grid { column-count: 4; column-gap: 18px; }
+.showcase-item {
+	display: block; width: 100%; margin: 0 0 18px; padding: 0; border: 0; background: none; cursor: pointer;
+	position: relative; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm);
+	break-inside: avoid; -webkit-column-break-inside: avoid;
+}
+.showcase-item img { width: 100%; height: auto; display: block; transition: transform .6s var(--ease); }
+.showcase-item:hover img { transform: scale(1.05); }
+.showcase-item__tag {
+	position: absolute; inset-block-end: 10px; inset-inline-start: 10px; z-index: 2;
+	padding: 5px 13px; border-radius: 100px; background: rgba(20,10,40,.72); color: #fff;
+	font-size: .74rem; font-weight: 700; opacity: 0; transform: translateY(8px);
+	transition: opacity .4s var(--ease), transform .4s var(--ease); backdrop-filter: blur(4px);
+}
+.showcase-item::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(20,10,40,.35), transparent 55%); opacity: 0; transition: opacity .4s; }
+.showcase-item:hover .showcase-item__tag { opacity: 1; transform: none; }
+.showcase-item:hover::after { opacity: 1; }
+.showcase-item.is-hidden { display: none; }
+/* Lightbox */
+.showcase-lightbox { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(12,7,26,.92); backdrop-filter: blur(6px); }
+.showcase-lightbox[hidden] { display: none; }
+.showcase-lightbox__figure { margin: 0; max-width: min(92vw, 1100px); max-height: 88vh; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.showcase-lightbox__figure img { max-width: 100%; max-height: 78vh; border-radius: var(--radius); box-shadow: var(--shadow-lg); object-fit: contain; }
+.showcase-lightbox__figure figcaption { color: rgba(255,255,255,.85); font-weight: 700; }
+.showcase-lightbox__close { position: absolute; inset-block-start: 18px; inset-inline-end: 24px; width: 48px; height: 48px; border-radius: 50%; border: 0; background: rgba(255,255,255,.12); color: #fff; font-size: 2rem; line-height: 1; cursor: pointer; transition: background .3s; }
+.showcase-lightbox__close:hover { background: rgba(255,255,255,.25); }
+.showcase-lightbox__nav { position: absolute; inset-block-start: 50%; transform: translateY(-50%); width: 54px; height: 54px; border-radius: 50%; border: 0; background: rgba(255,255,255,.12); color: #fff; font-size: 2rem; line-height: 1; cursor: pointer; transition: background .3s; }
+.showcase-lightbox__nav:hover { background: var(--grad-brand); }
+.showcase-lightbox__nav--prev { inset-inline-start: 24px; }
+.showcase-lightbox__nav--next { inset-inline-end: 24px; }
+
+/* ---------- Ad-campaign results (dark) ---------- */
+.results__inner { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1.1fr; gap: clamp(32px, 6vw, 70px); align-items: center; }
+.results__head .section-sub--light { color: rgba(255,255,255,.72); }
+.results__badge { display: inline-block; margin-block-start: 20px; padding: 10px 22px; border-radius: 100px; background: rgba(255,255,255,.08); border: 1px solid rgba(243,111,33,.5); color: var(--orange-light); font-weight: 700; font-size: .92rem; }
+.results__metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.metric-card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: var(--radius); padding: 28px 22px; text-align: center; backdrop-filter: blur(6px); transition: transform .4s var(--ease), border-color .4s; }
+.metric-card:hover { transform: translateY(-6px); border-color: rgba(243,111,33,.5); }
+.metric-card__icon { display: inline-grid; place-items: center; width: 52px; height: 52px; border-radius: 14px; background: var(--grad-orange); color: #fff; margin-block-end: 14px; }
+.metric-card__icon .aeon-icon { width: 26px; height: 26px; }
+.metric-card__value { display: block; font-family: var(--font-en); font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 800; line-height: 1; color: #fff; }
+.metric-card__label { display: block; margin-block-start: 8px; color: rgba(255,255,255,.66); font-weight: 600; font-size: .92rem; }
+
+/* ---------- Visit our office ---------- */
+/* Office closes into the contact form — tighter than a full section gap, but
+   with enough air that the two still read as separate blocks. */
+.office { padding-block-end: clamp(28px, 3.2vw, 44px); }
+.office + .contact { padding-block-start: clamp(24px, 2.8vw, 38px); }
+.office__inner { display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(32px, 6vw, 70px); align-items: center; }
+.office__sub { color: var(--muted); font-size: 1.08rem; margin-block: 12px 24px; line-height: 1.7; }
+.office__partner { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--ink); margin-block-end: 26px; }
+.office__partner .aeon-icon { width: 24px; height: 24px; color: var(--violet); }
+.office__gallery { display: grid; grid-template-columns: 1.4fr 1fr; gap: 14px; }
+.office__main { border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-lg); }
+.office__main img { width: 100%; height: 100%; min-height: 260px; object-fit: cover; }
+.office__thumbs { display: grid; grid-template-rows: repeat(3, 1fr); gap: 14px; }
+.office__thumb { border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); }
+.office__thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s var(--ease); }
+.office__thumb:hover img { transform: scale(1.06); }
+
+/* ---------- Responsive (profile sections) ---------- */
+@media (max-width: 1024px) {
+	.about__stats { grid-template-columns: repeat(3, 1fr); row-gap: 28px; }
+	.values__grid { grid-template-columns: 1fr; max-width: 520px; margin-inline: auto; }
+	.events__grid { grid-template-columns: repeat(3, 1fr); }
+	.showcase__grid { column-count: 3; }
+	.results__inner, .office__inner { grid-template-columns: 1fr; }
+}
+@media (max-width: 860px) {
+	/* Two columns get too narrow for the copy below this width. */
+	.about__bullets { grid-template-columns: 1fr; }
+	.events__grid { grid-template-columns: repeat(2, 1fr); }
+	.showcase__grid { column-count: 2; }
+	.results__metrics { gap: 14px; }
+}
+@media (max-width: 640px) {
+	/* Five counters: three columns fit them in two rows instead of three. */
+	.about__stats { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 560px) {
+	.events__grid { grid-template-columns: 1fr 1fr; }
+	.showcase__grid { column-count: 1; }
+	.office__gallery { grid-template-columns: 1fr; }
+	.office__thumbs { grid-template-rows: none; grid-template-columns: repeat(3, 1fr); }
+	.showcase-lightbox__nav { width: 44px; height: 44px; font-size: 1.5rem; }
+}
+
+/* ======================================================================
+   Mobile scale
+   ======================================================================
+   Everything above is authored at desktop size: the breakpoints only re-flow
+   grids, so a phone inherited desktop padding, icon boxes, radii and type.
+   This layer is the missing small-screen scale — one block, last in the file,
+   so it wins on equal specificity and desktop is provably untouched.
+
+   Two tiers:
+     <= 860px  the shared trim, applied the moment the nav collapses
+     <= 640px  phone-only: the service card turns horizontal, forms grow back
+               to 16px to stop iOS zooming on focus
+     <= 400px  the last squeeze for 360px-class handsets
+
+   Ratios, not arbitrary numbers: type steps down ~12-18%, padding ~35%,
+   icon boxes ~20%. Colours, gradients, shadows and fonts are untouched, so
+   the page reads as the same design at a smaller scale.
+   ====================================================================== */
+
+@media (max-width: 860px) {
+
+	/* --- Tokens --- */
+	:root {
+		/* The real bar is 62px here (10px padding + a 42px action row), not the
+		   64px the desktop value assumed. Hero and page-banner offsets both
+		   derive from this, so an accurate figure removes ~14px of dead space
+		   under the header on every template. */
+		--header-h: 62px;
+		--radius: 15px;
+		--radius-sm: 11px;
+		--radius-lg: 22px;
+	}
+
+	/* --- Header --- */
+	.site-header { padding-block: 10px; }
+	.site-header.is-scrolled { padding-block: 7px; }
+	.brand-link img, .site-header__brand .custom-logo { height: 34px; }
+	.site-header.is-scrolled .brand-link img,
+	.site-header.is-scrolled .custom-logo { height: 30px; }
+	.nav-toggle { width: 40px; height: 40px; }
+	.mobile-menu__inner { gap: 18px; padding: 24px; }
+	.mobile-menu__list { gap: 14px; }
+	.mobile-menu__list a { font-size: 1.25rem; }
+
+	/* --- Section rhythm --- */
+	.section { padding-block: 38px; }
+	.section-head { margin-block-end: 26px; }
+	/* Upper bound must stay under the value the base clamp resolves to at 860px
+	   (34.4px) *and* at 768px (30.7px), or tablets would get bigger type than
+	   before. 3.5vw capped at 1.9rem clears both across the whole tier. */
+	.section-title { font-size: clamp(1.6rem, 3.5vw, 1.9rem); letter-spacing: -.5px; }
+	.section-sub { font-size: 1rem; margin-block-start: 11px; }
+	.section-cta { margin-block-start: 30px; }
+	.eyebrow { font-size: .76rem; margin-block-end: 11px; }
+	.eyebrow::before { width: 22px; }
+	/* Shorter travel: a 40px rise reads as a lurch on a short viewport. */
+	[data-reveal] { transform: translateY(24px); }
+
+	/* --- Buttons --- */
+	.btn { padding: 12px 22px; font-size: .94rem; }
+	.btn--lg { padding: 14px 26px; font-size: .98rem; }
+	.btn--sm { padding: 10px 17px; font-size: .86rem; }
+	.btn .aeon-icon { width: 17px; height: 17px; }
+
+	/* --- Hero --- */
+	.hero { padding-block: calc(var(--header-h) + 34px) 52px; }
+	.hero__eyebrow { font-size: .78rem; margin-block-end: 16px; padding: 7px 14px; }
+	.hero__title { font-size: clamp(2.1rem, 5.6vw, 3.4rem); letter-spacing: -1px; margin-block-end: 18px; }
+	.aeon-lang-ar .hero__title { line-height: 1.28; }
+	.hero__sub { font-size: 1rem; margin-block-end: 26px; }
+	.hero__actions { gap: 12px; }
+	/* The two orbs that survive the 560px cull carry the whole backdrop here, so
+	   they get scaled with the section rather than left at desktop size. */
+	.hero__orb--1 { width: 300px; height: 300px; }
+	.hero__orb--2 { width: 240px; height: 240px; }
+	.hero__orb--3 { width: 210px; height: 210px; }
+	.hero__orb--4 { width: 260px; height: 260px; }
+	.hero__swoosh { height: 80px; }
+
+	/* --- Services --- */
+	.services__grid { gap: 16px; }
+	.services__grid--page { gap: 18px; }
+	.service-card { padding: 20px 18px; }
+	.service-card__icon { width: 52px; height: 52px; border-radius: 15px; margin-block-end: 14px; }
+	.service-card__icon .aeon-duo { width: 30px; height: 30px; }
+	.service-card__icon .aeon-icon { width: 26px; height: 26px; }
+	.service-card__title { font-size: 1.08rem; margin-block-end: 8px; }
+	.service-card__desc { font-size: .9rem; line-height: 1.6; }
+	.service-card__cta { margin-block-start: 14px; padding: 9px 16px; font-size: .84rem; }
+	.service-card__more { margin-block-start: 12px; font-size: .85rem; }
+	.service-card__features { margin-block: 12px 2px; gap: 7px; }
+	.service-card__features li { font-size: .85rem; }
+
+	/* --- About / expertise (home) --- */
+	.about__title { font-size: clamp(1.6rem, 3.5vw, 1.9rem); margin-block-end: 22px; }
+	.about__bullets { gap: 12px; margin-block-end: 26px; }
+	.about-point { gap: 10px; }
+	.about-point__icon { width: 42px; height: 42px; border-radius: 12px; }
+	.about-point__icon .aeon-duo { width: 24px; height: 24px; }
+	.about-point__text { font-size: .9rem; line-height: 1.65; padding-inline-start: 11px; }
+	.about__branches-title { margin-block-end: 14px; }
+	.about__branches-title > span { font-size: .95rem; }
+	.about__branch-list { gap: 10px 18px; }
+	.branch__pin .aeon-duo { width: 22px; height: 22px; }
+	.branch__name { font-size: .88rem; }
+	.about__stats { margin-block-start: 28px; gap: 16px 10px; }
+	.about-stat__icon .aeon-duo { width: 32px; height: 32px; }
+	.about-stat__num { font-size: 1.45rem; }
+	.about-stat__label { font-size: .8rem; max-width: 14ch; }
+
+	/* --- About page (two-column media layout) --- */
+	.about__text { font-size: 1rem; margin-block: 6px 22px; }
+	.about__media-frame img { aspect-ratio: 4/3; }
+	.about__badge { padding: 14px 18px; min-width: 112px; inset-block-end: 18px; }
+	.about__badge-num { font-size: 1.7rem; }
+	.about__badge-label { font-size: .8rem; }
+	.about__cards { gap: 14px; margin-block-end: 26px; }
+	.mini-card { padding: 16px; }
+	.mini-card__icon { width: 40px; height: 40px; border-radius: 11px; margin-block-end: 10px; }
+	.mini-card__icon .aeon-icon { width: 21px; height: 21px; }
+	.mini-card h3 { font-size: 1rem; }
+	.mini-card p { font-size: .88rem; line-height: 1.55; }
+
+	/* --- Events --- */
+	.events__grid { gap: 12px; }
+	.event-card { padding: 5px; border-radius: 16px; }
+	.event-card__media { border-radius: 12px; }
+	.event-card__caption { padding: 0 6px 10px; }
+	.event-card__icon { width: 36px; height: 36px; border-width: 2px; margin-block: 9px 7px; }
+	.event-card__icon .aeon-duo,
+	.event-card__icon img { width: 20px; height: 20px; }
+	.event-card__text { font-size: .78rem; line-height: 1.5; }
+	.events__note { margin-block-start: 24px; font-size: 1rem; gap: 9px; }
+	.events__note .aeon-icon { width: 21px; height: 21px; }
+
+	/* --- Why (dark) --- */
+	.why__grid { gap: 14px; }
+	.why-card { padding: 20px 16px; }
+	.why-card__icon { width: 52px; height: 52px; margin-block-end: 13px; }
+	.why-card__icon .aeon-icon { width: 25px; height: 25px; }
+	.why-card__title { font-size: 1.02rem; }
+	.why-card__desc { font-size: .87rem; line-height: 1.55; }
+
+	/* --- Values (dark) --- */
+	.values__lead p { font-size: .96rem; line-height: 1.7; }
+	.values__believe { margin-block: 24px 20px; }
+	.values__believe span::before,
+	.values__believe span::after { width: 28px; }
+	.values__grid { gap: 14px; }
+	.value-card { padding: 22px 18px; }
+	.value-card__icon { width: 54px; height: 54px; margin-block-end: 14px; }
+	.value-card__icon .aeon-icon { width: 26px; height: 26px; }
+	.value-card__title { font-size: 1.1rem; }
+	.value-card__desc { font-size: .9rem; line-height: 1.6; }
+	.values__closer { margin-block-start: 28px; }
+	.values__solutions { font-size: .95rem; }
+	.values__circle { padding: 12px 24px; }
+
+	/* --- Stats band --- */
+	.stats { padding-block: 32px; }
+	.stat { padding: 20px 12px; }
+	.stat__icon { margin-block-end: 9px; }
+	.stat__icon .aeon-duo { width: 32px; height: 32px; }
+	.stat__num { font-size: clamp(1.8rem, 4.2vw, 2.6rem); }
+	.stat__label { font-size: .85rem; margin-block-start: 7px; }
+
+	/* --- Work / portfolio --- */
+	.work__grid { gap: 14px; }
+	.work-filters { gap: 9px; margin-block-end: 26px; }
+	.work-filter { padding: 8px 16px; font-size: .88rem; }
+	/* Touch has no hover, so the caption never appeared. Show it resting. */
+	.work-card__overlay { opacity: 1; padding: 16px; }
+	.work-card__cat,
+	.work-card__title,
+	.work-card__view { transform: none; }
+	.work-card__cat { font-size: .72rem; margin-block-end: 5px; }
+	.work-card__title { font-size: 1.05rem; }
+	.work-card__view { margin-block-start: 9px; font-size: .84rem; }
+
+	/* --- Testimonials --- */
+	.testimonials__slider { padding-block: 14px 4px; }
+	.tst-card { padding: 28px 22px 24px; }
+	.tst-card__quote { width: 34px; height: 34px; margin-block-end: 13px; }
+	.tst-card__text { font-size: .96rem; line-height: 1.7; }
+	.tst-card__author { gap: 11px; margin-block-start: 20px; padding-block-start: 16px; }
+	.tst-card__avatar { width: 44px; height: 44px; }
+	.tst-card__avatar--ph { font-size: 1.1rem; }
+	.tst-card__meta strong { font-size: .95rem; }
+	.tst-card__meta small { font-size: .84rem; }
+	.testimonials__controls { gap: 16px; margin-block-start: 24px; }
+	.testimonials__nav { width: 44px; height: 44px; }
+	.testimonials__nav svg { width: 19px; height: 19px; }
+
+	/* --- Partners marquee --- */
+	.partners { padding-block: 26px; }
+	.partners__title { font-size: .86rem; margin-block-end: 16px; }
+	.marquee__track { gap: 20px; }
+	.marquee__item { font-size: 1.15rem; }
+	.marquee--logos .marquee__track { gap: 34px; }
+	.marquee__logo { height: 40px; }
+	.marquee__logo img { max-height: 40px; }
+
+	/* --- Contact --- */
+	.contact__details { margin-block-start: 22px; gap: 10px; }
+	.contact__detail { padding: 11px 13px; gap: 11px; }
+	.contact__detail-icon { width: 40px; height: 40px; border-radius: 12px; }
+	.contact__detail-icon .aeon-icon { width: 19px; height: 19px; }
+	.contact__detail-value { font-size: .92rem; }
+	.contact-form { padding: 20px 18px; }
+	.form-row { gap: 12px; margin-block-end: 12px; }
+	.field { margin-block-end: 12px; }
+	.field__label { font-size: .82rem; margin-block-end: 5px; }
+	.field input, .field textarea, .field select { padding: 11px 13px; }
+	.field textarea { min-height: 96px; }
+
+	/* --- Page banner --- */
+	.page-banner { padding-block: calc(var(--header-h) + 26px) 40px; }
+	.page-banner__title { font-size: clamp(1.7rem, 4.6vw, 2.5rem); letter-spacing: -.5px; }
+	.page-banner__sub { font-size: 1rem; margin-block-start: 10px; }
+	.breadcrumb { font-size: .84rem; margin-block-end: 11px; }
+	.page-banner__bg .hero__orb--1 { width: 220px; height: 220px; }
+
+	/* --- Blog --- */
+	.blog__grid { gap: 18px; }
+	.post-card__body { padding: 18px; }
+	.post-card__meta { font-size: .8rem; margin-block-end: 10px; }
+	.post-card__title { font-size: 1.08rem; }
+	.post-card__excerpt { font-size: .9rem; }
+	.post-card__more { margin-block-start: 12px; font-size: .85rem; }
+	.post-card__ph .aeon-icon { width: 36px; height: 36px; }
+
+	/* --- Single / entry content --- */
+	.entry-content { font-size: 1rem; }
+	.entry-content h2 { font-size: 1.35rem; }
+	.entry-content h3 { font-size: 1.15rem; }
+	.single-work__hero, .single-service__hero, .single-post__hero { margin-block-end: 24px; }
+	.single-post__meta { gap: 12px; margin-block-end: 18px; font-size: .85rem; }
+	.single-service__cta { margin-block-start: 32px; padding: 26px 20px; }
+	.single-service__cta h3 { font-size: 1.2rem; margin-block-end: 16px; }
+	.empty-state { padding: 40px 0; font-size: 1rem; }
+	.error-404__title { font-size: 1.5rem; }
+	.error-404__text { margin-block-end: 24px; }
+	.pagination { margin-block-start: 36px; }
+	.pagination .page-numbers { min-width: 38px; height: 38px; border-radius: 10px; }
+
+	/* --- Service detail blocks --- */
+	.svc-detail { padding-block: 30px; scroll-margin-top: 76px; }
+	.svc-detail__inner { gap: 22px; }
+	.svc-detail__num { font-size: 2.8rem; }
+	.svc-detail__intro { font-size: .96rem; line-height: 1.7; margin-block: 10px 18px; }
+	.svc-detail__subhead { font-size: .94rem; margin-block: 6px 10px; }
+	.svc-detail__chips { gap: 8px; margin-block-end: 18px; }
+	.svc-detail__chips li { padding: 6px 12px; font-size: .82rem; }
+	.svc-detail__list { gap: 9px; margin-block-end: 22px; }
+	.svc-detail__list li { font-size: .9rem; }
+	.svc-detail__list li .aeon-icon { width: 18px; height: 18px; }
+
+	/* --- Showcase --- */
+	.showcase__filters { gap: 8px; margin-block-end: 22px; }
+	.showcase__filter { padding: 8px 16px; font-size: .85rem; }
+	.showcase__grid { column-gap: 12px; }
+	.showcase-item { margin-block-end: 12px; }
+
+	/* --- Ad results (dark) --- */
+	.results__badge { margin-block-start: 16px; padding: 8px 18px; font-size: .85rem; }
+	.results__metrics { gap: 12px; }
+	.metric-card { padding: 18px 14px; }
+	.metric-card__icon { width: 42px; height: 42px; border-radius: 12px; margin-block-end: 10px; }
+	.metric-card__icon .aeon-icon { width: 21px; height: 21px; }
+	.metric-card__value { font-size: clamp(1.4rem, 4vw, 2rem); }
+	.metric-card__label { font-size: .82rem; margin-block-start: 6px; }
+
+	/* --- Office --- */
+	.office__sub { font-size: 1rem; margin-block: 10px 18px; }
+	.office__partner { margin-block-end: 20px; font-size: .95rem; }
+	.office__partner .aeon-icon { width: 21px; height: 21px; }
+	.office__gallery { gap: 10px; }
+	.office__main img { min-height: 190px; }
+
+	/* --- Footer --- */
+	.site-footer { padding-block: 36px 0; margin-block-start: 20px; }
+	.site-footer__grid { gap: 24px; padding-block-end: 26px; }
+	.footer-about { font-size: .9rem; line-height: 1.7; max-width: none; }
+	.social-list { margin-block-start: 16px; gap: 8px; }
+	.social-list a { width: 38px; height: 38px; border-radius: 11px; }
+	.social-list a svg { width: 17px; height: 17px; }
+	.footer-col__title { font-size: .98rem; margin-block-end: 14px; padding-block-end: 9px; }
+	.footer-links { gap: 9px; }
+	.footer-links a { font-size: .9rem; }
+	.footer-contact { gap: 10px; }
+	.footer-contact__item { font-size: .88rem; gap: 9px; }
+	.footer-contact__icon { width: 28px; height: 28px; border-radius: 9px; }
+	.footer-contact__icon .aeon-icon { width: 15px; height: 15px; }
+	.footer-uae { margin-block-start: 14px; font-size: .84rem; }
+	.footer-locations { padding-block: 24px; }
+	.footer-locations__title { font-size: .98rem; margin-block-end: 14px; }
+	.footer-locations__grid { gap: 10px; }
+	.loc-card { padding: 12px 14px; gap: 10px; }
+	.loc-card__name { font-size: .92rem; margin-block-end: 3px; }
+	.loc-card__desc { font-size: .82rem; line-height: 1.5; }
+	.loc-card__pin { width: 36px; height: 36px; }
+	.loc-card__pin svg { width: 17px; height: 17px; }
+	.site-footer__bottom { padding-block: 16px; }
+	.site-footer__bottom-inner { gap: 8px; font-size: .82rem; }
+}
+
+@media (max-width: 640px) {
+
+	.section { padding-block: 30px; }
+	.stats { padding-block: 26px; }
+
+	/* The scroll cue would collide with the CTAs once the hero stops being
+	   full-height, and a scroll hint earns nothing on a touch device. */
+	.hero { padding-block: calc(var(--header-h) + 26px) 40px; }
+	.hero__scroll { display: none; }
+
+	/* Service card goes horizontal: the icon moves beside the copy instead of
+	   above it. Same card, border, gradient tile and hover accent — only the
+	   internal arrangement changes, and eight cards lose ~1,500px of height. */
+	.service-card {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr);
+		column-gap: 13px;
+		align-items: start;
+		padding: 16px 15px;
+	}
+	.service-card > * { grid-column: 2; }
+	.service-card__icon {
+		grid-column: 1; grid-row: 1 / -1; align-self: start;
+		width: 46px; height: 46px; border-radius: 13px; margin-block-end: 0;
+	}
+	.service-card__icon .aeon-duo { width: 27px; height: 27px; }
+	.service-card__icon .aeon-icon { width: 23px; height: 23px; }
+	/* Grid items stretch by default — the pill must keep its own width. */
+	.service-card__cta { justify-self: start; margin-block-start: 11px; }
+	.service-card__more { justify-self: start; }
+
+	/* Anything under 16px makes iOS zoom the viewport on focus and never zoom
+	   back. Height still drops, via the tighter padding and line-height. */
+	.field input, .field textarea, .field select { font-size: 1rem; line-height: 1.4; }
+
+	.footer-locations__grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 400px) {
+	/* 360px-class handsets: buy back gutter width for the 4-up logo wall and
+	   the 2-up events row, and take one more step off the display type. */
+	.container { padding-inline: 16px; }
+	.hero__title { font-size: 1.95rem; }
+	.section-title, .about__title { font-size: 1.5rem; }
+	.page-banner__title { font-size: 1.6rem; }
+	.about-stat__num { font-size: 1.3rem; }
+	/* Floor for the two caption styles: three-up counters and the 2-up events
+	   row squeeze these hardest, and Arabic loses legibility below ~12px. */
+	.about-stat__label { font-size: .8rem; }
+	.event-card__text { font-size: .76rem; }
 }

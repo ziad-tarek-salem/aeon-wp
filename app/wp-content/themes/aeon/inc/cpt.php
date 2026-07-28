@@ -22,6 +22,7 @@ require_once AEON_DIR . '/inc/content/taxonomies.php';
 require_once AEON_DIR . '/inc/content/fields.php';
 require_once AEON_DIR . '/inc/content/works.php';
 require_once AEON_DIR . '/inc/content/settings.php';
+require_once AEON_DIR . '/inc/content/images.php';
 require_once AEON_DIR . '/inc/content/migrate.php';
 
 /**

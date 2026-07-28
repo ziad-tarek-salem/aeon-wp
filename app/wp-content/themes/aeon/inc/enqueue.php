@@ -26,9 +26,25 @@ function aeon_lib_url( $relative, $cdn ) {
 	return $cdn;
 }
 
-function aeon_assets() {
-	$ver = AEON_VERSION;
+/**
+ * Cache-busting version for an asset the theme ships itself.
+ *
+ * AEON_VERSION alone is not enough: editing main.css without bumping the
+ * constant leaves the ?ver= query identical, so browsers and host caches keep
+ * serving the stale file. Fall back to the constant if the file is missing.
+ *
+ * @param string $relative Path relative to the theme root (e.g. 'assets/css/main.css').
+ * @return string
+ */
+function aeon_asset_ver( $relative ) {
+	$path = AEON_DIR . '/' . ltrim( $relative, '/' );
+	if ( file_exists( $path ) ) {
+		return AEON_VERSION . '.' . filemtime( $path );
+	}
+	return AEON_VERSION;
+}
 
+function aeon_assets() {
 	// Google Fonts: Cairo (Arabic) + Poppins (English).
 	wp_enqueue_style(
 		'aeon-fonts',
@@ -41,10 +57,14 @@ function aeon_assets() {
 	wp_enqueue_style( 'swiper', aeon_lib_url( 'css/lib/swiper-bundle.min.css', 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css' ), array(), '11' );
 
 	// Main stylesheet.
-	wp_enqueue_style( 'aeon-main', AEON_URI . '/assets/css/main.css', array( 'aeon-fonts' ), $ver );
+	wp_enqueue_style( 'aeon-main', AEON_URI . '/assets/css/main.css', array( 'aeon-fonts' ), aeon_asset_ver( 'assets/css/main.css' ) );
+
+	// Company-profile brand layer: the dash-dot title rules, corner ribbons,
+	// proof strips and the sections built straight from the profile deck.
+	wp_enqueue_style( 'aeon-profile', AEON_URI . '/assets/css/profile.css', array( 'aeon-main' ), aeon_asset_ver( 'assets/css/profile.css' ) );
 
 	// WordPress required style.css (theme header).
-	wp_enqueue_style( 'aeon-style', get_stylesheet_uri(), array( 'aeon-main' ), $ver );
+	wp_enqueue_style( 'aeon-style', get_stylesheet_uri(), array( 'aeon-profile' ), aeon_asset_ver( 'style.css' ) );
 
 	// --- Scripts (all deferred). Local-first with CDN fallback. ---
 	wp_enqueue_script( 'gsap',    aeon_lib_url( 'js/lib/gsap.min.js',          'https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js' ), array(), '3.12.5', true );
@@ -52,7 +72,7 @@ function aeon_assets() {
 	wp_enqueue_script( 'lenis',   aeon_lib_url( 'js/lib/lenis.min.js',         'https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js' ), array(), '1.1.13', true );
 	wp_enqueue_script( 'swiper',  aeon_lib_url( 'js/lib/swiper-bundle.min.js', 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js' ), array(), '11', true );
 
-	wp_enqueue_script( 'aeon-app', AEON_URI . '/assets/js/app.js', array( 'gsap', 'gsap-st', 'lenis', 'swiper' ), $ver, true );
+	wp_enqueue_script( 'aeon-app', AEON_URI . '/assets/js/app.js', array( 'gsap', 'gsap-st', 'lenis', 'swiper' ), aeon_asset_ver( 'assets/js/app.js' ), true );
 
 	wp_localize_script( 'aeon-app', 'AEON', array(
 		'ajaxUrl' => admin_url( 'admin-ajax.php' ),

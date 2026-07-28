@@ -22,7 +22,7 @@ while ( have_posts() ) :
 
 			<div class="single-service__cta" data-reveal>
 				<h3><?php aeon_e( 'cta_band_title' ); ?></h3>
-				<a class="btn btn--primary btn--lg" href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">
+				<a class="btn btn--primary btn--lg" href="<?php echo esc_url( aeon_contact_url() ); ?>">
 					<span><?php aeon_e( 'cta_request' ); ?></span><?php echo aeon_icon( 'arrow' ); ?>
 				</a>
 			</div>

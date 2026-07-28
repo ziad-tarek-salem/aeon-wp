@@ -19,7 +19,7 @@ function aeon_customize_register( $wp_customize ) {
 
 	$fields = array(
 		'aeon_email'    => array( __( 'Email', 'aeon' ), 'hello@aeondm.com' ),
-		'aeon_phone'    => array( __( 'Phone', 'aeon' ), '+971 50 000 0000' ),
+		'aeon_phone'    => array( __( 'Phone', 'aeon' ), '+971 56 109 8015' ),
 		'aeon_whatsapp' => array( __( 'WhatsApp (digits only, intl)', 'aeon' ), '971500000000' ),
 		'aeon_address'  => array( __( 'Address', 'aeon' ), 'Dubai, United Arab Emirates' ),
 		'aeon_map'      => array( __( 'Google Maps embed URL', 'aeon' ), '' ),

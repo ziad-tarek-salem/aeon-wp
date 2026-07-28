@@ -25,11 +25,12 @@
 	<div class="container site-header__inner">
 
 		<div class="site-header__brand">
-			<?php if ( has_custom_logo() ) : ?>
+			<?php // Falls through to the logo slot when the custom logo's file is missing. ?>
+			<?php if ( aeon_custom_logo_ok() ) : ?>
 				<?php the_custom_logo(); // outputs its own home link — must NOT be nested in another <a> ?>
 			<?php else : ?>
 				<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="brand-link" aria-label="<?php bloginfo( 'name' ); ?>">
-					<img src="<?php echo esc_url( AEON_URI . '/assets/images/logo-wordmark.jpeg' ); ?>" alt="<?php bloginfo( 'name' ); ?>" width="160" height="50" class="brand-logo-img">
+					<img src="<?php echo esc_url( aeon_image_url( 'logo_mark', 'full' ) ); ?>" alt="<?php bloginfo( 'name' ); ?>" width="720" height="205" class="brand-logo-img" fetchpriority="high">
 				</a>
 			<?php endif; ?>
 		</div>
@@ -60,7 +61,7 @@
 					<?php aeon_e( 'lang_switch' ); ?>
 				</a>
 			<?php endif; ?>
-			<a class="btn btn--primary btn--sm header-cta" href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">
+			<a class="btn btn--primary btn--sm header-cta" href="<?php echo esc_url( aeon_contact_url() ); ?>">
 				<span><?php aeon_e( 'cta_request' ); ?></span>
 			</a>
 			<button class="nav-toggle" aria-label="<?php esc_attr_e( 'Menu', 'aeon' ); ?>" aria-expanded="false" data-nav-toggle>
@@ -82,7 +83,7 @@
 			'depth'          => 1,
 		) );
 		?>
-		<a class="btn btn--primary btn--block" href="<?php echo esc_url( home_url( '/contact/' ) ); ?>"><?php aeon_e( 'cta_request' ); ?></a>
+		<a class="btn btn--primary btn--block" href="<?php echo esc_url( aeon_contact_url() ); ?>"><?php aeon_e( 'cta_request' ); ?></a>
 		<?php if ( $aeon_show_lang ) : // Hidden alongside the header switcher — see AEON_SHOW_LANG_SWITCH above. ?>
 			<a class="mobile-menu__lang" href="<?php echo aeon_switch_url(); ?>"><?php echo aeon_is_rtl() ? 'English' : 'العربية'; ?></a>
 		<?php endif; ?>
@@ -95,13 +96,14 @@
  * Fallback nav so the theme works before menus are assigned.
  */
 function aeon_default_menu( $args = array() ) {
+	// One-pager: Services keeps its own page, everything else is a homepage
+	// section. See aeon_single_page_mode() in inc/template-functions.php for how
+	// to restore the standalone /about/, /work/, /blog/ and /contact/ routes.
 	$items = array(
-		'/'         => aeon_t( 'nav_home' ),
-		'/about/'   => aeon_t( 'nav_about' ),
-		'/services/'=> aeon_t( 'nav_services' ),
-		'/work/'    => aeon_t( 'nav_work' ),
-		'/blog/'    => aeon_t( 'nav_blog' ),
-		'/contact/' => aeon_t( 'nav_contact' ),
+		'/'          => aeon_t( 'nav_home' ),
+		'/#about'    => aeon_t( 'nav_about' ),
+		'/services/' => aeon_t( 'nav_services' ),
+		'/#contact'  => aeon_t( 'nav_contact' ),
 	);
 	$class = isset( $args['menu_class'] ) ? $args['menu_class'] : 'site-nav__menu';
 	echo '<ul class="' . esc_attr( $class ) . '">';
