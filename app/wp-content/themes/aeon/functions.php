@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'AEON_VERSION', '1.10.2' );
+define( 'AEON_VERSION', '1.11.0' );
 define( 'AEON_DIR', get_template_directory() );
 define( 'AEON_URI', get_template_directory_uri() );
 

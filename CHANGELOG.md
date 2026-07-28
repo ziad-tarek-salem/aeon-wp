@@ -5,6 +5,27 @@ All notable changes to the **AEON Digital Marketing** theme are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.0] — 2026-07-28
+
+### Added
+- Content parity sync (`inc/content/sync.php`). Only the theme folder is
+  deployed, so the database never travels and a live site keeps whatever its
+  sections were seeded with months earlier. The theme now carries an
+  authoritative snapshot of every section taxonomy plus the settings that drive
+  the front end, and reconciles the site to it on the first request after a
+  deploy. Bump `AEON_CONTENT_REVISION` to publish new content; a taxonomy that
+  already matches is left untouched, and posts, pages, portfolio items and media
+  are never touched.
+- Transparent `assets/images/logo-wordmark.png`, published to the media library
+  and selected as the custom logo by the sync. The previous JPEG sat on an opaque
+  white rectangle that showed against the header.
+
+### Changed
+- The Hostinger Reach subscription-block CSS and view script are dequeued on
+  pages that do not embed the block — the plugin is pre-installed on the host and
+  loaded them site-wide.
+- `style.css` version realigned with `AEON_VERSION`; the two had drifted apart.
+
 ## [1.0.0] — 2026-06-30
 
 ### Added

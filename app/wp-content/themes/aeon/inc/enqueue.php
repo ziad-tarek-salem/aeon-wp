@@ -94,6 +94,29 @@ function aeon_assets() {
 add_action( 'wp_enqueue_scripts', 'aeon_assets' );
 
 /**
+ * Drop the Hostinger Reach subscription-block assets from pages that do not use
+ * the block.
+ *
+ * The host pre-installs that plugin on production, and it enqueues its block CSS
+ * and view script site-wide. None of the AEON templates render post content, so
+ * the block never appears and the two files are pure weight — and they are the
+ * only thing left making the deployed markup differ from the reference site.
+ * The guard keeps them for any page that genuinely embeds the block, so turning
+ * the feature on later still works.
+ */
+function aeon_dequeue_unused_host_assets() {
+	if ( is_singular() && has_block( 'hostinger-reach/subscription' ) ) {
+		return;
+	}
+
+	foreach ( array( 'hostinger-reach-subscription-block', 'hostinger-reach-subscription-block-view' ) as $handle ) {
+		wp_dequeue_style( $handle );
+		wp_dequeue_script( $handle );
+	}
+}
+add_action( 'wp_enqueue_scripts', 'aeon_dequeue_unused_host_assets', 100 );
+
+/**
  * Add defer to heavy third-party scripts.
  */
 function aeon_defer_scripts( $tag, $handle ) {

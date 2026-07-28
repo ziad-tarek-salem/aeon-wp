@@ -129,6 +129,9 @@ function aeon_strings() {
 
 		// About.
 		'about_eyebrow'     => array( 'ar' => 'من نحن', 'en' => 'About AEON' ),
+		// Section heading, split so the second word takes the accent colour.
+		'about_exp_t1'      => array( 'ar' => 'نبذة عن', 'en' => 'About our' ),
+		'about_exp_t2'      => array( 'ar' => 'خبراتنا', 'en' => 'expertise' ),
 		'about_title'       => array( 'ar' => 'شريكك الرقمي للنمو والتميّز', 'en' => 'Your Digital Partner for Growth & Excellence' ),
 		'about_text'        => array( 'ar' => 'في AEON للتسويق الرقمي نؤمن بأن كل علامة تجارية تحمل قصة تستحق أن تُروى. نمتلك خبرة تتجاوز عشر سنوات في التسويق الإلكتروني وإدارة الحسابات الإعلانية وإعلانات جوجل وتحسين محرّكات البحث عبر الإمارات ومصر والكويت والسعودية، وعملنا مع شركات كبرى وقابضة وأسواق ومولات وجهات حكومية. نحوّل قصتك إلى تجربة رقمية متكاملة تجذب الجمهور وتبني الثقة وتحقق نتائج ملموسة.', 'en' => 'At AEON Digital Marketing we believe every brand carries a story worth telling. With 10+ years of experience in digital marketing, ad-account management, Google Ads and SEO across the UAE, Egypt, Kuwait and Saudi Arabia — working with major corporations, holdings, retail markets, malls and government entities — we turn your story into an integrated digital experience that attracts audiences, builds trust and delivers tangible results.' ),
 		'about_mission_t'   => array( 'ar' => 'رسالتنا', 'en' => 'Our Mission' ),
@@ -248,6 +251,12 @@ function aeon_strings() {
 		'footer_locations'  => array( 'ar' => 'فروعنا ومواقعنا', 'en' => 'Our Locations' ),
 		'open_in_maps'      => array( 'ar' => 'افتح الموقع على خرائط جوجل', 'en' => 'Open in Google Maps' ),
 
+		// Welcome popup. It holds only the logo and the button, so the dialog's
+		// accessible name has to come from here rather than a visible heading.
+		'welcome_aria'      => array( 'ar' => 'رسالة ترحيب — تواصل معنا على واتساب', 'en' => 'Welcome — contact us on WhatsApp' ),
+		'wa_cta'            => array( 'ar' => 'ابدأ المحادثة الآن', 'en' => 'Start the chat now' ),
+		'wa_close'          => array( 'ar' => 'إغلاق', 'en' => 'Close' ),
+
 		// 404 / misc.
 		'e404_title'        => array( 'ar' => 'الصفحة غير موجودة', 'en' => 'Page Not Found' ),
 		'e404_text'        => array( 'ar' => 'عذراً، الصفحة التي تبحث عنها غير موجودة.', 'en' => 'Sorry, the page you are looking for does not exist.' ),
@@ -256,10 +265,8 @@ function aeon_strings() {
 		'blog_title'        => array( 'ar' => 'المدونة وآخر الأخبار', 'en' => 'Blog & Latest News' ),
 
 		// Services closing tagline (profile p2).
-		'services_tagline'  => array( 'ar' => 'نحو مستقبل رقمي... نصنع النجاح معاً', 'en' => 'Toward a digital future… we build success together' ),
 
 		// About / Expertise (profile p3).
-		'about_lead'        => array( 'ar' => 'نحو نجاح رقمي.. نصنع الفارق', 'en' => 'Toward digital success — we make the difference' ),
 		'about_quote'       => array( 'ar' => 'شركة تسويق رقمي متكاملة تقدّم حلولاً تسويقية مبتكرة تصنع الفارق وتحقق النجاح المستدام.', 'en' => 'A full-service digital marketing agency delivering innovative solutions that make the difference and achieve sustainable success.' ),
 		'about_b1'          => array( 'ar' => 'نمتلك خبرة بالتسويق الإلكتروني وإدارة الحسابات الإعلانية وإعلانات جوجل وتحسين محركات البحث (SEO) تتجاوز عشر سنوات بمصر والإمارات والكويت والمملكة العربية السعودية.', 'en' => 'We have over ten years of experience in digital marketing, ad-account management, Google Ads and SEO across Egypt, the UAE, Kuwait and Saudi Arabia.' ),
 		'about_b2'          => array( 'ar' => 'عملنا مع شركات كبرى وشركات قابضة وأسواق تجارية ومولات وجهات حكومية.', 'en' => 'We have worked with major corporations, holding companies, commercial markets, malls and government entities.' ),
@@ -326,6 +333,87 @@ function aeon_strings() {
 		'office_sub'        => array( 'ar' => 'تواصلوا معنا لترتيب موعد للاستشارات.', 'en' => 'Get in touch to arrange a consultation appointment.' ),
 		'office_cta'        => array( 'ar' => 'احجز موعد استشارة', 'en' => 'Book a Consultation' ),
 		'office_partner'    => array( 'ar' => 'شراكة حقيقية — بناء نجاح مستدام', 'en' => 'A true partnership — building lasting success' ),
+
+		// Web design chapter (profile p10).
+		'web_title_1'       => array( 'ar' => 'تصميم', 'en' => 'Website' ),
+		'web_title_2'       => array( 'ar' => 'المواقع الإلكترونية', 'en' => 'Design & Development' ),
+		'web_lead'          => array( 'ar' => 'تصميم وتطوير المواقع الإلكترونية', 'en' => 'Web design and development' ),
+		'web_text'          => array( 'ar' => 'نصمّم تجارب رقمية متكاملة تجمع بين جمالية الواجهات (UI) وسهولة الاستخدام (UX). نضمن لك موقعاً سريع الاستجابة، متوافقاً مع كافة الأجهزة، ليكون مرآة تعكس هوية علامتك التجارية وتروي قصتها بأسلوب تقني مبتكر وسلس.', 'en' => 'We design complete digital experiences that combine beautiful interfaces (UI) with effortless usability (UX). Your site will be fast, responsive and consistent across every device — a mirror of your brand identity that tells its story with smooth, inventive craft.' ),
+		'web_cta'           => array( 'ar' => 'عرض النماذج', 'en' => 'View Samples' ),
+		'web_f1'            => array( 'ar' => 'أمان متقدم', 'en' => 'Advanced security' ),
+		'web_f1_d'          => array( 'ar' => 'وحماية للبيانات', 'en' => 'and data protection' ),
+		'web_f2'            => array( 'ar' => 'سرعة عالية', 'en' => 'High speed' ),
+		'web_f2_d'          => array( 'ar' => 'وأداء متميز', 'en' => 'and standout performance' ),
+		'web_f3'            => array( 'ar' => 'متوافق', 'en' => 'Compatible' ),
+		'web_f3_d'          => array( 'ar' => 'مع جميع الأجهزة', 'en' => 'with every device' ),
+
+		// Photography chapter (profile p11–16).
+		'photo_title_1'     => array( 'ar' => 'تصوير', 'en' => 'Professional' ),
+		'photo_title_2'     => array( 'ar' => 'إحترافي', 'en' => 'photography' ),
+		'photo_sub'         => array( 'ar' => 'يبرز منتجاتك', 'en' => 'that makes your products stand out' ),
+		'photo_l1_t'        => array( 'ar' => 'إضاءة إحترافية', 'en' => 'Professional lighting' ),
+		'photo_l1_d'        => array( 'ar' => 'تُظهر تفاصيل منتجك', 'en' => 'reveals every detail of your product' ),
+		'photo_l2_t'        => array( 'ar' => 'ألوان جذابة', 'en' => 'Appetising colour' ),
+		'photo_l2_d'        => array( 'ar' => 'تعزز المذاق والشهية', 'en' => 'that heightens taste and appetite' ),
+		'photo_l3_t'        => array( 'ar' => 'جودة عالية', 'en' => 'High quality' ),
+		'photo_l3_d'        => array( 'ar' => 'صور بجودة سينمائية', 'en' => 'cinematic-grade imagery' ),
+		'photo_l4_t'        => array( 'ar' => 'عرض مثالي', 'en' => 'Perfect presentation' ),
+		'photo_l4_d'        => array( 'ar' => 'يزيد من جاذبية منتجك', 'en' => 'that makes your product irresistible' ),
+		'photo_tagline'     => array( 'ar' => 'كل لقطة تحكي طعم الجودة', 'en' => 'Every shot tells the taste of quality' ),
+
+		// Reels & motion chapters (profile p17–21).
+		'reels_title_1'     => array( 'ar' => 'فيديوهات ريلز', 'en' => 'Reels videos' ),
+		'reels_title_2'     => array( 'ar' => 'بشكل إحترافي', 'en' => 'done professionally' ),
+		'reels_sub'         => array( 'ar' => 'تصنع الفارق لمحتواك', 'en' => 'that set your content apart' ),
+		'motion_title_1'    => array( 'ar' => 'موشن', 'en' => 'Motion graphics' ),
+		'motion_title_2'    => array( 'ar' => 'بشكل إحترافي', 'en' => 'done professionally' ),
+		'motion_sub'        => array( 'ar' => 'يستهدف احتياجك بشكل دقيق', 'en' => 'targeted precisely to what you need' ),
+
+		// The recurring four-item proof strip (profile p17–21, p38).
+		'proof_1'           => array( 'ar' => 'استهداف دقيق', 'en' => 'Precise targeting' ),
+		'proof_2'           => array( 'ar' => 'نتائج قابلة للقياس', 'en' => 'Measurable results' ),
+		'proof_3'           => array( 'ar' => 'نمو مستمر لبراندك', 'en' => 'Continuous brand growth' ),
+		'proof_4'           => array( 'ar' => 'محتوى يصنع الفرق', 'en' => 'Content that makes the difference' ),
+
+		// Social-media chapter (profile p22–37).
+		'social_title_1'    => array( 'ar' => 'تصميمات سوشيال ميديا', 'en' => 'Social media design' ),
+		'social_title_2'    => array( 'ar' => 'بشكل إحترافي', 'en' => 'done professionally' ),
+		'social_sub'        => array( 'ar' => 'أعمال منفّذة لعلامات تجارية في قطاعات متنوّعة.', 'en' => 'Work delivered for brands across a range of sectors.' ),
+
+		// Clients (profile p7–9) — the profile's own wording.
+		'clients_proud'     => array( 'ar' => 'نفخر بتعاملنا مع <span class="accent">أكثر من 120 عميل</span>', 'en' => 'Proud to work with <span class="accent">more than 120 clients</span>' ),
+		'clients_region'    => array( 'ar' => 'بمصر والسعودية والإمارات والكويت', 'en' => 'across Egypt, Saudi Arabia, the UAE and Kuwait' ),
+		'clients_partners'  => array( 'ar' => 'شركاؤنا في النجاح', 'en' => 'Our partners in success' ),
+
+		// Results card detail (profile p38).
+		'metric_avg_l'      => array( 'ar' => 'متوسط وقت المشاهدة', 'en' => 'Avg. watch time' ),
+		'metric_avg_v'      => array( 'ar' => '2 ث', 'en' => '2s' ),
+		'metric_follow_l'   => array( 'ar' => 'متابعو مقطع ريلز', 'en' => 'Reel followers' ),
+		'metric_follow_v'   => array( 'ar' => '—', 'en' => '—' ),
+		'donut_title'       => array( 'ar' => 'المشاهدات', 'en' => 'Views' ),
+		'donut_sub'         => array( 'ar' => 'المتابعون مقابل غير المتابعين', 'en' => 'Followers vs non-followers' ),
+		'donut_followers'   => array( 'ar' => 'المتابعون', 'en' => 'Followers' ),
+		'donut_non'         => array( 'ar' => 'غير المتابعين', 'en' => 'Non-followers' ),
+		'views_unit'        => array( 'ar' => 'ألف مشاهدة', 'en' => 'K views' ),
+
+		// Ad-campaign platforms (client-supplied AEON campaign creatives).
+		'camp_eyebrow'      => array( 'ar' => 'حملاتنا الإعلانية', 'en' => 'Our Ad Campaigns' ),
+		'camp_title'        => array( 'ar' => 'حملات مدفوعة على المنصات التي يستخدمها جمهورك', 'en' => 'Paid campaigns on the platforms your audience actually uses' ),
+		'camp_sub'          => array( 'ar' => 'ندير حساباتك الإعلانية على جوجل وسناب شات وتيك توك وفيسبوك وإنستجرام باستهداف دقيق ونتائج قابلة للقياس.', 'en' => 'We run your ad accounts on Google, Snapchat, TikTok, Facebook and Instagram with precise targeting and measurable results.' ),
+		'camp_google_t'     => array( 'ar' => 'إعلانات جوجل', 'en' => 'Google Ads' ),
+		'camp_google_d'     => array( 'ar' => 'حملات مدفوعة وتحسين SEO لتتصدّر نتائج البحث.', 'en' => 'Paid campaigns and SEO to top the search results.' ),
+		'camp_snap_t'       => array( 'ar' => 'إعلانات سناب شات', 'en' => 'Snapchat Ads' ),
+		'camp_snap_d'       => array( 'ar' => 'وصول عالي الاستهداف لجمهورك في السوق المحلي.', 'en' => 'Highly targeted reach to your audience in the local market.' ),
+		'camp_tiktok_t'     => array( 'ar' => 'إعلانات تيك توك', 'en' => 'TikTok Ads' ),
+		'camp_tiktok_d'     => array( 'ar' => 'فيديوهاتك تصل إلى ملايين المشاهدات بمحتوى يصنع الفرق.', 'en' => 'Your videos reach millions of views with content that makes a difference.' ),
+		'camp_meta_t'       => array( 'ar' => 'إعلانات فيسبوك وإنستجرام', 'en' => 'Facebook & Instagram Ads' ),
+		'camp_meta_d'       => array( 'ar' => 'حملات رسائل وتحويلات تجلب لك عملاء حقيقيين.', 'en' => 'Message and conversion campaigns that bring in real customers.' ),
+
+		// Work archive page.
+		'work_page_title'   => array( 'ar' => 'أعمالنا', 'en' => 'Our Work' ),
+		'work_page_sub'     => array( 'ar' => 'نماذج من أعمالنا في تصميم المواقع والتصوير والريلز والموشن وتصميمات السوشيال ميديا.', 'en' => 'Samples of our work in web design, photography, reels, motion graphics and social media design.' ),
+		'work_back_home'    => array( 'ar' => 'العودة للرئيسية', 'en' => 'Back to home' ),
+		'show_all_work'     => array( 'ar' => 'شاهد كل الأعمال', 'en' => 'View all work' ),
 	);
 
 	return $s;

@@ -61,118 +61,78 @@
 		onScroll();
 	}
 
-	/* ---------- WhatsApp ---------- */
-	// The link carries no `text` parameter, so the chat always opens empty —
-	// WhatsApp's own default. A bare wa.me link still lands on WhatsApp's
-	// "Open app / Continue to WhatsApp Web" page on desktop, so desktop browsers
-	// are pointed straight at the web client instead. Phones keep the wa.me deep
-	// link, which opens the app directly. The markup keeps the wa.me href, so
-	// this is pure enhancement — it degrades to the standard link without JS.
+	/* ---------- Welcome popup ---------- */
+	// The site's only popup: logo and one button, opened by itself on every page
+	// load — no sessionStorage, no cookie, nothing remembered between views — so
+	// a refresh always brings it back. Nothing opens it on click; the floating
+	// WhatsApp button is a plain link that goes straight to the chat.
 	//
-	// The dialog is a real modal: it dims the page, traps focus and locks scroll.
-	// It shows itself once per browsing session (sessionStorage) rather than on
-	// every page load, so moving between pages does not reopen it; the floating
-	// button reopens it on demand.
-	var WA_SEEN = 'aeonWaSeen';
-	var WA_DELAY = 1200;
+	// Its button carries the same bare wa.me href as the floating one and is left
+	// untouched by JS, so both land on WhatsApp's own chat page for the number.
+	//
+	// Delay is long enough for the entrance transition to run from the hidden
+	// state instead of flashing in on top of first paint.
+	var WELCOME_DELAY = 300;
 
-	function initWhatsApp() {
-		var fab = $('[data-wa-toggle]');
-		var modal = $('[data-wa-modal]');
-		if (!fab || !modal) return;
-		var popup = $('.wa-popup', modal);
-		var link = $('[data-wa-link]', modal);
-		if (!popup || !link) return;
-
-		var number = (link.getAttribute('href') || '').replace(/\D+/g, '');
-		if (!number) return;
-
-		// A bare wa.me link lands on WhatsApp's "Open app / Continue to WhatsApp
-		// Web" page on desktop. Point desktop browsers straight at the web client;
-		// phones keep wa.me, which deep-links into the app. No `text` parameter
-		// either way, so the chat opens empty — WhatsApp's own default.
-		var touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
-		var mobileUA = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-		if (!touch && !mobileUA) {
-			link.setAttribute('href', 'https://web.whatsapp.com/send?phone=' + number);
-		}
-
-		// sessionStorage throws in some privacy modes — never let that break the
-		// dialog. Failing to read just means it opens again, which is harmless.
-		function seen(write) {
-			try {
-				if (write) { sessionStorage.setItem(WA_SEEN, '1'); return true; }
-				return sessionStorage.getItem(WA_SEEN) === '1';
-			} catch (err) { return false; }
-		}
-
-		var lastFocus = null;
+	function initWelcome() {
+		var modal = $('[data-welcome-modal]');
+		if (!modal) return;
+		var card = $('.welcome-card', modal);
+		var link = $('[data-welcome-link]', modal);
+		if (!card || !link) return;
 
 		function isOpen() { return modal.classList.contains('is-open'); }
 
 		function open() {
-			if (isOpen()) return;
-			lastFocus = document.activeElement;
 			modal.hidden = false;
 			// Flush styles synchronously so the transition runs from the hidden
 			// state. A rAF callback would do the same, but it is throttled in
-			// background tabs — which would leave the panel open yet invisible.
+			// background tabs — which would leave the card open yet invisible.
 			void modal.offsetWidth;
 			modal.classList.add('is-open');
-			fab.setAttribute('aria-expanded', 'true');
 
-			// Hold the page still. Lenis owns the scroll when it is running;
-			// the body class covers reduced-motion and no-library cases. Pad for
-			// the vanished scrollbar so the layout does not jump sideways.
+			// Hold the page still. Lenis owns the scroll when it is running; the
+			// body class covers reduced-motion and no-library cases. Pad for the
+			// vanished scrollbar so the layout does not jump sideways.
 			var bar = window.innerWidth - document.documentElement.clientWidth;
 			if (bar > 0) document.body.style.paddingRight = bar + 'px';
-			document.body.classList.add('wa-lock');
+			document.body.classList.add('welcome-lock');
 			if (lenis) lenis.stop();
 
 			link.focus();
 		}
 
-		function close(refocus) {
+		function close() {
 			if (!isOpen()) return;
 			modal.classList.remove('is-open');
-			fab.setAttribute('aria-expanded', 'false');
-			document.body.classList.remove('wa-lock');
+			document.body.classList.remove('welcome-lock');
 			document.body.style.paddingRight = '';
 			if (lenis) lenis.start();
 			// Keep it in the DOM until the fade finishes, then take it back out
 			// of the accessibility tree.
-			setTimeout(function () { if (!isOpen()) modal.hidden = true; }, 450);
-			// Never leave focus stranded inside the panel we just hid. On the
-			// automatic open the previous element is <body>, and focusing that is
-			// a no-op — so fall back to the button, which owns the dialog anyway.
-			if (refocus) {
-				var back = (lastFocus && lastFocus.isConnected && lastFocus !== document.body) ? lastFocus : fab;
-				back.focus();
+			setTimeout(function () { if (!isOpen()) modal.hidden = true; }, 500);
+			// The popup opened itself, so there is no element worth restoring
+			// focus to — hand it back to the document and let the page take over.
+			if (document.activeElement && modal.contains(document.activeElement)) {
+				document.activeElement.blur();
 			}
 		}
 
-		// The button stays a real wa.me link for the no-JS case; here it opens
-		// the dialog instead.
-		fab.addEventListener('click', function (e) {
-			e.preventDefault();
-			if (isOpen()) { close(false); } else { open(); }
-		});
-
-		// Backdrop and close button share the hook, so a click outside the panel
+		// Backdrop and close button share the hook, so a click outside the card
 		// dismisses it the way a modal should.
-		$$('[data-wa-close]', modal).forEach(function (el) {
-			el.addEventListener('click', function () { close(true); });
+		$$('[data-welcome-close]', modal).forEach(function (el) {
+			el.addEventListener('click', close);
 		});
 
 		// Tapping through to WhatsApp should leave a clean page behind.
-		link.addEventListener('click', function () { close(false); });
+		link.addEventListener('click', close);
 
 		document.addEventListener('keydown', function (e) {
 			if (!isOpen()) return;
-			if (e.key === 'Escape') { close(true); return; }
+			if (e.key === 'Escape') { close(); return; }
 			if (e.key !== 'Tab') return;
 			// Focus trap: the dialog is modal, so Tab must not reach the page.
-			var items = $$('a[href], button:not([disabled])', popup).filter(function (el) {
+			var items = $$('a[href], button:not([disabled])', card).filter(function (el) {
 				return el.offsetWidth || el.offsetHeight || el.getClientRects().length;
 			});
 			if (!items.length) return;
@@ -182,9 +142,7 @@
 			else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
 		});
 
-		if (!seen()) {
-			setTimeout(function () { seen(true); open(); }, WA_DELAY);
-		}
+		setTimeout(open, WELCOME_DELAY);
 	}
 
 	/* ---------- Mobile menu ---------- */
@@ -460,7 +418,7 @@
 		if (hasGSAP && window.ScrollTrigger) { window.gsap.registerPlugin(window.ScrollTrigger); }
 		initSmoothScroll();
 		initHeader();
-		initWhatsApp();
+		initWelcome();
 		initMobileMenu();
 		initReveal();
 		initHero();

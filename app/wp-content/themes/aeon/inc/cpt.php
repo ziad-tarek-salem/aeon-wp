@@ -24,6 +24,7 @@ require_once AEON_DIR . '/inc/content/works.php';
 require_once AEON_DIR . '/inc/content/settings.php';
 require_once AEON_DIR . '/inc/content/images.php';
 require_once AEON_DIR . '/inc/content/migrate.php';
+require_once AEON_DIR . '/inc/content/sync.php';
 
 /**
  * Flush rewrite rules on theme activation so the public CPT slugs resolve.

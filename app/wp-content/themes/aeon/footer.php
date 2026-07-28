@@ -103,48 +103,21 @@ $aeon_numbers = aeon_phone_numbers();
 </footer>
 
 <?php
+// Greeting dialog — the site's only popup, shown automatically on every page
+// load. Nothing opens it on click.
+get_template_part( 'template-parts/components/welcome-popup' );
+
 // Number is managed from the dashboard (محتوى الموقع → زر الواتساب). The button
 // only renders once a number is configured.
 $aeon_wa = aeon_whatsapp_number();
 if ( $aeon_wa ) : ?>
 
 	<?php
-	// The dialog is a root-level modal, not a panel tethered to the button: its
-	// backdrop has to cover the whole viewport, which it could not do from
-	// inside the button's fixed bottom-corner box.
+	// A plain wa.me link and nothing more: clicking it goes straight to
+	// WhatsApp's own chat page for the number. No dialog, no JS in the path.
 	?>
-	<div class="wa-modal" data-wa-modal hidden>
-		<div class="wa-modal__backdrop" data-wa-close></div>
-
-		<div class="wa-popup" id="aeon-wa-popup" role="dialog" aria-modal="true"
-			aria-labelledby="aeon-wa-title" aria-describedby="aeon-wa-sub">
-
-			<div class="wa-popup__head">
-				<button type="button" class="wa-popup__close" data-wa-close aria-label="<?php echo esc_attr( aeon_t( 'wa_close' ) ); ?>">
-					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
-				</button>
-				<img class="wa-popup__logo" src="<?php echo esc_url( aeon_image_url( 'logo_lockup', 'full' ) ); ?>"
-					alt="<?php bloginfo( 'name' ); ?>" width="816" height="294" loading="lazy" decoding="async">
-				<p class="wa-popup__status"><span class="wa-popup__dot" aria-hidden="true"></span><?php aeon_e( 'wa_online' ); ?></p>
-			</div>
-
-			<div class="wa-popup__body">
-				<h2 class="wa-popup__title" id="aeon-wa-title"><?php aeon_e( 'wa_title' ); ?></h2>
-				<p class="wa-popup__sub" id="aeon-wa-sub"><?php aeon_e( 'wa_sub' ); ?></p>
-
-				<a class="wa-cta" href="https://wa.me/<?php echo esc_attr( $aeon_wa ); ?>"
-					target="_blank" rel="noopener" data-wa-link>
-					<svg class="wa-cta__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15l-1.4 5 5.1-1.3A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.7-.8s-.4-.1-.6.1-.6.8-.8 1-.3.2-.5.1a6.5 6.5 0 0 1-1.9-1.2 7.2 7.2 0 0 1-1.4-1.7c-.1-.2 0-.4.1-.5l.4-.4.2-.4a.5.5 0 0 0 0-.4l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.9 11.9 0 0 0 4.6 4c.6.3 1.1.4 1.5.6.6.2 1.2.2 1.6.1.5-.1 1.4-.6 1.6-1.1s.2-1 .2-1.1z"/></svg>
-					<span><?php aeon_e( 'wa_cta' ); ?></span>
-				</a>
-			</div>
-		</div>
-	</div>
-
-	<?php // Stays a real link, so the button still works with JS disabled. ?>
 	<a class="whatsapp-fab" href="https://wa.me/<?php echo esc_attr( $aeon_wa ); ?>"
-		target="_blank" rel="noopener" aria-label="WhatsApp"
-		aria-expanded="false" aria-controls="aeon-wa-popup" data-wa-toggle>
+		target="_blank" rel="noopener" aria-label="WhatsApp">
 		<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15l-1.4 5 5.1-1.3A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.7-.8s-.4-.1-.6.1-.6.8-.8 1-.3.2-.5.1a6.5 6.5 0 0 1-1.9-1.2 7.2 7.2 0 0 1-1.4-1.7c-.1-.2 0-.4.1-.5l.4-.4.2-.4a.5.5 0 0 0 0-.4l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.9 11.9 0 0 0 4.6 4c.6.3 1.1.4 1.5.6.6.2 1.2.2 1.6.1.5-.1 1.4-.6 1.6-1.1s.2-1 .2-1.1z"/></svg>
 	</a>
 <?php endif; ?>

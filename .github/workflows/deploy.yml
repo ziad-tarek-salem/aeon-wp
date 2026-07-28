@@ -54,3 +54,10 @@ jobs:
 
 # After each deploy, purge any host/page cache, and if rewrite rules changed,
 # re-save Settings → Permalinks once.
+#
+# Dashboard content does NOT travel with this workflow — the database stays put.
+# Section content (services, statistics, branches, …) is published through the
+# theme instead: see inc/content/sync.php, which reconciles the live site to the
+# snapshot it ships on the first request after a deploy. Publishing edited
+# content means editing that snapshot and bumping AEON_CONTENT_REVISION; a
+# deploy alone will not move it.

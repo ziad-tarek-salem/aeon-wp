@@ -791,8 +791,8 @@ a.contact__detail-value:hover { color: var(--violet); }
 
 /* ---------- WhatsApp FAB ---------- */
 /* Pinned to the physical right edge regardless of text direction (RTL/LTR).
-   Deliberately plain: no halo, no icon morph. It is a quiet, permanent way
-   into WhatsApp, and the dialog below is what does the talking. */
+   Deliberately plain: no halo, no icon morph. A quiet, permanent link straight
+   to the WhatsApp chat — it opens nothing on the page. */
 .whatsapp-fab {
 	position: fixed; bottom: 26px; right: 26px; left: auto; z-index: 800;
 	width: 58px; height: 58px; border-radius: 50%; background: #25d366; color: #fff;
@@ -803,121 +803,141 @@ a.contact__detail-value:hover { color: var(--violet); }
 .whatsapp-fab:hover { transform: scale(1.1) translateY(-2px); }
 @keyframes fabIn { from { transform: scale(0); } to { transform: scale(1); } }
 
-/* ---------- WhatsApp dialog ---------- */
-/* A centred modal over a dimmed page, not a panel tethered to the button.
-   Opens by itself once per visit; the button reopens it afterwards. */
-.wa-modal {
-	position: fixed; inset: 0; z-index: 1000;
-	display: grid; place-items: center; padding: 24px;
-}
-.wa-modal[hidden] { display: none; }
-.wa-modal__backdrop {
-	position: absolute; inset: 0; cursor: pointer;
-	background: rgba(20, 16, 31, .58);
-	backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
-	opacity: 0; transition: opacity .4s var(--ease);
-}
-.wa-modal.is-open .wa-modal__backdrop { opacity: 1; }
-/* Scroll lock for the no-Lenis case (reduced motion, or the lib absent). */
-body.wa-lock { overflow: hidden; }
-
-.wa-popup {
-	position: relative; z-index: 1; width: min(390px, 100%);
-	background: var(--white); border-radius: var(--radius-lg);
-	box-shadow: 0 34px 90px rgba(20, 16, 31, .34);
-	overflow: hidden; text-align: center;
-	opacity: 0; transform: translateY(18px) scale(.96);
-	transition: opacity .45s var(--ease), transform .45s var(--ease);
-}
-.wa-modal.is-open .wa-popup { opacity: 1; transform: none; }
-
-/* Brand-gradient cap carrying the lockup, so the panel is unmistakably ours. */
-.wa-popup__head {
-	position: relative; overflow: hidden;
-	background: var(--grad-brand); padding: 30px 26px 24px;
-	display: flex; flex-direction: column; align-items: center; gap: 13px;
-}
-/* The same soft bloom the hero uses, to keep the gradient from reading flat. */
-.wa-popup__head::after {
-	content: ""; position: absolute; inset-block-start: -70%; inset-inline-start: 50%;
-	width: 300px; aspect-ratio: 1; transform: translateX(-50%); pointer-events: none;
-	background: radial-gradient(circle, rgba(255,255,255,.32), transparent 62%);
-}
-.wa-popup__logo {
-	position: relative; z-index: 1; height: 54px; width: auto;
-	background: var(--white); padding: 9px 16px; border-radius: 14px;
-	box-shadow: 0 10px 26px rgba(20,16,31,.20);
-}
-.wa-popup__status {
-	position: relative; z-index: 1; margin: 0;
-	display: inline-flex; align-items: center; gap: 8px;
-	font-size: .8rem; font-weight: 700; color: #fff;
-	background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.28);
-	padding: 5px 14px; border-radius: 100px;
-	backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-}
-.wa-popup__dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 0 0 rgba(74,222,128,.7); animation: waDot 2s ease-out infinite; }
-@keyframes waDot { 70% { box-shadow: 0 0 0 6px rgba(74,222,128,0); } 100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); } }
-
-/* White-on-gradient: legible on the cap without needing its own solid chip. */
-.wa-popup__close {
-	position: absolute; inset-block-start: 12px; inset-inline-end: 12px; z-index: 2;
-	width: 32px; height: 32px; border-radius: 50%; border: 0; cursor: pointer;
-	background: rgba(255,255,255,.20); color: #fff; display: grid; place-items: center;
-	transition: background .3s, transform .35s var(--ease);
-}
-.wa-popup__close svg { width: 15px; height: 15px; }
-.wa-popup__close:hover { background: rgba(255,255,255,.34); transform: rotate(90deg); }
-/* Keeps the 32px look but gives thumbs the recommended 44px target. */
-.wa-popup__close::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; }
-
-.wa-popup__body { padding: 26px 26px 28px; }
-.wa-popup__title { font-size: 1.2rem; font-weight: 800; color: var(--purple); margin: 0 0 8px; line-height: 1.5; }
-.wa-popup__sub { font-size: .93rem; color: var(--muted); line-height: 1.7; margin: 0 0 22px; }
-
-/* CTA: WhatsApp green, with a sheen that sweeps across on hover. */
-.wa-cta {
-	position: relative; overflow: hidden; width: 100%;
-	display: flex; align-items: center; justify-content: center; gap: 10px;
-	padding: 14px 20px; border-radius: 100px;
-	background: linear-gradient(135deg, #1faa53, #25d366);
-	color: #fff; font-weight: 800; font-size: .97rem;
-	box-shadow: 0 14px 28px rgba(37,211,102,.34);
-	transition: transform .3s var(--ease), box-shadow .3s;
-}
-.wa-cta:hover { transform: translateY(-2px); box-shadow: 0 18px 34px rgba(37,211,102,.44); color: #fff; }
-.wa-cta::after {
-	content: ""; position: absolute; inset-block: 0; inset-inline-start: -60%; width: 45%;
-	background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
-	transform: skewX(-20deg); transition: inset-inline-start .6s var(--ease);
-}
-.wa-cta:hover::after { inset-inline-start: 115%; }
-.wa-cta__icon { width: 21px; height: 21px; flex-shrink: 0; }
-
+/* ---------- WhatsApp FAB responsive ---------- */
 @media (max-width: 480px) {
-	/* Sit clear of the thumb rail; the dialog keeps a margin off the edges. */
+	/* Sit clear of the thumb rail. */
 	.whatsapp-fab { bottom: 18px; right: 18px; width: 54px; height: 54px; }
 	.whatsapp-fab svg { width: 27px; height: 27px; }
-	.wa-modal { padding: 18px; }
-	.wa-popup__head { padding: 24px 20px 20px; gap: 11px; }
-	.wa-popup__logo { height: 46px; padding: 8px 14px; }
-	.wa-popup__body { padding: 22px 20px 24px; }
-	.wa-popup__title { font-size: 1.08rem; }
-	.wa-popup__sub { font-size: .88rem; margin-block-end: 18px; }
-	.wa-cta { padding: 13px 18px; font-size: .92rem; }
 }
-/* Short viewports (landscape phones): let the panel scroll rather than clip. */
+
+/* ---------- Welcome popup ---------- */
+/* The arrival moment, and the site's only dialog: it shows itself on every page
+   load and holds nothing but the lockup and the WhatsApp button. Sits above the
+   floating button (z 800) so the button cannot poke through the backdrop. */
+.welcome-modal {
+	position: fixed; inset: 0; z-index: 1100;
+	display: grid; place-items: center; padding: 24px;
+}
+.welcome-modal[hidden] { display: none; }
+/* Scroll lock for the no-Lenis case (reduced motion, or the lib absent). */
+body.welcome-lock { overflow: hidden; }
+.welcome-modal__backdrop {
+	position: absolute; inset: 0; cursor: pointer;
+	background: rgba(20, 16, 31, .62);
+	backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+	opacity: 0; transition: opacity .45s var(--ease);
+}
+.welcome-modal.is-open .welcome-modal__backdrop { opacity: 1; }
+
+.welcome-card {
+	position: relative; z-index: 1; width: min(400px, 100%);
+	background: var(--white); border-radius: var(--radius-lg);
+	padding: 46px 32px 38px; text-align: center;
+	box-shadow: 0 36px 96px rgba(20, 16, 31, .36);
+	opacity: 0; transform: translateY(22px) scale(.955);
+	transition: opacity .5s var(--ease), transform .5s var(--ease);
+}
+.welcome-modal.is-open .welcome-card { opacity: 1; transform: none; }
+/* A 1px brand-gradient hairline instead of a solid border — the whole premium
+   cue on an otherwise plain white card. Falls back to no border where the mask
+   is unsupported, which is exactly the intended look minus the sheen. */
+.welcome-card::before {
+	content: ""; position: absolute; inset: 0; pointer-events: none;
+	border-radius: inherit; padding: 1px;
+	background: linear-gradient(150deg, rgba(147,51,234,.55), rgba(243,111,33,.45) 55%, rgba(147,51,234,.12));
+	-webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+	mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+	-webkit-mask-composite: xor; mask-composite: exclude;
+}
+/* Soft brand aura behind the lockup, same bloom language as the hero. */
+.welcome-card__bloom {
+	position: absolute; inset-block-start: -18%; inset-inline-start: 50%;
+	width: 320px; aspect-ratio: 1; transform: translateX(-50%);
+	pointer-events: none; border-radius: 50%;
+	background: radial-gradient(circle, rgba(147, 51, 234, .16), rgba(243, 111, 33, .07) 45%, transparent 68%);
+}
+
+.welcome-card__logo {
+	position: relative; z-index: 1;
+	display: block; height: 66px; width: auto; margin-inline: auto;
+}
+
+.welcome-card__close {
+	position: absolute; inset-block-start: 14px; inset-inline-end: 14px; z-index: 2;
+	width: 32px; height: 32px; border-radius: 50%; border: 0; cursor: pointer;
+	background: var(--surface-2); color: var(--muted); display: grid; place-items: center;
+	transition: background .3s, color .3s, transform .35s var(--ease);
+}
+.welcome-card__close svg { width: 15px; height: 15px; }
+.welcome-card__close:hover { background: var(--purple); color: #fff; transform: rotate(90deg); }
+/* Keeps the 32px look but gives thumbs the recommended 44px target. */
+.welcome-card__close::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; }
+
+/* CTA: its own shape, not the FAB dialog's button. A white icon disc rides at
+   the leading edge, the arrow trails, and a slow halo breathes underneath. */
+.welcome-cta {
+	position: relative; z-index: 1; margin-block-start: 34px;
+	display: flex; align-items: center; gap: 14px; width: 100%;
+	padding: 8px; padding-inline-end: 22px;
+	border-radius: 100px; color: #fff;
+	background: linear-gradient(120deg, #128c47 0%, #25d366 55%, #4ade80 130%);
+	box-shadow: 0 16px 32px rgba(37, 211, 102, .34);
+	transition: transform .35s var(--ease), box-shadow .35s;
+}
+.welcome-cta:hover { transform: translateY(-3px); color: #fff; box-shadow: 0 22px 40px rgba(37, 211, 102, .46); }
+/* Breathing halo — the one thing on the card that moves on its own. */
+.welcome-cta::before {
+	content: ""; position: absolute; inset: 0; border-radius: inherit;
+	pointer-events: none; box-shadow: 0 0 0 0 rgba(37, 211, 102, .5);
+	animation: welcomePulse 2.8s var(--ease) infinite;
+}
+@keyframes welcomePulse {
+	60% { box-shadow: 0 0 0 14px rgba(37, 211, 102, 0); }
+	100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+}
+.welcome-cta__label {
+	flex: 1; text-align: center;
+	font-weight: 800; font-size: 1rem; letter-spacing: .1px;
+}
+.welcome-cta__badge {
+	flex-shrink: 0; width: 46px; height: 46px; border-radius: 50%;
+	background: var(--white); color: #17a34a;
+	display: grid; place-items: center;
+	box-shadow: 0 6px 16px rgba(11, 84, 41, .22);
+	transition: transform .45s var(--ease);
+}
+.welcome-cta__badge svg { width: 25px; height: 25px; }
+.welcome-cta:hover .welcome-cta__badge { transform: scale(1.07) rotate(-6deg); }
+.welcome-cta__arrow {
+	flex-shrink: 0; width: 19px; height: 19px; opacity: .9;
+	transition: transform .35s var(--ease);
+}
+/* The glyph points right; mirror it for Arabic so it still reads "forward". */
+.aeon-rtl .welcome-cta__arrow { transform: scaleX(-1); }
+.welcome-cta:hover .welcome-cta__arrow { transform: translateX(5px); }
+.aeon-rtl .welcome-cta:hover .welcome-cta__arrow { transform: scaleX(-1) translateX(5px); }
+
+@media (max-width: 600px) {
+	.welcome-modal { padding: 18px; }
+	.welcome-card { padding: 38px 22px 30px; border-radius: var(--radius); }
+	.welcome-card__logo { height: 54px; }
+	.welcome-card__bloom { width: 250px; }
+	.welcome-cta { margin-block-start: 28px; gap: 11px; padding-inline-end: 18px; }
+	.welcome-cta__badge { width: 42px; height: 42px; }
+	.welcome-cta__badge svg { width: 23px; height: 23px; }
+	.welcome-cta__label { font-size: .94rem; }
+}
+/* Short viewports (landscape phones): let the card scroll rather than clip. */
 @media (max-height: 520px) {
-	.wa-modal { place-items: start center; overflow-y: auto; padding-block: 16px; }
-	.wa-popup__head { padding-block: 18px 14px; }
-	.wa-popup__logo { height: 40px; }
-	.wa-popup__body { padding-block: 18px 20px; }
+	.welcome-modal { place-items: start center; overflow-y: auto; padding-block: 16px; }
+	.welcome-card { padding-block: 28px 24px; }
+	.welcome-card__logo { height: 44px; }
+	.welcome-cta { margin-block-start: 22px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.wa-popup__dot { animation: none; }
-	.wa-cta::after { display: none; }
-	.wa-popup { transform: none; }
+	.welcome-card { transform: none; }
+	.welcome-cta::before { animation: none; }
 }
 
 /* ---------- Reveal animations ---------- */
