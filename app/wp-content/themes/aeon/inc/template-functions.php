@@ -395,6 +395,127 @@ function aeon_service_features( $slug ) {
 }
 
 /**
+ * Work samples for a service, drawn from the client's own material.
+ *
+ * The company profile deck devotes one chapter to each kind of work, so its
+ * shots are traceable to a page: photography p11–17, reels p18–20 and motion
+ * p21–22 (both are the video service), the social-media design boards p23–37,
+ * the website mockups p10 and the campaign insights card p38. Two services are
+ * sourced from outside the deck: photography also uses the client's own
+ * full-resolution originals, and digital marketing uses AEON's four platform
+ * campaign banners, which the deck has no chapter for.
+ *
+ * The design boards chapter is the deck's only source for both the graphic
+ * design and the social media services, so it is split between them — no shot
+ * is used twice. Brand identity has no source in any of the supplied material;
+ * it returns an empty list and its section renders without a strip.
+ *
+ * Nothing here comes from the `حملاتي` campaign screenshots: those carry other
+ * companies' account names, ad-account IDs, phone numbers and identifiable
+ * people, so they are deliberately not shipped.
+ *
+ * @param string $slug Service slug (see aeon_service_slug()).
+ * @return array{ratio:string,cols:int,shots:array<int,array{file:string,alt:string}>} Empty shots when unknown.
+ */
+function aeon_service_gallery( $slug ) {
+	$g = array(
+		// Square tiles: five of these come from the client's own full-resolution
+		// originals (portrait) and three from the deck collages (landscape), so a
+		// 1:1 crop is the only ratio that treats both fairly.
+		'photo' => array(
+			'ratio' => '1 / 1',
+			'cols'  => 4,
+			'shots' => array(
+				array( 'burger.jpg',          'ar' => 'تصوير الأطعمة والوجبات',   'en' => 'Food & meal photography' ),
+				array( 'coffee-brew.jpg',     'ar' => 'تصوير محامص القهوة',       'en' => 'Coffee roastery photography' ),
+				array( 'perfume-labelle.jpg', 'ar' => 'تصوير العطور والمنتجات',   'en' => 'Perfume & product photography' ),
+				array( 'latte.jpg',           'ar' => 'تصوير مشروبات الكافيهات',  'en' => 'Café drinks photography' ),
+				array( 'baklava.jpg',         'ar' => 'تصوير الحلويات الشرقية',   'en' => 'Pastry & sweets photography' ),
+				array( 'milkshake.jpg',       'ar' => 'تصوير الحلويات والمشروبات', 'en' => 'Dessert & drinks photography' ),
+				array( 'juices.jpg',          'ar' => 'تصوير العصائر الطازجة',    'en' => 'Fresh juice photography' ),
+				array( 'grill-platter.jpg',   'ar' => 'تصوير أطباق المطاعم',      'en' => 'Restaurant dishes photography' ),
+			),
+		),
+		'design' => array(
+			'ratio' => '4 / 5',
+			'cols'  => 4,
+			'shots' => array(
+				array( 'business-setup.jpg', 'ar' => 'تصميمات إدارة المنشآت',   'en' => 'Business setup designs' ),
+				array( 'perfume-gift.jpg',   'ar' => 'تصميمات العطور والهدايا', 'en' => 'Perfume & gifting designs' ),
+				array( 'perfume-clove.jpg',  'ar' => 'تصميمات علامات العطور',   'en' => 'Perfume brand designs' ),
+				array( 'meat.jpg',           'ar' => 'تصميمات محلات اللحوم',    'en' => 'Butchery brand designs' ),
+			),
+		),
+		'video' => array(
+			'ratio' => '9 / 16',
+			'cols'  => 5,
+			'shots' => array(
+				array( 'reel-podcast.jpg',   'ar' => 'ريلز بودكاست وحوارات',   'en' => 'Podcast & interview reels' ),
+				array( 'reel-clinic.jpg',    'ar' => 'ريلز العيادات والتجميل', 'en' => 'Clinic & beauty reels' ),
+				array( 'reel-corporate.jpg', 'ar' => 'ريلز الشركات والعلامات', 'en' => 'Corporate & brand reels' ),
+				array( 'motion-dental.jpg',  'ar' => 'موشن جرافيك طبي',        'en' => 'Medical motion graphics' ),
+				array( 'motion-goals.jpg',   'ar' => 'موشن جرافيك تسويقي',     'en' => 'Marketing motion graphics' ),
+			),
+		),
+		// AEON's own campaign banners, one per ad platform — not from the deck.
+		'marketing' => array(
+			'ratio' => '16 / 9',
+			'cols'  => 2,
+			'shots' => array(
+				array( 'google.jpg',   'ar' => 'حملات جوجل المدفوعة وتحسين محركات البحث', 'en' => 'Google Ads campaigns & SEO' ),
+				array( 'facebook.jpg', 'ar' => 'حملات فيسبوك وإنستجرام الإعلانية',        'en' => 'Facebook & Instagram ad campaigns' ),
+				array( 'tiktok.jpg',   'ar' => 'حملات تيك توك الإعلانية',                 'en' => 'TikTok ad campaigns' ),
+				array( 'snapchat.jpg', 'ar' => 'حملات سناب شات الإعلانية',                'en' => 'Snapchat ad campaigns' ),
+			),
+		),
+		'social' => array(
+			'ratio' => '4 / 5',
+			'cols'  => 4,
+			'shots' => array(
+				array( 'travel.jpg',     'ar' => 'محتوى حسابات السياحة',   'en' => 'Travel account content' ),
+				array( 'coffee.jpg',     'ar' => 'محتوى حسابات القهوة',    'en' => 'Coffee account content' ),
+				array( 'delivery.jpg',   'ar' => 'محتوى شركات التوصيل',    'en' => 'Delivery account content' ),
+				array( 'restaurant.jpg', 'ar' => 'محتوى حسابات المطاعم',   'en' => 'Restaurant account content' ),
+			),
+		),
+		'web' => array(
+			'ratio' => '16 / 10',
+			'cols'  => 2,
+			'shots' => array(
+				array( 'devices.jpg', 'ar' => 'موقع متجاوب على كل الأجهزة', 'en' => 'A responsive site on every device' ),
+				array( 'laptop.jpg',  'ar' => 'واجهة الصفحة الرئيسية',      'en' => 'Home page interface' ),
+			),
+		),
+		'analytics' => array(
+			'ratio' => '2 / 3',
+			'cols'  => 4,
+			'shots' => array(
+				array( 'insights.jpg', 'ar' => 'تقرير أداء حملة إعلانية', 'en' => 'Campaign performance report' ),
+			),
+		),
+	);
+
+	if ( ! isset( $g[ $slug ] ) ) {
+		return array( 'ratio' => '4 / 5', 'cols' => 4, 'shots' => array() );
+	}
+
+	$lang  = aeon_lang();
+	$shots = array();
+	foreach ( $g[ $slug ]['shots'] as $shot ) {
+		$shots[] = array(
+			'file' => 'services/' . $slug . '/' . $shot[0],
+			'alt'  => isset( $shot[ $lang ] ) ? $shot[ $lang ] : $shot['en'],
+		);
+	}
+
+	return array(
+		'ratio' => $g[ $slug ]['ratio'],
+		'cols'  => $g[ $slug ]['cols'],
+		'shots' => $shots,
+	);
+}
+
+/**
  * Display-ready services list (dashboard terms first, else brand defaults),
  * each with a stable slug for deep-linking to its detail block.
  *

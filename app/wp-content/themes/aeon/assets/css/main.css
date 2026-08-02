@@ -1083,18 +1083,39 @@ body.welcome-lock { overflow: hidden; }
 .svc-detail__list li { display: flex; align-items: flex-start; gap: 10px; font-size: .98rem; color: var(--ink-2); line-height: 1.5; }
 .svc-detail__list li .aeon-icon { width: 20px; height: 20px; flex-shrink: 0; margin-block-start: 1px; color: var(--violet); background: var(--surface-2); border-radius: 50%; padding: 3px; stroke-width: 2.6; }
 
+/* Work samples strip — the profile-deck crops for services that have a chapter
+   in the deck. Column count and tile ratio come from aeon_service_gallery(),
+   because the deck mixes landscape photography with 4:5 boards and 9:16 reels. */
+.svc-work { margin-block-start: clamp(30px, 4vw, 46px); }
+.svc-work__head { margin-block-end: 16px; }
+.svc-work__grid { display: grid; grid-template-columns: repeat(var(--svc-shot-cols, 4), 1fr); gap: clamp(10px, 1.4vw, 18px); }
+.svc-work__shot {
+	margin: 0; border-radius: var(--radius); overflow: hidden;
+	background: var(--surface-2); border: 1px solid var(--line); box-shadow: var(--shadow-sm);
+}
+.svc-work__shot img {
+	display: block; width: 100%; height: auto; aspect-ratio: var(--svc-shot-ratio, 4 / 5);
+	object-fit: cover; transition: transform .5s var(--ease);
+}
+.svc-work__shot:hover img { transform: scale(1.05); }
+
 @media (max-width: 860px) {
 	.svc-detail__inner { grid-template-columns: 1fr; gap: 28px; }
+	/* repeat() takes a literal integer, so the per-service column count cannot be
+	   clamped here — fall back to auto-fit, which lands on 2–3 tiles at this width. */
+	.svc-work__grid { grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); }
 	.svc-detail--rev .svc-detail__visual { order: 0; }
 	/* A fixed height rather than a ratio + max-height: the 16/9 ratio could not
 	   be honoured under the cap, so the box shrank below the column width and
 	   sat flush against the inline-end edge — visibly out of line with the copy
-	   beneath it. Nothing here is a photo, so a plain height is safe. */
-	.svc-detail__visual { aspect-ratio: auto; height: clamp(170px, 26vw, 230px); }
+	   beneath it. Nothing here is a photo, so a plain height is safe.
+	   It holds only a number and an icon, so it stays a slim banner on phones
+	   instead of the deep block a photo would need. */
+	.svc-detail__visual { aspect-ratio: auto; height: clamp(84px, 16vw, 150px); }
 	.svc-detail__list { grid-template-columns: 1fr; }
-	.svc-detail__icon { width: 68px; height: 68px; border-radius: 18px; }
-	.svc-detail__icon .aeon-duo { width: 38px; height: 38px; }
-	.svc-detail__icon .aeon-icon { width: 34px; height: 34px; }
+	.svc-detail__icon { width: 52px; height: 52px; border-radius: 15px; }
+	.svc-detail__icon .aeon-duo { width: 28px; height: 28px; }
+	.svc-detail__icon .aeon-icon { width: 26px; height: 26px; }
 }
 
 /* ======================================================================
@@ -1592,16 +1613,22 @@ a.branch__link:hover { color: var(--violet); transform: translateY(-3px); }
 	.pagination .page-numbers { min-width: 38px; height: 38px; border-radius: 10px; }
 
 	/* --- Service detail blocks --- */
-	.svc-detail { padding-block: 30px; scroll-margin-top: 76px; }
-	.svc-detail__inner { gap: 22px; }
-	.svc-detail__num { font-size: 2.8rem; }
-	.svc-detail__intro { font-size: .96rem; line-height: 1.7; margin-block: 10px 18px; }
-	.svc-detail__subhead { font-size: .94rem; margin-block: 6px 10px; }
-	.svc-detail__chips { gap: 8px; margin-block-end: 18px; }
+	/* Eight of these stack on one page, so the vertical rhythm is tightened
+	   across the board rather than only on the gradient banner. */
+	.svc-detail { padding-block: 22px; scroll-margin-top: 76px; }
+	.svc-detail__inner { gap: 16px; }
+	.svc-detail__num { font-size: 2.1rem; }
+	.svc-detail__intro { font-size: .96rem; line-height: 1.65; margin-block: 8px 14px; }
+	.svc-detail__subhead { font-size: .94rem; margin-block: 4px 8px; }
+	.svc-detail__chips { gap: 8px; margin-block-end: 14px; }
 	.svc-detail__chips li { padding: 6px 12px; font-size: .82rem; }
-	.svc-detail__list { gap: 9px; margin-block-end: 22px; }
+	.svc-detail__list { gap: 8px; margin-block-end: 18px; }
 	.svc-detail__list li { font-size: .9rem; }
 	.svc-detail__list li .aeon-icon { width: 18px; height: 18px; }
+	.svc-work { margin-block-start: 18px; }
+	.svc-work__head { margin-block-end: 10px; }
+	/* Columns are left to the auto-fit rule above so portrait reels stay small. */
+	.svc-work__grid { gap: 10px; }
 
 	/* --- Showcase --- */
 	.showcase__filters { gap: 8px; margin-block-end: 22px; }
@@ -1682,6 +1709,23 @@ a.branch__link:hover { color: var(--violet); transform: translateY(-3px); }
 	/* Grid items stretch by default — the pill must keep its own width. */
 	.service-card__cta { justify-self: start; margin-block-start: 11px; }
 	.service-card__more { justify-self: start; }
+
+	/* The gradient banner carries a number and an icon and nothing else, so on a
+	   phone it earns only the height those two need — and no longer the full
+	   column width either. Centred rather than edge-aligned: the contents are
+	   symmetrical, so a narrow box hugging one gutter would read as clipped.
+	   A shallower band also wants a smaller corner radius — 22px on an 84px box
+	   reads as a pill, not a card. */
+	.svc-detail { padding-block: 18px; }
+	.svc-detail__inner { gap: 14px; }
+	.svc-detail__visual {
+		height: 84px; inline-size: min(74%, 320px); justify-self: center;
+		border-radius: var(--radius);
+	}
+	.svc-detail__num { font-size: 1.8rem; inset-inline-end: 6%; }
+	.svc-detail__icon { width: 44px; height: 44px; border-radius: 13px; }
+	.svc-detail__icon .aeon-duo { width: 24px; height: 24px; }
+	.svc-detail__icon .aeon-icon { width: 22px; height: 22px; }
 
 	/* Anything under 16px makes iOS zoom the viewport on focus and never zoom
 	   back. Height still drops, via the tighter padding and line-height. */

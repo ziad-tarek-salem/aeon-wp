@@ -148,6 +148,7 @@ function aeon_strings() {
 		'svc_detail_kicker' => array( 'ar' => 'خدمة', 'en' => 'Service' ),
 		'svc_includes_t'    => array( 'ar' => 'ما تشمله الخدمة', 'en' => "What's Included" ),
 		'svc_highlights_t'  => array( 'ar' => 'أبرز المميزات', 'en' => 'Key Highlights' ),
+		'svc_work_t'        => array( 'ar' => 'من أعمالنا', 'en' => 'Selected Work' ),
 		'svc_cta'           => array( 'ar' => 'اطلب هذه الخدمة', 'en' => 'Request This Service' ),
 		'svc_back'          => array( 'ar' => 'كل الخدمات', 'en' => 'All Services' ),
 
