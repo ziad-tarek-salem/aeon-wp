@@ -103,9 +103,12 @@ $aeon_numbers = aeon_phone_numbers();
 </footer>
 
 <?php
-// Greeting dialog — the site's only popup, shown automatically on every page
-// load. Nothing opens it on click.
-get_template_part( 'template-parts/components/welcome-popup' );
+// Greeting dialog — the site's only popup, shown automatically on the home page
+// and nowhere else, so inner pages (Services and the rest) open unobstructed.
+// Nothing opens it on click.
+if ( is_front_page() ) {
+	get_template_part( 'template-parts/components/welcome-popup' );
+}
 
 // Number is managed from the dashboard (محتوى الموقع → زر الواتساب). The button
 // only renders once a number is configured.

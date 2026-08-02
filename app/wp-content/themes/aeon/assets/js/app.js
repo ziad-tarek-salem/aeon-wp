@@ -62,10 +62,13 @@
 	}
 
 	/* ---------- Welcome popup ---------- */
-	// The site's only popup: logo and one button, opened by itself on every page
-	// load — no sessionStorage, no cookie, nothing remembered between views — so
-	// a refresh always brings it back. Nothing opens it on click; the floating
-	// WhatsApp button is a plain link that goes straight to the chat.
+	// The site's only popup: logo and one button, opened by itself on every home
+	// page load — no sessionStorage, no cookie, nothing remembered between views
+	// — so a refresh always brings it back. Nothing opens it on click; the
+	// floating WhatsApp button is a plain link that goes straight to the chat.
+	//
+	// Inner pages never print the markup (footer.php gates it on is_front_page),
+	// so this simply finds no modal there and returns.
 	//
 	// Its button carries the same bare wa.me href as the floating one and is left
 	// untouched by JS, so both land on WhatsApp's own chat page for the number.

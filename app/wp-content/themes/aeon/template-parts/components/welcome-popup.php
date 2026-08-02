@@ -2,10 +2,13 @@
 /**
  * Welcome popup.
  *
- * A greeting dialog that shows itself on every page load and carries a single
+ * A greeting dialog that shows itself on the home page and carries a single
  * message: talk to us on WhatsApp. Deliberately holds nothing but the lockup
  * and the button — no headline, no blurb — so the call to action is the only
  * thing to read.
+ *
+ * Home only: footer.php renders this behind an is_front_page() check, so it
+ * never greets someone who is already deeper in the site.
  *
  * The only dialog on the site: nothing opens it on click. The floating button
  * in footer.php is a plain link to the same bare wa.me URL this button uses, so
