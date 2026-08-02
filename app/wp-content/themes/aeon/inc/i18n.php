@@ -150,6 +150,9 @@ function aeon_strings() {
 		'svc_highlights_t'  => array( 'ar' => 'أبرز المميزات', 'en' => 'Key Highlights' ),
 		'svc_work_t'        => array( 'ar' => 'من أعمالنا', 'en' => 'Selected Work' ),
 		'svc_cta'           => array( 'ar' => 'اطلب هذه الخدمة', 'en' => 'Request This Service' ),
+		// Pre-filled WhatsApp message behind svc_cta. %s is the service name, so
+		// the chat opens already saying which one the visitor was reading.
+		'svc_wa_msg'        => array( 'ar' => 'أرغب في الاستفسار عن خدمة %s.', 'en' => 'I would like to inquire about the %s service.' ),
 		'svc_back'          => array( 'ar' => 'كل الخدمات', 'en' => 'All Services' ),
 
 		'svc_photo_t'       => array( 'ar' => 'التصوير الاحترافي', 'en' => 'Professional Photography' ),

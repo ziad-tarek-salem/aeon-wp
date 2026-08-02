@@ -177,6 +177,32 @@ function aeon_contact_url() {
 }
 
 /**
+ * Where a service's "request this service" button points: WhatsApp, with the
+ * chat pre-filled naming that service.
+ *
+ * The visitor lands in the conversation with the first message already typed,
+ * so the manager sees which service prompted it without having to ask. The text
+ * follows the active language, same as the button label.
+ *
+ * Falls back to the ordinary contact destination if no number is configured, so
+ * the button is never dead.
+ *
+ * @param string $name Service name, exactly as shown on the page.
+ * @return string
+ */
+function aeon_service_whatsapp_url( $name ) {
+	$number = aeon_whatsapp_number();
+
+	if ( ! $number ) {
+		return aeon_contact_url();
+	}
+
+	$message = sprintf( aeon_t( 'svc_wa_msg' ), $name );
+
+	return 'https://wa.me/' . $number . '?text=' . rawurlencode( $message );
+}
+
+/**
  * Menu paths that have no homepage section to scroll to, so their items are
  * dropped from the menus entirely.
  *

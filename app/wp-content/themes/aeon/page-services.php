@@ -59,7 +59,9 @@ $grads     = array( 'a', 'b', 'c' );
 						</ul>
 					<?php endif; ?>
 
-					<a class="btn btn--primary" href="<?php echo esc_url( aeon_contact_url() ); ?>">
+					<?php // Straight into WhatsApp with this service already named in the message. ?>
+					<a class="btn btn--primary" href="<?php echo esc_url( aeon_service_whatsapp_url( $svc['name'] ) ); ?>"
+						target="_blank" rel="noopener">
 						<span><?php aeon_e( 'svc_cta' ); ?></span>
 						<?php echo aeon_icon( 'arrow' ); ?>
 					</a>
