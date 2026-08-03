@@ -31,6 +31,21 @@ function aeon_icon_choices() {
 }
 
 /**
+ * Split a `lines` field's stored value into its items.
+ *
+ * List fields (service highlights, "what's included") are stored as one item per
+ * line in a single meta string, because term meta is flat text and the content
+ * sync compares meta as strings.
+ *
+ * @param mixed $value Stored meta value.
+ * @return string[] Trimmed, non-empty items in order.
+ */
+function aeon_lines_to_array( $value ) {
+	$items = preg_split( '/\r\n|\r|\n/', (string) $value );
+	return array_values( array_filter( array_map( 'trim', (array) $items ), 'strlen' ) );
+}
+
+/**
  * Guard a post meta-box save: verify nonce, skip autosave, check capability.
  *
  * @param int    $post_id Post being saved.

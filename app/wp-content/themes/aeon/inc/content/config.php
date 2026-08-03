@@ -72,11 +72,35 @@ function aeon_sections_config() {
 				'back_to_items' => '→ كل الخدمات',
 			),
 			'name_label'    => 'اسم الخدمة',
-			'name_hint'     => 'يظهر كعنوان البطاقة.',
+			'name_hint'     => 'يظهر كعنوان البطاقة في الصفحة الرئيسية وكعنوان القسم في صفحة الخدمات.',
 			'show_desc'     => true,
-			'desc_label'    => 'الوصف',
-			'desc_hint'     => 'وصف مختصر يظهر أسفل العنوان داخل البطاقة.',
-			'fields'        => aeon_icon_fields( 'اختر أيقونة تمثّل الخدمة. تُستخدم ما لم ترفع أيقونة مخصّصة بالأسفل.' ),
+			'desc_label'    => 'الوصف المختصر',
+			'desc_hint'     => 'سطر أو سطران يظهران أسفل العنوان في بطاقة الصفحة الرئيسية.',
+			// The three fields below fill this service's block on the Services
+			// page; the name, description and icon above drive its home-page card.
+			'fields'        => array_merge(
+				array(
+					'intro'    => array(
+						'type'  => 'textarea',
+						'label' => 'النص التعريفي (صفحة الخدمات)',
+						'hint'  => 'الفقرة الطويلة التي تشرح الخدمة في صفحة الخدمات. اتركها فارغة ليُستخدم الوصف المختصر بدلاً منها.',
+						'rows'  => 6,
+					),
+					'features' => array(
+						'type'      => 'lines',
+						'label'     => 'أبرز المميزات (صفحة الخدمات)',
+						'hint'      => 'نقاط قصيرة تظهر بجانب النص التعريفي، كل نقطة في سطر مستقل. الترتيب هنا هو ترتيب ظهورها.',
+						'add_label' => 'إضافة ميزة',
+					),
+					'includes' => array(
+						'type'      => 'lines',
+						'label'     => 'ما تشمله الخدمة (صفحة الخدمات)',
+						'hint'      => 'قائمة ما تشمله الخدمة، كل عنصر في سطر مستقل.',
+						'add_label' => 'إضافة عنصر',
+					),
+				),
+				aeon_icon_fields( 'اختر أيقونة تمثّل الخدمة. تُستخدم ما لم ترفع أيقونة مخصّصة بالأسفل.' )
+			),
 		),
 
 		'aeon_expertise' => array(

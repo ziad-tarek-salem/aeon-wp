@@ -39,7 +39,7 @@ $aeon_numbers = aeon_phone_numbers();
 					<?php // One-pager — see aeon_single_page_mode() in inc/template-functions.php. ?>
 					<li><a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php aeon_e( 'nav_home' ); ?></a></li>
 					<li><a href="<?php echo esc_url( home_url( '/#about' ) ); ?>"><?php aeon_e( 'nav_about' ); ?></a></li>
-					<li><a href="<?php echo esc_url( home_url( '/services/' ) ); ?>"><?php aeon_e( 'nav_services' ); ?></a></li>
+					<li><a href="<?php echo esc_url( aeon_services_url() ); ?>"><?php aeon_e( 'nav_services' ); ?></a></li>
 					<li><a href="<?php echo esc_url( home_url( '/#contact' ) ); ?>"><?php aeon_e( 'nav_contact' ); ?></a></li>
 				</ul>
 			</div>

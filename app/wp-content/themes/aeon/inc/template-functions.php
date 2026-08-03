@@ -159,8 +159,12 @@ function aeon_single_page_mode() {
  */
 function aeon_single_page_anchors() {
 	return (array) apply_filters( 'aeon_single_page_anchors', array(
-		'about'   => '#about',
-		'contact' => '#contact',
+		'about'    => '#about',
+		// The Services page keeps its route, but nothing navigates to it wholesale
+		// any more: a general "our services" link scrolls to the homepage section,
+		// and only a specific service opens the page at its own detail block.
+		'services' => '#services',
+		'contact'  => '#contact',
 	) );
 }
 
@@ -174,6 +178,20 @@ function aeon_single_page_anchors() {
  */
 function aeon_contact_url() {
 	return aeon_single_page_mode() ? home_url( '/#contact' ) : home_url( '/contact/' );
+}
+
+/**
+ * Where a general "our services" link points.
+ *
+ * The overview lives on the homepage, so browsing the range is a scroll rather
+ * than a page load. The Services page is for one service at a time — reached
+ * through a card's "view details", which links to that service's own block
+ * (/services/#service-slug) and so is deliberately not routed through here.
+ *
+ * @return string
+ */
+function aeon_services_url() {
+	return aeon_single_page_mode() ? home_url( '/#services' ) : home_url( '/services/' );
 }
 
 /**
@@ -278,6 +296,154 @@ function aeon_single_page_menu_items( $items ) {
 add_filter( 'wp_nav_menu_objects', 'aeon_single_page_menu_items', 20 );
 
 /**
+ * Homepage sections the one-page nav always offers, in the order they appear on
+ * the page (see front-page.php).
+ *
+ * The assigned menu only knows about pages, so sections with no page behind them
+ * — events, the client wall, the office — could never appear in it. They are
+ * injected from here instead, which also keeps the nav complete on installs
+ * where the client has trimmed the dashboard menu.
+ *
+ * @return array<string,string> Anchor => aeon_strings() key for the label.
+ */
+function aeon_single_page_sections() {
+	return (array) apply_filters( 'aeon_single_page_sections', array(
+		'#home'     => 'nav_home',
+		'#services' => 'nav_services',
+		'#about'    => 'nav_about',
+		'#events'   => 'nav_events',
+		'#clients'  => 'nav_clients',
+		'#office'   => 'nav_office',
+		'#contact'  => 'nav_contact',
+	) );
+}
+
+/**
+ * Where a nav item sits in homepage order.
+ *
+ * Anchors rank by their position in aeon_single_page_sections(); the steps of ten
+ * leave room for any page that still keeps a route of its own to slot in just
+ * after Home rather than falling to the end.
+ *
+ * @param stdClass $item Menu item.
+ * @return int
+ */
+function aeon_single_page_rank( $item ) {
+	$url  = empty( $item->url ) ? '' : $item->url;
+	$hash = (string) wp_parse_url( $url, PHP_URL_FRAGMENT );
+
+	if ( '' !== $hash ) {
+		$pos = array_search( '#' . $hash, array_keys( aeon_single_page_sections() ), true );
+		return false === $pos ? 999 : 10 + ( $pos * 10 );
+	}
+
+	return 15;
+}
+
+/**
+ * A nav item for a homepage section.
+ *
+ * Built by hand rather than through wp_setup_nav_menu_item(), which expects a
+ * real post behind the item — these have none, so every property the nav walker
+ * reads is set here explicitly.
+ *
+ * @param string $url   Absolute URL, anchor included.
+ * @param string $title Label.
+ * @return stdClass
+ */
+function aeon_section_menu_item( $url, $title ) {
+	$item = new stdClass();
+
+	$item->ID                    = 0;
+	$item->db_id                 = 0;
+	$item->menu_item_parent      = 0;
+	$item->object_id             = 0;
+	$item->object                = 'custom';
+	$item->type                  = 'custom';
+	$item->type_label            = 'Custom Link';
+	$item->title                 = $title;
+	$item->url                   = $url;
+	$item->target                = '';
+	$item->attr_title            = '';
+	$item->description           = '';
+	$item->xfn                   = '';
+	$item->classes               = array( '', 'menu-item', 'menu-item-type-custom', 'menu-item-object-custom' );
+	$item->post_type             = 'nav_menu_item';
+	$item->post_parent           = 0;
+	$item->menu_order            = 0;
+	$item->current               = false;
+	$item->current_item_ancestor = false;
+	$item->current_item_parent   = false;
+
+	return $item;
+}
+
+/**
+ * Complete the one-page nav, then put it in homepage order.
+ *
+ * Runs after aeon_single_page_menu_items() has turned the page entries into
+ * anchors, so what is already covered can be read straight off the URLs and no
+ * section ends up listed twice.
+ *
+ * @param array    $items Menu item objects.
+ * @param stdClass $args  wp_nav_menu args.
+ * @return array
+ */
+function aeon_single_page_add_sections( $items, $args ) {
+	if ( ! aeon_single_page_mode() ) {
+		return $items;
+	}
+	if ( empty( $args->theme_location ) || 'primary' !== $args->theme_location ) {
+		return $items;
+	}
+
+	$home    = home_url( '/' );
+	$present = array();
+
+	foreach ( $items as $item ) {
+		if ( empty( $item->url ) ) {
+			continue;
+		}
+
+		// The dashboard's "Home" entry points at the site root, which would
+		// reload the page. Give it the hero's anchor so it scrolls like the rest.
+		if ( untrailingslashit( $item->url ) === untrailingslashit( $home ) ) {
+			$item->url = $home . '#home';
+		}
+
+		$hash = (string) wp_parse_url( $item->url, PHP_URL_FRAGMENT );
+		if ( '' !== $hash ) {
+			$present[ '#' . $hash ] = true;
+		}
+	}
+
+	foreach ( aeon_single_page_sections() as $anchor => $key ) {
+		if ( ! isset( $present[ $anchor ] ) ) {
+			$items[] = aeon_section_menu_item( $home . $anchor, aeon_t( $key ) );
+		}
+	}
+
+	// Decorated sort: rank first, original position as the tiebreak, so items
+	// the ranking treats alike keep the order the dashboard gave them.
+	$decorated = array();
+	foreach ( array_values( $items ) as $i => $item ) {
+		$decorated[] = array( aeon_single_page_rank( $item ), $i, $item );
+	}
+	usort( $decorated, function ( $a, $b ) {
+		return $a[0] === $b[0] ? $a[1] - $b[1] : $a[0] - $b[0];
+	} );
+
+	$sorted = array();
+	foreach ( $decorated as $row ) {
+		$row[2]->menu_order = count( $sorted ) + 1;
+		$sorted[]           = $row[2];
+	}
+
+	return $sorted;
+}
+add_filter( 'wp_nav_menu_objects', 'aeon_single_page_add_sections', 21, 2 );
+
+/**
  * Pages that keep a route of their own, by slug. Everything else is a homepage
  * section.
  *
@@ -358,7 +524,20 @@ function aeon_why_items() {
  * @return string Slug, or '' when unknown.
  */
 function aeon_service_slug( $name ) {
-	$map = array(
+	$map = aeon_service_slug_map();
+	return isset( $map[ $name ] ) ? $map[ $name ] : '';
+}
+
+/**
+ * The canonical service name => slug map, in page order.
+ *
+ * Flipped, it also gives the default Arabic name for a slug — which is how the
+ * gallery screens label a service the client has renamed off the map.
+ *
+ * @return array<string,string>
+ */
+function aeon_service_slug_map() {
+	return array(
 		'التصوير الاحترافي'       => 'photo',
 		'التصميم الجرافيكي'       => 'design',
 		'المونتاج وصناعة الفيديو' => 'video',
@@ -368,175 +547,62 @@ function aeon_service_slug( $name ) {
 		'تصميم وتطوير المواقع'    => 'web',
 		'تحليل الأداء والتقارير'  => 'analytics',
 	);
-	return isset( $map[ $name ] ) ? $map[ $name ] : '';
 }
 
 /**
- * Three short feature bullets per service, in the active language.
- * Sourced from the company profile.
+ * Work samples for a service — entirely from the media library.
+ *
+ * The media a service starts with is published into the library by the content
+ * sync (see aeon_content_sync_service_galleries()) rather than rendered from the
+ * theme folder, so every item on the page is an attachment the client can
+ * replace, reorder or delete. A service with nothing picked renders no strip.
+ *
+ * Most services hold stills. The video service holds uploaded reels instead, and
+ * its shots carry `poster` and `mime` so the template can render a player; see
+ * aeon_service_gallery_kind().
+ *
+ * Images are served at `full` size: these files are the ones the page has always
+ * shown, and asking for a generated size would swap four of them for resized
+ * copies.
  *
  * @param string $slug Service slug (see aeon_service_slug()).
- * @return string[] Feature lines, or an empty array.
- */
-function aeon_service_features( $slug ) {
-	$f = array(
-		'photo' => array(
-			'ar' => array( 'إضاءة احترافية تُبرز تفاصيل منتجك', 'ألوان جذّابة تعزّز الجاذبية والشهية', 'جودة سينمائية وعرض مثالي' ),
-			'en' => array( 'Professional lighting that reveals detail', 'Vibrant colors that boost appeal', 'Cinematic quality & perfect presentation' ),
-		),
-		'design' => array(
-			'ar' => array( 'هوية بصرية متكاملة ومتّسقة', 'تصاميم تترك انطباعاً دائماً', 'اتساق كامل عبر كل المنصات' ),
-			'en' => array( 'A complete, consistent visual identity', 'Designs that leave a lasting impression', 'Full consistency across every platform' ),
-		),
-		'video' => array(
-			'ar' => array( 'محتوى ريلز يستهدف جمهورك بدقة', 'نتائج قابلة للقياس', 'نمو مستمر لعلامتك' ),
-			'en' => array( 'Reels content precisely targeting your audience', 'Measurable results', 'Sustained growth for your brand' ),
-		),
-		'marketing' => array(
-			'ar' => array( 'استهداف دقيق للجمهور المناسب', 'حملات على جميع المنصات', 'أعلى نسب وصول وتحويل' ),
-			'en' => array( 'Precise targeting of the right audience', 'Campaigns across every platform', 'The highest reach & conversion rates' ),
-		),
-		'social' => array(
-			'ar' => array( 'إدارة يومية احترافية لحساباتك', 'محتوى يصنع التفاعل', 'تفاعل حقيقي مع جمهورك' ),
-			'en' => array( 'Professional daily account management', 'Content that drives engagement', 'Genuine interaction with your audience' ),
-		),
-		'brand' => array(
-			'ar' => array( 'هوية قوية ومميزة', 'تُبرز علامتك بين المنافسين', 'حضور بصري لا يُنسى' ),
-			'en' => array( 'A strong, distinctive identity', 'Makes your brand stand out', 'An unforgettable visual presence' ),
-		),
-		'web' => array(
-			'ar' => array( 'متوافق مع جميع الأجهزة', 'سرعة عالية وأداء متميّز', 'أمان متقدّم وحماية للبيانات' ),
-			'en' => array( 'Compatible with all devices', 'High speed & outstanding performance', 'Advanced security & data protection' ),
-		),
-		'analytics' => array(
-			'ar' => array( 'تحليل دقيق للأداء', 'تقارير تفصيلية دورية', 'تحسين مستمر للنتائج' ),
-			'en' => array( 'Precise performance analysis', 'Detailed, regular reporting', 'Continuous improvement of results' ),
-		),
-	);
-	if ( ! isset( $f[ $slug ] ) ) {
-		return array();
-	}
-	$lang = aeon_lang();
-	return isset( $f[ $slug ][ $lang ] ) ? $f[ $slug ][ $lang ] : $f[ $slug ]['en'];
-}
-
-/**
- * Work samples for a service, drawn from the client's own material.
- *
- * The company profile deck devotes one chapter to each kind of work, so its
- * shots are traceable to a page: photography p11–17, reels p18–20 and motion
- * p21–22 (both are the video service), the social-media design boards p23–37,
- * the website mockups p10 and the campaign insights card p38. Two services are
- * sourced from outside the deck: photography also uses the client's own
- * full-resolution originals, and digital marketing uses AEON's four platform
- * campaign banners, which the deck has no chapter for.
- *
- * The design boards chapter is the deck's only source for both the graphic
- * design and the social media services, so it is split between them — no shot
- * is used twice. Brand identity has no source in any of the supplied material;
- * it returns an empty list and its section renders without a strip.
- *
- * Nothing here comes from the `حملاتي` campaign screenshots: those carry other
- * companies' account names, ad-account IDs, phone numbers and identifiable
- * people, so they are deliberately not shipped.
- *
- * @param string $slug Service slug (see aeon_service_slug()).
- * @return array{ratio:string,cols:int,shots:array<int,array{file:string,alt:string}>} Empty shots when unknown.
+ * @return array{kind:string,ratio:string,cols:int,shots:array<int,array{url:string,alt:string,id:int,poster:string,mime:string}>} Empty shots when nothing is set.
  */
 function aeon_service_gallery( $slug ) {
-	$g = array(
-		// Square tiles: five of these come from the client's own full-resolution
-		// originals (portrait) and three from the deck collages (landscape), so a
-		// 1:1 crop is the only ratio that treats both fairly.
-		'photo' => array(
-			'ratio' => '1 / 1',
-			'cols'  => 4,
-			'shots' => array(
-				array( 'burger.jpg',          'ar' => 'تصوير الأطعمة والوجبات',   'en' => 'Food & meal photography' ),
-				array( 'coffee-brew.jpg',     'ar' => 'تصوير محامص القهوة',       'en' => 'Coffee roastery photography' ),
-				array( 'perfume-labelle.jpg', 'ar' => 'تصوير العطور والمنتجات',   'en' => 'Perfume & product photography' ),
-				array( 'latte.jpg',           'ar' => 'تصوير مشروبات الكافيهات',  'en' => 'Café drinks photography' ),
-				array( 'baklava.jpg',         'ar' => 'تصوير الحلويات الشرقية',   'en' => 'Pastry & sweets photography' ),
-				array( 'milkshake.jpg',       'ar' => 'تصوير الحلويات والمشروبات', 'en' => 'Dessert & drinks photography' ),
-				array( 'juices.jpg',          'ar' => 'تصوير العصائر الطازجة',    'en' => 'Fresh juice photography' ),
-				array( 'grill-platter.jpg',   'ar' => 'تصوير أطباق المطاعم',      'en' => 'Restaurant dishes photography' ),
-			),
-		),
-		'design' => array(
-			'ratio' => '4 / 5',
-			'cols'  => 4,
-			'shots' => array(
-				array( 'business-setup.jpg', 'ar' => 'تصميمات إدارة المنشآت',   'en' => 'Business setup designs' ),
-				array( 'perfume-gift.jpg',   'ar' => 'تصميمات العطور والهدايا', 'en' => 'Perfume & gifting designs' ),
-				array( 'perfume-clove.jpg',  'ar' => 'تصميمات علامات العطور',   'en' => 'Perfume brand designs' ),
-				array( 'meat.jpg',           'ar' => 'تصميمات محلات اللحوم',    'en' => 'Butchery brand designs' ),
-			),
-		),
-		'video' => array(
-			'ratio' => '9 / 16',
-			'cols'  => 5,
-			'shots' => array(
-				array( 'reel-podcast.jpg',   'ar' => 'ريلز بودكاست وحوارات',   'en' => 'Podcast & interview reels' ),
-				array( 'reel-clinic.jpg',    'ar' => 'ريلز العيادات والتجميل', 'en' => 'Clinic & beauty reels' ),
-				array( 'reel-corporate.jpg', 'ar' => 'ريلز الشركات والعلامات', 'en' => 'Corporate & brand reels' ),
-				array( 'motion-dental.jpg',  'ar' => 'موشن جرافيك طبي',        'en' => 'Medical motion graphics' ),
-				array( 'motion-goals.jpg',   'ar' => 'موشن جرافيك تسويقي',     'en' => 'Marketing motion graphics' ),
-			),
-		),
-		// AEON's own campaign banners, one per ad platform — not from the deck.
-		'marketing' => array(
-			'ratio' => '16 / 9',
-			'cols'  => 2,
-			'shots' => array(
-				array( 'google.jpg',   'ar' => 'حملات جوجل المدفوعة وتحسين محركات البحث', 'en' => 'Google Ads campaigns & SEO' ),
-				array( 'facebook.jpg', 'ar' => 'حملات فيسبوك وإنستجرام الإعلانية',        'en' => 'Facebook & Instagram ad campaigns' ),
-				array( 'tiktok.jpg',   'ar' => 'حملات تيك توك الإعلانية',                 'en' => 'TikTok ad campaigns' ),
-				array( 'snapchat.jpg', 'ar' => 'حملات سناب شات الإعلانية',                'en' => 'Snapchat ad campaigns' ),
-			),
-		),
-		'social' => array(
-			'ratio' => '4 / 5',
-			'cols'  => 4,
-			'shots' => array(
-				array( 'travel.jpg',     'ar' => 'محتوى حسابات السياحة',   'en' => 'Travel account content' ),
-				array( 'coffee.jpg',     'ar' => 'محتوى حسابات القهوة',    'en' => 'Coffee account content' ),
-				array( 'delivery.jpg',   'ar' => 'محتوى شركات التوصيل',    'en' => 'Delivery account content' ),
-				array( 'restaurant.jpg', 'ar' => 'محتوى حسابات المطاعم',   'en' => 'Restaurant account content' ),
-			),
-		),
-		'web' => array(
-			'ratio' => '16 / 10',
-			'cols'  => 2,
-			'shots' => array(
-				array( 'devices.jpg', 'ar' => 'موقع متجاوب على كل الأجهزة', 'en' => 'A responsive site on every device' ),
-				array( 'laptop.jpg',  'ar' => 'واجهة الصفحة الرئيسية',      'en' => 'Home page interface' ),
-			),
-		),
-		'analytics' => array(
-			'ratio' => '2 / 3',
-			'cols'  => 4,
-			'shots' => array(
-				array( 'insights.jpg', 'ar' => 'تقرير أداء حملة إعلانية', 'en' => 'Campaign performance report' ),
-			),
-		),
-	);
-
-	if ( ! isset( $g[ $slug ] ) ) {
-		return array( 'ratio' => '4 / 5', 'cols' => 4, 'shots' => array() );
-	}
-
-	$lang  = aeon_lang();
+	$set   = aeon_service_gallery_settings( $slug );
+	$kind  = aeon_service_gallery_kind( $slug );
 	$shots = array();
-	foreach ( $g[ $slug ]['shots'] as $shot ) {
-		$shots[] = array(
-			'file' => 'services/' . $slug . '/' . $shot[0],
-			'alt'  => isset( $shot[ $lang ] ) ? $shot[ $lang ] : $shot['en'],
-		);
+
+	foreach ( $set['ids'] as $id ) {
+		$url = ( 'video' === $kind ) ? wp_get_attachment_url( $id ) : wp_get_attachment_image_url( $id, 'full' );
+		if ( ! $url ) {
+			continue; // Attachment deleted from the library since it was picked.
+		}
+
+		if ( 'video' === $kind ) {
+			// A reel is labelled by its library title, and shows its featured
+			// image — when one is set — as the frame before playback.
+			$shots[] = array(
+				'url'    => $url,
+				'alt'    => (string) get_the_title( $id ),
+				'id'     => (int) $id,
+				'poster' => (string) get_the_post_thumbnail_url( $id, 'large' ),
+				'mime'   => (string) get_post_mime_type( $id ),
+			);
+			continue;
+		}
+
+		$alt = (string) get_post_meta( $id, '_wp_attachment_image_alt', true );
+		if ( '' === $alt ) {
+			$alt = get_the_title( $id );
+		}
+		$shots[] = array( 'url' => $url, 'alt' => $alt, 'id' => (int) $id, 'poster' => '', 'mime' => '' );
 	}
 
 	return array(
-		'ratio' => $g[ $slug ]['ratio'],
-		'cols'  => $g[ $slug ]['cols'],
+		'kind'  => $kind,
+		'ratio' => $set['ratio'],
+		'cols'  => $set['cols'],
 		'shots' => $shots,
 	);
 }
@@ -549,7 +615,11 @@ function aeon_service_gallery( $slug ) {
  * dashboard (`icon_id` for an uploaded file, `icon_url` for a pasted link);
  * aeon_card_icon() decides which of the three wins at render time.
  *
- * @return array<int,array{name:string,desc:string,icon:string,icon_id:int,icon_url:string,slug:string}>
+ * `name`, `desc` and the icon fields render the home-page card; `intro`,
+ * `features` and `includes` render the service's block on the Services page.
+ * All of them are term fields on محتوى الموقع → الخدمات.
+ *
+ * @return array<int,array{name:string,desc:string,icon:string,icon_id:int,icon_url:string,slug:string,intro:string,features:string[],includes:string[]}>
  */
 function aeon_services_list() {
 	$out   = array();
@@ -564,9 +634,15 @@ function aeon_services_list() {
 				'icon_id'  => (int) get_term_meta( $t->term_id, '_aeon_iconfile', true ),
 				'icon_url' => (string) get_term_meta( $t->term_id, '_aeon_iconurl', true ),
 				'slug'     => aeon_service_slug( $t->name ),
+				'intro'    => (string) get_term_meta( $t->term_id, '_aeon_intro', true ),
+				'features' => aeon_lines_to_array( get_term_meta( $t->term_id, '_aeon_features', true ) ),
+				'includes' => aeon_lines_to_array( get_term_meta( $t->term_id, '_aeon_includes', true ) ),
 			);
 		}
 	} else {
+		// Only reached before the content sync has seeded the terms. The card
+		// fields have brand defaults; the Services page detail fields do not, and
+		// its template falls back to the short description.
 		$strings = aeon_strings();
 		foreach ( aeon_default_services() as $svc ) {
 			$ar    = isset( $strings[ $svc['title'] ]['ar'] ) ? $strings[ $svc['title'] ]['ar'] : '';
@@ -577,112 +653,13 @@ function aeon_services_list() {
 				'icon_id'  => 0,
 				'icon_url' => '',
 				'slug'     => aeon_service_slug( $ar ),
+				'intro'    => '',
+				'features' => array(),
+				'includes' => array(),
 			);
 		}
 	}
 	return $out;
-}
-
-/**
- * Full detail content for a service, in the active language: a long intro
- * paragraph and a "what's included" list. Sourced from the company profile.
- * Feature highlights come from aeon_service_features().
- *
- * @param string $slug Service slug (see aeon_service_slug()).
- * @return array{intro:string,includes:string[]} Empty strings/arrays when unknown.
- */
-function aeon_service_details( $slug ) {
-	$d = array(
-		'photo' => array(
-			'intro' => array(
-				'ar' => 'نلتقط علامتك التجارية في أبهى صورها. نقدّم تصويراً احترافياً للمنتجات والأطعمة والمنتجات التجارية بإضاءة مدروسة وألوان جذّابة وجودة سينمائية — فكل لقطة تحكي طعم الجودة وتُبرز تفاصيل منتجك بأفضل شكل يعكس هوية علامتك.',
-				'en' => 'We capture your brand at its very best. We deliver professional photography for products, food and commercial items with considered lighting, appealing colors and cinematic quality — every shot tells the taste of quality and showcases your product in the best light for your brand.',
-			),
-			'includes' => array(
-				'ar' => array( 'تصوير المنتجات والأطعمة', 'إضاءة استوديو احترافية', 'معالجة وتنقيح الصور (ريتاتش)', 'صور جاهزة للسوشيال ميديا والمتاجر', 'جلسات تصوير في الموقع أو الاستوديو' ),
-				'en' => array( 'Product & food photography', 'Professional studio lighting', 'Editing & retouching', 'Assets ready for social & storefronts', 'On-location or in-studio sessions' ),
-			),
-		),
-		'design' => array(
-			'intro' => array(
-				'ar' => 'نبني هوية بصرية متكاملة تترك انطباعاً دائماً. من الشعارات إلى تصاميم السوشيال ميديا والمطبوعات، نصمّم بأسلوب إبداعي متّسق يعبّر عن شخصية علامتك ويميّزها بصرياً عبر كل نقطة تواصل مع جمهورك.',
-				'en' => 'We build a complete visual identity that leaves a lasting impression. From logos to social media designs and print, we design with a consistent creative style that expresses your brand’s personality and sets it apart at every touchpoint.',
-			),
-			'includes' => array(
-				'ar' => array( 'تصميم الشعارات والهوية البصرية', 'تصاميم منشورات السوشيال ميديا', 'المطبوعات والإعلانات', 'أدلة استخدام العلامة (Brand Guidelines)', 'تصاميم مخصّصة لكل حملة ومناسبة' ),
-				'en' => array( 'Logo & visual identity design', 'Social media post designs', 'Print & advertising material', 'Brand guidelines', 'Custom designs for every campaign' ),
-			),
-		),
-		'video' => array(
-			'intro' => array(
-				'ar' => 'نحوّل أفكارك إلى قصص مؤثرة. ننتج ونمنتج فيديوهات ريلز احترافية تصنع الفارق لمحتواك — باستهداف دقيق ومحتوى يجذب الانتباه ويحقق نتائج قابلة للقياس ونمواً مستمراً لعلامتك.',
-				'en' => 'We turn your ideas into compelling stories. We produce and edit professional reels that set your content apart — with precise targeting and attention-grabbing content that delivers measurable results and sustained growth.',
-			),
-			'includes' => array(
-				'ar' => array( 'مونتاج فيديوهات ريلز وقصيرة', 'موشن جرافيك احترافي', 'إضافة المؤثرات والترجمة', 'تجهيز الفيديو لكل منصة', 'سرد بصري يخدم رسالتك' ),
-				'en' => array( 'Reels & short-video editing', 'Professional motion graphics', 'Effects & subtitles', 'Platform-ready delivery', 'Visual storytelling for your message' ),
-			),
-		),
-		'marketing' => array(
-			'intro' => array(
-				'ar' => 'نضع استراتيجيات ذكية مبنية على تحليل السوق والمنافسين لتحقيق وصول أكبر وتحوّلات أعلى. ندير حملاتك الإعلانية على جميع المنصات ونحسّن ظهورك في محرّكات البحث لتصل إلى الجمهور المناسب في الوقت المناسب.',
-				'en' => 'We craft smart strategies grounded in market and competitor analysis to achieve greater reach and higher conversions. We manage your ad campaigns across every platform and improve your search visibility to reach the right audience at the right time.',
-			),
-			'includes' => array(
-				'ar' => array( 'إدارة إعلانات جوجل ومنصات التواصل', 'تحسين محرّكات البحث (SEO)', 'استهداف دقيق للجمهور', 'تحليل المنافسين وخطة تسويق', 'تقارير أداء دورية' ),
-				'en' => array( 'Google & social ad management', 'Search engine optimization (SEO)', 'Precise audience targeting', 'Competitor analysis & marketing plan', 'Regular performance reports' ),
-			),
-		),
-		'social' => array(
-			'intro' => array(
-				'ar' => 'نبني حضورك الرقمي ونصنع تفاعلاً حقيقياً مع جمهورك. ندير حساباتك بشكل احترافي عبر خطة محتوى متكاملة تجمع بين التصميم والكتابة والنشر والتفاعل لتنمية مجتمع علامتك.',
-				'en' => 'We build your digital presence and create genuine engagement with your audience. We manage your accounts professionally through an integrated content plan that blends design, copywriting, publishing and community management to grow your brand’s community.',
-			),
-			'includes' => array(
-				'ar' => array( 'خطة محتوى شهرية', 'تصميم وكتابة المنشورات', 'جدولة ونشر يومي', 'إدارة التفاعل والرسائل', 'تقارير نمو وتفاعل' ),
-				'en' => array( 'Monthly content plan', 'Post design & copywriting', 'Daily scheduling & publishing', 'Engagement & message management', 'Growth & engagement reports' ),
-			),
-		),
-		'brand' => array(
-			'intro' => array(
-				'ar' => 'نخلق هوية قوية ومميّزة تجعل علامتك تبرز بين المنافسين. من اسم العلامة وشعارها إلى نظام الألوان والخطوط ونبرة الصوت، نبني حضوراً بصرياً متماسكاً لا يُنسى.',
-				'en' => 'We create a strong, distinctive identity that makes your brand stand out from competitors. From the brand name and logo to the color system, typography and tone of voice, we build a cohesive, unforgettable visual presence.',
-			),
-			'includes' => array(
-				'ar' => array( 'تصميم الشعار والهوية', 'نظام الألوان والخطوط', 'نبرة صوت العلامة', 'تطبيقات الهوية الرقمية والمطبوعة', 'دليل استخدام الهوية' ),
-				'en' => array( 'Logo & identity design', 'Color & typography system', 'Brand tone of voice', 'Digital & print applications', 'Brand usage guide' ),
-			),
-		),
-		'web' => array(
-			'intro' => array(
-				'ar' => 'نصمّم تجارب رقمية متكاملة تجمع بين جمالية الواجهات (UI) وسهولة الاستخدام (UX). نضمن لك موقعاً سريع الاستجابة متوافقاً مع كافة الأجهزة، ليكون مرآة تعكس هوية علامتك وتروي قصتها بأسلوب تقني مبتكر وسلس.',
-				'en' => 'We design integrated digital experiences that blend interface aesthetics (UI) with ease of use (UX). We guarantee a fast, responsive site compatible with every device — a mirror that reflects your brand identity and tells its story in an innovative, seamless technical style.',
-			),
-			'includes' => array(
-				'ar' => array( 'تصميم واجهات UI/UX', 'مواقع متجاوبة مع كل الأجهزة', 'المتاجر الإلكترونية', 'سرعة عالية وأمان متقدّم', 'تهيئة للظهور في البحث (SEO)' ),
-				'en' => array( 'UI/UX interface design', 'Responsive on every device', 'E-commerce stores', 'High speed & advanced security', 'Search-ready (SEO)' ),
-			),
-		),
-		'analytics' => array(
-			'intro' => array(
-				'ar' => 'نقيس ما يهم. نقدّم تحليلاً دقيقاً وتقارير تفصيلية دورية لأداء حملاتك وحساباتك، لنحوّل البيانات إلى قرارات تحسّن النتائج باستمرار وتضمن عائداً حقيقياً على استثمارك.',
-				'en' => 'We measure what matters. We provide precise analysis and regular, detailed reports on the performance of your campaigns and accounts — turning data into decisions that continuously improve results and ensure a real return on your investment.',
-			),
-			'includes' => array(
-				'ar' => array( 'تقارير أداء دورية', 'تحليل مؤشرات الأداء (KPIs)', 'متابعة التحويلات', 'رؤى وتوصيات للتحسين', 'لوحات متابعة واضحة' ),
-				'en' => array( 'Regular performance reports', 'KPI analysis', 'Conversion tracking', 'Insights & recommendations', 'Clear dashboards' ),
-			),
-		),
-	);
-	if ( ! isset( $d[ $slug ] ) ) {
-		return array( 'intro' => '', 'includes' => array() );
-	}
-	$lang = aeon_lang();
-	$row  = $d[ $slug ];
-	return array(
-		'intro'    => isset( $row['intro'][ $lang ] ) ? $row['intro'][ $lang ] : $row['intro']['en'],
-		'includes' => isset( $row['includes'][ $lang ] ) ? $row['includes'][ $lang ] : $row['includes']['en'],
-	);
 }
 
 /**

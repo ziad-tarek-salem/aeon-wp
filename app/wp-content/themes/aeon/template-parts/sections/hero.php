@@ -5,7 +5,7 @@
  * @package AEON
  */
 ?>
-<section class="hero" data-hero>
+<section class="hero" id="home" data-hero>
 	<div class="hero__bg" aria-hidden="true">
 		<span class="hero__orb hero__orb--1"></span>
 		<span class="hero__orb hero__orb--2"></span>
@@ -52,7 +52,7 @@
 				<span><?php aeon_e( 'hero_cta_primary' ); ?></span>
 				<?php echo aeon_icon( 'arrow' ); ?>
 			</a>
-			<a class="btn btn--ghost btn--lg" href="<?php echo esc_url( home_url( '/services/' ) ); ?>">
+			<a class="btn btn--ghost btn--lg" href="<?php echo esc_url( aeon_services_url() ); ?>">
 				<span><?php aeon_e( 'hero_cta_secondary' ); ?></span>
 			</a>
 		</div>

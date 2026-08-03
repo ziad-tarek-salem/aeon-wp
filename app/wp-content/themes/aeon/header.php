@@ -73,7 +73,7 @@
 </header>
 
 <div class="mobile-menu" data-mobile-menu aria-hidden="true">
-	<div class="mobile-menu__inner">
+	<div class="mobile-menu__inner" data-menu-panel>
 		<?php
 		wp_nav_menu( array(
 			'theme_location' => 'primary',
@@ -99,10 +99,18 @@ function aeon_default_menu( $args = array() ) {
 	// One-pager: Services keeps its own page, everything else is a homepage
 	// section. See aeon_single_page_mode() in inc/template-functions.php for how
 	// to restore the standalone /about/, /work/, /blog/ and /contact/ routes.
+	//
+	// Order mirrors the homepage flow in front-page.php, and every "#" entry
+	// matches a section id there — hero (#home), about, events, clients, office
+	// and contact. The hashes are what the JS binds to; they never reach the
+	// address bar, which stays on "/" (see initSectionLinks in assets/js/app.js).
 	$items = array(
-		'/'          => aeon_t( 'nav_home' ),
+		'/#home'     => aeon_t( 'nav_home' ),
+		'/#services' => aeon_t( 'nav_services' ),
 		'/#about'    => aeon_t( 'nav_about' ),
-		'/services/' => aeon_t( 'nav_services' ),
+		'/#events'   => aeon_t( 'nav_events' ),
+		'/#clients'  => aeon_t( 'nav_clients' ),
+		'/#office'   => aeon_t( 'nav_office' ),
 		'/#contact'  => aeon_t( 'nav_contact' ),
 	);
 	$class = isset( $args['menu_class'] ) ? $args['menu_class'] : 'site-nav__menu';

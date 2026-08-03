@@ -20,27 +20,98 @@
 		if (hasGSAP && window.ScrollTrigger) {
 			lenis.on('scroll', window.ScrollTrigger.update);
 		}
-		// Anchor links go through Lenis — both bare "#id" links and the one-page
-		// menu's full URLs ("https://site/#contact") when they point at a section
-		// of the page we are already on.
+	}
+
+	/* ---------- Section links ---------- */
+	/**
+	 * The one-page nav scrolls without ever writing to the address bar: whichever
+	 * section you jump to, the URL stays the plain page URL with no "#section"
+	 * fragment. The hrefs stay real URLs so the menu still works with JS off and
+	 * "open in new tab" still lands on the right section.
+	 *
+	 * Kept out of initSmoothScroll() on purpose — that one bails when Lenis is
+	 * missing or reduced motion is on, and the browser's own hash jump would then
+	 * put the fragment straight back into the URL.
+	 */
+	// --header-h is the theme's own figure for the bar, already used for the hero
+	// and page-banner offsets. Measuring the element instead would read its tall
+	// unscrolled height (76px) even though it has shrunk to ~64px by the time the
+	// scroll lands, leaving a visible gap above the section.
+	function sectionOffset() {
+		var raw = getComputedStyle(document.documentElement).getPropertyValue('--header-h');
+		var h = parseInt(raw, 10);
+		if (isNaN(h)) {
+			var header = $('[data-header]');
+			h = header ? header.offsetHeight : 64;
+		}
+		return -(h + 12);
+	}
+
+	function sectionTop(target) {
+		var top = window.scrollY || document.documentElement.scrollTop;
+		return Math.max(0, target.getBoundingClientRect().top + top + sectionOffset());
+	}
+
+	function scrollToSection(target) {
+		if (lenis) {
+			lenis.scrollTo(target, { offset: sectionOffset() });
+			return;
+		}
+		var y = sectionTop(target);
+		if (reduceMotion) window.scrollTo(0, y);
+		else window.scrollTo({ top: y, behavior: 'smooth' });
+	}
+
+	/**
+	 * Land on a section with no animation, for a hash arriving from another page.
+	 *
+	 * Lenis owns the scroll position whenever it is running, so the jump goes
+	 * through it; scrolling the window directly here would only be undone on its
+	 * next tick. The native branch matters under reduced motion, where there is no
+	 * Lenis and the browser's own fragment jump lands the section under the fixed
+	 * header — clearing the hash then leaves nothing to correct it.
+	 */
+	function jumpToSection(target) {
+		if (lenis) {
+			lenis.scrollTo(target, { offset: sectionOffset(), immediate: true });
+			return;
+		}
+		window.scrollTo(0, sectionTop(target));
+	}
+
+	function stripHash() {
+		if (!window.history || !history.replaceState) return;
+		history.replaceState(null, '', window.location.pathname + window.location.search);
+	}
+
+	function initSectionLinks() {
+		// Both bare "#id" links and the one-page menu's full URLs
+		// ("https://site/#contact") when they point at a section of the page we
+		// are already on.
 		$$('a[href*="#"]').forEach(function (a) {
 			var url;
 			try { url = new URL(a.href, window.location.href); } catch (err) { return; }
 			if (url.hash.length < 2) return;
 			if (url.host !== window.location.host || url.pathname !== window.location.pathname) return;
 			a.addEventListener('click', function (e) {
+				// Leave modified clicks to the browser so new-tab/new-window work.
+				if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
 				var target = document.getElementById(decodeURIComponent(url.hash.slice(1)));
 				if (!target) return;
 				e.preventDefault();
-				lenis.scrollTo(target, { offset: -80 });
-				if (window.history && history.replaceState) { history.replaceState(null, '', url.hash); }
+				scrollToSection(target);
 			});
 		});
-		// Honour a hash arriving from another page (e.g. /services/#service-web).
+
+		// A hash arriving from elsewhere (/services/#service-web, or the menu of
+		// another page) still lands on its section — then the fragment is cleared
+		// so the bar reads as a plain URL from the first moment.
 		if (window.location.hash.length > 1) {
 			var landing = document.getElementById(window.location.hash.slice(1));
 			if (landing) {
-				setTimeout(function () { lenis.scrollTo(landing, { offset: -80, immediate: true }); }, 60);
+				setTimeout(function () { jumpToSection(landing); stripHash(); }, 60);
+			} else {
+				stripHash();
 			}
 		}
 	}
@@ -62,10 +133,9 @@
 	}
 
 	/* ---------- Welcome popup ---------- */
-	// The site's only popup: logo and one button, opened by itself on every home
-	// page load — no sessionStorage, no cookie, nothing remembered between views
-	// — so a refresh always brings it back. Nothing opens it on click; the
-	// floating WhatsApp button is a plain link that goes straight to the chat.
+	// The site's only popup: logo and one button, opening by itself the first time
+	// the home page is reached. Nothing opens it on click; the floating WhatsApp
+	// button is a plain link that goes straight to the chat.
 	//
 	// Inner pages never print the markup (footer.php gates it on is_front_page),
 	// so this simply finds no modal there and returns.
@@ -77,9 +147,51 @@
 	// state instead of flashing in on top of first paint.
 	var WELCOME_DELAY = 300;
 
+	// Once per visit, not once per home page load: leaving for the Services page
+	// and coming back should not be greeted a second time. sessionStorage is what
+	// matches that — it survives navigation but dies with the tab, unlike
+	// localStorage, which would still be there weeks later.
+	//
+	// A refresh is the deliberate exception. Reloading is how someone asks for the
+	// page fresh, so the flag is dropped and the greeting returns; the Navigation
+	// Timing entry is what tells a reload apart from ordinary navigation. Back and
+	// forward count as navigation, so they stay quiet.
+	var WELCOME_SEEN = 'aeonWelcomeSeen';
+
+	function welcomeIsReload() {
+		try {
+			var entry = performance.getEntriesByType('navigation')[0];
+			if (entry && entry.type) return 'reload' === entry.type;
+			// Navigation Timing Level 1, for browsers without the entry above.
+			return !!(performance.navigation && 1 === performance.navigation.type);
+		} catch (err) {
+			return false;
+		}
+	}
+
+	function welcomeAlreadySeen() {
+		try {
+			if (welcomeIsReload()) {
+				sessionStorage.removeItem(WELCOME_SEEN);
+				return false;
+			}
+			return '1' === sessionStorage.getItem(WELCOME_SEEN);
+		} catch (err) {
+			// Storage blocked (private mode, cookies off). Greeting on every load is
+			// the friendlier failure of the two.
+			return false;
+		}
+	}
+
+	function markWelcomeSeen() {
+		try { sessionStorage.setItem(WELCOME_SEEN, '1'); } catch (err) {}
+	}
+
 	function initWelcome() {
 		var modal = $('[data-welcome-modal]');
 		if (!modal) return;
+		// Left as the markup authored it — hidden, and out of the a11y tree.
+		if (welcomeAlreadySeen()) return;
 		var card = $('.welcome-card', modal);
 		var link = $('[data-welcome-link]', modal);
 		if (!card || !link) return;
@@ -87,6 +199,7 @@
 		function isOpen() { return modal.classList.contains('is-open'); }
 
 		function open() {
+			markWelcomeSeen();
 			modal.hidden = false;
 			// Flush styles synchronously so the transition runs from the hidden
 			// state. A rAF callback would do the same, but it is throttled in
@@ -166,6 +279,11 @@
 			document.body.style.overflow = open ? 'hidden' : '';
 		});
 		$$('a', menu).forEach(function (a) { a.addEventListener('click', close); });
+		// Tap the scrim to dismiss. Guarded by closest() so taps that land inside
+		// the panel — including on its padding — don't bubble up as a close.
+		menu.addEventListener('click', function (e) {
+			if (!e.target.closest('[data-menu-panel]')) close();
+		});
 		document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
 	}
 
@@ -416,10 +534,27 @@
 		});
 	}
 
+	// Reel strip on the Services page: starting one reel stops whichever was
+	// already running, so a visitor clicking down the row never ends up with two
+	// soundtracks at once. Listening on the document (capture, since `play` does
+	// not bubble) covers every player without a listener each.
+	function initReels() {
+		var reels = $$('.svc-work__shot--video video');
+		if (!reels.length) { return; }
+
+		document.addEventListener('play', function (e) {
+			if (!e.target || 'VIDEO' !== e.target.tagName) { return; }
+			reels.forEach(function (other) {
+				if (other !== e.target && !other.paused) { other.pause(); }
+			});
+		}, true);
+	}
+
 	/* ---------- Boot ---------- */
 	function boot() {
 		if (hasGSAP && window.ScrollTrigger) { window.gsap.registerPlugin(window.ScrollTrigger); }
 		initSmoothScroll();
+		initSectionLinks();
 		initHeader();
 		initWelcome();
 		initMobileMenu();
@@ -429,6 +564,7 @@
 		initSwipers();
 		initWorkFilters();
 		initShowcase();
+		initReels();
 		initMagnetic();
 		initContactForm();
 	}

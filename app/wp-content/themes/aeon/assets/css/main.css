@@ -194,18 +194,57 @@ h1, h2, h3, h4 { line-height: 1.18; font-weight: 800; color: var(--ink); }
 .nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
 /* ---------- Mobile menu ---------- */
+/* The scrim dims the page and doubles as the tap-outside-to-close target; the
+   panel inside is top-aligned so it reads as a dropdown from the header rather
+   than a full-screen takeover. Centred + logical properties, so RTL mirrors
+   without an override. */
 .mobile-menu {
-	position: fixed; inset: 0; z-index: 890; background: rgba(255,255,255,.98);
-	backdrop-filter: blur(10px); transform: translateX(100%); transition: transform .5s var(--ease);
-	display: flex; align-items: center; justify-content: center; visibility: hidden;
+	position: fixed; inset: 0; z-index: 890;
+	background: rgba(20, 16, 31, .38); backdrop-filter: blur(5px);
+	display: flex; align-items: flex-start; justify-content: center;
+	padding: calc(var(--header-h) + 10px) 14px 24px;
+	opacity: 0; visibility: hidden;
+	/* Visibility is held until the fade finishes, otherwise the close animation
+	   is cut off the moment the class drops. */
+	transition: opacity .32s var(--ease), visibility 0s .32s;
 }
-.aeon-rtl .mobile-menu { transform: translateX(-100%); }
-.mobile-menu.is-open { transform: translateX(0); visibility: visible; }
-.mobile-menu__inner { display: flex; flex-direction: column; gap: 22px; text-align: center; padding: 32px; width: min(90%, 420px); }
-.mobile-menu__list { display: flex; flex-direction: column; gap: 18px; }
-.mobile-menu__list a { font-size: 1.5rem; font-weight: 700; }
-.mobile-menu__list a:hover { color: var(--violet); }
+.mobile-menu.is-open { opacity: 1; visibility: visible; transition: opacity .32s var(--ease); }
+
+.mobile-menu__inner {
+	display: flex; flex-direction: column; gap: 16px; text-align: center;
+	width: min(100%, 420px); max-height: 100%; overflow-y: auto;
+	padding: 8px 20px 20px;
+	background: var(--white); border: 1px solid var(--line);
+	border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+	opacity: 0; transform: translateY(-14px) scale(.97);
+	transition: opacity .28s var(--ease), transform .38s var(--ease);
+}
+.mobile-menu.is-open .mobile-menu__inner { opacity: 1; transform: none; }
+
+.mobile-menu__list { display: flex; flex-direction: column; }
+.mobile-menu__list li + li { border-block-start: 1px solid var(--line); }
+.mobile-menu__list a {
+	display: block; padding-block: 15px; font-size: 1.05rem; font-weight: 600;
+	color: var(--ink-2); transition: color .25s;
+}
+.mobile-menu__list a:hover, .mobile-menu__list .current-menu-item > a { color: var(--violet); }
+
+/* Rows settle in sequence after the panel lands. Six steps covers the menu; any
+   further rows simply share the last delay. */
+.mobile-menu__list li { opacity: 0; transform: translateY(8px); transition: opacity .3s var(--ease), transform .3s var(--ease); }
+.mobile-menu.is-open .mobile-menu__list li { opacity: 1; transform: none; }
+.mobile-menu.is-open .mobile-menu__list li { transition-delay: .22s; }
+.mobile-menu.is-open .mobile-menu__list li:nth-child(1) { transition-delay: .10s; }
+.mobile-menu.is-open .mobile-menu__list li:nth-child(2) { transition-delay: .13s; }
+.mobile-menu.is-open .mobile-menu__list li:nth-child(3) { transition-delay: .16s; }
+.mobile-menu.is-open .mobile-menu__list li:nth-child(4) { transition-delay: .19s; }
 .mobile-menu__lang { font-weight: 700; color: var(--violet); }
+
+/* The global reduce block zeroes durations but not delays, which would leave the
+   rows popping in one by one. */
+@media (prefers-reduced-motion: reduce) {
+	.mobile-menu.is-open .mobile-menu__list li { transition-delay: 0s; }
+}
 
 /* ---------- Progress bar ---------- */
 .aeon-progress { position: fixed; inset-block-start: 0; inset-inline-start: 0; width: 100%; height: 3px; z-index: 950; pointer-events: none; }
@@ -1050,38 +1089,44 @@ body.welcome-lock { overflow: hidden; }
 .service-card:hover .service-card__cta .aeon-icon { transform: translateX(4px); }
 .aeon-rtl .service-card:hover .service-card__cta .aeon-icon { transform: scaleX(-1) translateX(4px); }
 
-/* ---------- Service detail blocks (Services page) ---------- */
+/* ---------- Service detail blocks (Services page) ----------
+   Title spans the block; below it the narrative and the specs sit side by side.
+   No decorative panel: the work-samples strip underneath is the section's
+   imagery, so the copy gets the full row and the reading measure stays sane. */
 .svc-detail { padding-block: clamp(44px, 5vw, 72px); border-block-end: 1px solid var(--line); scroll-margin-top: 92px; }
 .svc-detail:last-child { border-block-end: 0; }
-.svc-detail__inner { display: grid; grid-template-columns: .82fr 1.18fr; gap: clamp(30px, 5vw, 66px); align-items: center; }
-.svc-detail--rev .svc-detail__visual { order: 2; }
-.svc-detail__visual {
-	position: relative; aspect-ratio: 4/3.4; border-radius: var(--radius-lg); overflow: hidden;
-	display: grid; place-items: center; box-shadow: var(--shadow-purple);
-}
-.svc-detail__visual--a { background: var(--grad-brand); }
-.svc-detail__visual--b { background: var(--grad-purple); }
-.svc-detail__visual--c { background: linear-gradient(135deg, #7E22CE 0%, #5B2A86 55%, #F36F21 130%); }
-.svc-detail__num {
-	position: absolute; inset-block-start: 6%; inset-inline-end: 8%;
-	font-family: var(--font-en); font-size: clamp(4rem, 9vw, 7rem); font-weight: 800;
-	color: rgba(255,255,255,.14); line-height: 1;
-}
-.svc-detail__icon { display: grid; place-items: center; width: 120px; height: 120px; border-radius: 30px; background: rgba(255,255,255,.14); color: #fff; backdrop-filter: blur(4px); }
-.svc-detail__icon .aeon-icon { width: 60px; height: 60px; }
-/* The detail hero sits on a brand gradient — light tones keep both tiers legible. */
-.svc-detail__icon .aeon-duo { width: 68px; height: 68px; --ico-a: #fff; --ico-b: #FFD2AE; }
-.svc-detail__intro { color: var(--muted); font-size: 1.1rem; line-height: 1.85; margin-block: 14px 26px; }
-.svc-detail__subhead { font-size: 1rem; font-weight: 800; color: var(--ink); margin-block: 8px 14px; }
-.svc-detail__chips { list-style: none; padding: 0; margin: 0 0 24px; display: flex; flex-wrap: wrap; gap: 10px; }
+/* Alternating tint is what separates eight stacked blocks now that they no
+   longer alternate a coloured tile. --surface over white is deliberately faint;
+   the 1px rule above carries the boundary where the tint alone is too subtle. */
+.svc-detail--alt { background: var(--surface); }
+.svc-detail__head { margin-block-end: clamp(20px, 2.6vw, 30px); }
+.svc-detail__inner { display: grid; grid-template-columns: 1fr 1.1fr; gap: clamp(28px, 4vw, 60px); align-items: start; }
+/* A dashboard-added service with no mapped specs: one measured column, not a
+   full-bleed line of text beside an empty track. */
+.svc-detail__inner--solo { grid-template-columns: minmax(0, 68ch); }
+.svc-detail__lead { display: flex; flex-direction: column; align-items: flex-start; }
+.svc-detail__intro { color: var(--muted); font-size: 1.08rem; line-height: 1.85; margin-block: 0 26px; }
+.svc-detail__specs { display: flex; flex-direction: column; gap: 14px; }
+.svc-detail__subhead { font-size: 1rem; font-weight: 800; color: var(--ink); margin: 0; }
+.svc-detail__chips + .svc-detail__subhead { margin-block-start: 6px; }
+.svc-detail__chips { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 10px; }
 .svc-detail__chips li {
 	display: inline-flex; align-items: center; gap: 7px; padding: 8px 15px; border-radius: 100px;
 	background: var(--surface); border: 1px solid var(--line); font-size: .9rem; font-weight: 600; color: var(--ink-2);
 }
+/* On a tinted block the chip fill matches its own background — invert it so the
+   pills keep their edge instead of dissolving into the section. */
+.svc-detail--alt .svc-detail__chips li { background: var(--white); }
 .svc-detail__chips li .aeon-icon { width: 15px; height: 15px; color: var(--orange); stroke-width: 2.6; }
-.svc-detail__list { list-style: none; padding: 0; margin: 0 0 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; }
+/* auto-fit rather than a fixed pair: this list sits in a column whose width is
+   set by the row it's in, not by the viewport, so a breakpoint can't tell when
+   two tracks stop fitting. It pairs up from ~544px of column and drops to one
+   below that — which is what the ~900px band needs, where the row is still side
+   by side but the specs column is only ~400px. */
+.svc-detail__list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); gap: 12px 24px; }
 .svc-detail__list li { display: flex; align-items: flex-start; gap: 10px; font-size: .98rem; color: var(--ink-2); line-height: 1.5; }
 .svc-detail__list li .aeon-icon { width: 20px; height: 20px; flex-shrink: 0; margin-block-start: 1px; color: var(--violet); background: var(--surface-2); border-radius: 50%; padding: 3px; stroke-width: 2.6; }
+.svc-detail--alt .svc-detail__list li .aeon-icon { background: var(--white); }
 
 /* Work samples strip — the profile-deck crops for services that have a chapter
    in the deck. Column count and tile ratio come from aeon_service_gallery(),
@@ -1099,23 +1144,32 @@ body.welcome-lock { overflow: hidden; }
 }
 .svc-work__shot:hover img { transform: scale(1.05); }
 
+/* Reel players — the video service's strip. Same tile as a still, but the
+   element inside is a player: it must not scale on hover (that would fight the
+   native controls) and it letterboxes rather than crops, because cropping a
+   reel to fit would cut the subject the edit was built around. */
+.svc-work__shot--video { background: #000; }
+.svc-work__shot--video video {
+	display: block; width: 100%; height: auto;
+	aspect-ratio: var(--svc-shot-ratio, 9 / 16);
+	object-fit: contain; background: #000;
+}
+.svc-work__shot--video:hover video { transform: none; }
+
+/* The row splits only while the container is at its full 1200px. Narrower than
+   that, a two-up row leaves the specs column too tight for its own paired list,
+   which would flip 2 → 1 → 2 columns on the way down the breakpoints and read as
+   a bug. Stacked, the block is capped instead of full-bleed: 800px keeps the
+   list paired while nothing else limits the measure. */
+@media (max-width: 1199px) {
+	.svc-detail__inner, .svc-detail__inner--solo { grid-template-columns: minmax(0, 800px); gap: 26px; }
+	.svc-detail__intro { max-width: 62ch; }
+}
+
 @media (max-width: 860px) {
-	.svc-detail__inner { grid-template-columns: 1fr; gap: 28px; }
 	/* repeat() takes a literal integer, so the per-service column count cannot be
 	   clamped here — fall back to auto-fit, which lands on 2–3 tiles at this width. */
 	.svc-work__grid { grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); }
-	.svc-detail--rev .svc-detail__visual { order: 0; }
-	/* A fixed height rather than a ratio + max-height: the 16/9 ratio could not
-	   be honoured under the cap, so the box shrank below the column width and
-	   sat flush against the inline-end edge — visibly out of line with the copy
-	   beneath it. Nothing here is a photo, so a plain height is safe.
-	   It holds only a number and an icon, so it stays a slim banner on phones
-	   instead of the deep block a photo would need. */
-	.svc-detail__visual { aspect-ratio: auto; height: clamp(84px, 16vw, 150px); }
-	.svc-detail__list { grid-template-columns: 1fr; }
-	.svc-detail__icon { width: 52px; height: 52px; border-radius: 15px; }
-	.svc-detail__icon .aeon-duo { width: 28px; height: 28px; }
-	.svc-detail__icon .aeon-icon { width: 26px; height: 26px; }
 }
 
 /* ======================================================================
@@ -1407,9 +1461,8 @@ a.branch__link:hover { color: var(--violet); transform: translateY(-3px); }
 	.site-header.is-scrolled .brand-link img,
 	.site-header.is-scrolled .custom-logo { height: 30px; }
 	.nav-toggle { width: 40px; height: 40px; }
-	.mobile-menu__inner { gap: 18px; padding: 24px; }
-	.mobile-menu__list { gap: 14px; }
-	.mobile-menu__list a { font-size: 1.25rem; }
+	/* The mobile menu only exists below 860px, so its base rules are already the
+	   phone-tier values — no override needed here. */
 
 	/* --- Section rhythm --- */
 	.section { padding-block: 38px; }
@@ -1615,14 +1668,16 @@ a.branch__link:hover { color: var(--violet); transform: translateY(-3px); }
 	/* --- Service detail blocks --- */
 	/* Eight of these stack on one page, so the vertical rhythm is tightened
 	   across the board rather than only on the gradient banner. */
-	.svc-detail { padding-block: 22px; scroll-margin-top: 76px; }
-	.svc-detail__inner { gap: 16px; }
-	.svc-detail__num { font-size: 2.1rem; }
-	.svc-detail__intro { font-size: .96rem; line-height: 1.65; margin-block: 8px 14px; }
-	.svc-detail__subhead { font-size: .94rem; margin-block: 4px 8px; }
-	.svc-detail__chips { gap: 8px; margin-block-end: 14px; }
+	.svc-detail { padding-block: 26px; scroll-margin-top: 76px; }
+	.svc-detail__head { margin-block-end: 14px; }
+	.svc-detail__inner, .svc-detail__inner--solo { gap: 18px; }
+	.svc-detail__intro { font-size: .96rem; line-height: 1.65; margin-block: 0 14px; }
+	.svc-detail__specs { gap: 10px; }
+	.svc-detail__subhead { font-size: .94rem; }
+	.svc-detail__chips + .svc-detail__subhead { margin-block-start: 4px; }
+	.svc-detail__chips { gap: 8px; }
 	.svc-detail__chips li { padding: 6px 12px; font-size: .82rem; }
-	.svc-detail__list { gap: 8px; margin-block-end: 18px; }
+	.svc-detail__list { gap: 8px; }
 	.svc-detail__list li { font-size: .9rem; }
 	.svc-detail__list li .aeon-icon { width: 18px; height: 18px; }
 	.svc-work { margin-block-start: 18px; }
@@ -1710,22 +1765,11 @@ a.branch__link:hover { color: var(--violet); transform: translateY(-3px); }
 	.service-card__cta { justify-self: start; margin-block-start: 11px; }
 	.service-card__more { justify-self: start; }
 
-	/* The gradient banner carries a number and an icon and nothing else, so on a
-	   phone it earns only the height those two need — and no longer the full
-	   column width either. Centred rather than edge-aligned: the contents are
-	   symmetrical, so a narrow box hugging one gutter would read as clipped.
-	   A shallower band also wants a smaller corner radius — 22px on an 84px box
-	   reads as a pill, not a card. */
-	.svc-detail { padding-block: 18px; }
-	.svc-detail__inner { gap: 14px; }
-	.svc-detail__visual {
-		height: 84px; inline-size: min(74%, 320px); justify-self: center;
-		border-radius: var(--radius);
-	}
-	.svc-detail__num { font-size: 1.8rem; inset-inline-end: 6%; }
-	.svc-detail__icon { width: 44px; height: 44px; border-radius: 13px; }
-	.svc-detail__icon .aeon-duo { width: 24px; height: 24px; }
-	.svc-detail__icon .aeon-icon { width: 22px; height: 22px; }
+	/* Eight blocks stack on this page, so the phone breakpoint keeps trimming the
+	   vertical rhythm — the copy is all that's left to tighten. */
+	.svc-detail { padding-block: 22px; }
+	.svc-detail__head { margin-block-end: 12px; }
+	.svc-detail__inner, .svc-detail__inner--solo { gap: 16px; }
 
 	/* Anything under 16px makes iOS zoom the viewport on focus and never zoom
 	   back. Height still drops, via the tighter padding and line-height. */
@@ -1746,4 +1790,10 @@ a.branch__link:hover { color: var(--violet); transform: translateY(-3px); }
 	   row squeeze these hardest, and Arabic loses legibility below ~12px. */
 	.about-stat__label { font-size: .8rem; }
 	.event-card__text { font-size: .76rem; }
+
+	/* Buy back panel width on 360px-class handsets without dropping the rows
+	   below a 44px tap target. */
+	.mobile-menu { padding-inline: 10px; }
+	.mobile-menu__inner { padding-inline: 16px; gap: 14px; }
+	.mobile-menu__list a { padding-block: 13px; font-size: 1rem; }
 }

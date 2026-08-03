@@ -112,6 +112,9 @@ function aeon_strings() {
 		'nav_services'      => array( 'ar' => 'خدماتنا', 'en' => 'Services' ),
 		'nav_work'          => array( 'ar' => 'أعمالنا', 'en' => 'Work' ),
 		'nav_blog'          => array( 'ar' => 'المدونة', 'en' => 'Blog' ),
+		'nav_events'        => array( 'ar' => 'فعالياتنا', 'en' => 'Events' ),
+		'nav_clients'       => array( 'ar' => 'شركاء النجاح', 'en' => 'Success Partners' ),
+		'nav_office'        => array( 'ar' => 'زورونا', 'en' => 'Visit Us' ),
 		'nav_contact'       => array( 'ar' => 'تواصل معنا', 'en' => 'Contact' ),
 		'cta_request'       => array( 'ar' => 'اطلب خدمتك', 'en' => 'Request a Service' ),
 		'cta_start'         => array( 'ar' => 'ابدأ مشروعك', 'en' => 'Start Your Project' ),
@@ -145,13 +148,10 @@ function aeon_strings() {
 		'services_title'    => array( 'ar' => 'كل ما تحتاجه علامتك التجارية', 'en' => 'Everything Your Brand Needs' ),
 		'services_sub'      => array( 'ar' => 'باقة متكاملة من الخدمات الرقمية تحت سقف واحد — من التصوير والتصميم إلى التسويق وتطوير المواقع.', 'en' => 'A full suite of digital services under one roof — from photography and design to marketing and web development.' ),
 		'svc_learn'         => array( 'ar' => 'عرض التفاصيل', 'en' => 'View Details' ),
-		'svc_detail_kicker' => array( 'ar' => 'خدمة', 'en' => 'Service' ),
-		'svc_includes_t'    => array( 'ar' => 'ما تشمله الخدمة', 'en' => "What's Included" ),
-		'svc_highlights_t'  => array( 'ar' => 'أبرز المميزات', 'en' => 'Key Highlights' ),
-		'svc_work_t'        => array( 'ar' => 'من أعمالنا', 'en' => 'Selected Work' ),
-		'svc_cta'           => array( 'ar' => 'اطلب هذه الخدمة', 'en' => 'Request This Service' ),
-		// Pre-filled WhatsApp message behind svc_cta. %s is the service name, so
-		// the chat opens already saying which one the visitor was reading.
+		// The Services page banner and its repeated headings moved to the
+		// dashboard — see aeon_services_text_fields() in inc/content/services-page.php.
+		// Pre-filled WhatsApp message behind the Services page CTA. %s is the
+		// service name, so the chat opens already saying which one was read.
 		'svc_wa_msg'        => array( 'ar' => 'أرغب في الاستفسار عن خدمة %s.', 'en' => 'I would like to inquire about the %s service.' ),
 		'svc_back'          => array( 'ar' => 'كل الخدمات', 'en' => 'All Services' ),
 

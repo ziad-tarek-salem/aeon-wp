@@ -5,7 +5,9 @@
  * The dashboard-managed home sections (Services, Why Us, Statistics, Customer
  * Reviews) are flat taxonomies edited on the compact term screen; Our Works is
  * the portfolio post type. All are grouped under the Arabic "محتوى الموقع" menu.
- * Each concern is a self-contained module in inc/content/.
+ * The Services page work-sample galleries get their own menu, "صفحة الخدمات",
+ * seated directly beneath it. Each concern is a self-contained module in
+ * inc/content/.
  *
  * @package AEON
  */
@@ -23,6 +25,8 @@ require_once AEON_DIR . '/inc/content/fields.php';
 require_once AEON_DIR . '/inc/content/works.php';
 require_once AEON_DIR . '/inc/content/settings.php';
 require_once AEON_DIR . '/inc/content/images.php';
+require_once AEON_DIR . '/inc/content/services-page.php';
+require_once AEON_DIR . '/inc/content/service-galleries.php';
 require_once AEON_DIR . '/inc/content/migrate.php';
 require_once AEON_DIR . '/inc/content/sync.php';
 

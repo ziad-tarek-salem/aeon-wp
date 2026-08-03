@@ -147,6 +147,34 @@ function aeon_field_control( $key, $f, $value, $id ) {
 			echo '</div>';
 			break;
 
+		case 'textarea':
+			printf(
+				'<textarea id="%1$s" name="%2$s" rows="%5$d" class="large-text aeon-textarea" placeholder="%4$s">%3$s</textarea>',
+				esc_attr( $id ), $name, esc_textarea( $value ), $ph,
+				isset( $f['rows'] ) ? (int) $f['rows'] : 5
+			);
+			break;
+
+		case 'lines':
+			// One row per item, each its own input named `key[]`, so the browser
+			// posts the list in order without any JavaScript in the loop. The
+			// leading empty row guarantees the key is present even when every item
+			// has been deleted — otherwise "delete them all" would post nothing and
+			// silently leave the old value in place.
+			$items = aeon_lines_to_array( $value );
+			$add   = isset( $f['add_label'] ) ? $f['add_label'] : 'إضافة عنصر';
+
+			echo '<div class="aeon-lines" data-name="' . $name . '">';
+			printf( '<input type="hidden" name="%s[]" value="">', $name );
+			echo '<ul class="aeon-lines-list">';
+			foreach ( $items as $item ) {
+				echo aeon_lines_row( $key, $item ); // phpcs:ignore WordPress.Security.EscapeOutput -- built escaped.
+			}
+			echo '</ul>';
+			echo '<button type="button" class="button aeon-lines-add"><span class="dashicons dashicons-plus-alt2"></span> ' . esc_html( $add ) . '</button>';
+			echo '</div>';
+			break;
+
 		case 'text':
 		default:
 			printf(
@@ -159,6 +187,28 @@ function aeon_field_control( $key, $f, $value, $id ) {
 	if ( ! empty( $f['hint'] ) ) {
 		echo '<p class="description">' . esc_html( $f['hint'] ) . '</p>';
 	}
+}
+
+/**
+ * One editable row of a `lines` field, escaped and ready to echo.
+ *
+ * The same shape is rebuilt in assets/admin/section-fields.js when a row is
+ * added — keep the two in step.
+ *
+ * @param string $key   Field key (the form field name).
+ * @param string $value Row value.
+ * @return string
+ */
+function aeon_lines_row( $key, $value = '' ) {
+	$out  = '<li class="aeon-lines-row">';
+	$out .= '<span class="aeon-lines-handle dashicons dashicons-menu-alt2" aria-hidden="true"></span>';
+	$out .= '<input type="text" name="' . esc_attr( $key ) . '[]" value="' . esc_attr( $value ) . '">';
+	$out .= '<button type="button" class="button aeon-lines-up" aria-label="تحريك لأعلى"><span class="dashicons dashicons-arrow-up-alt2"></span></button>';
+	$out .= '<button type="button" class="button aeon-lines-down" aria-label="تحريك لأسفل"><span class="dashicons dashicons-arrow-down-alt2"></span></button>';
+	$out .= '<button type="button" class="button aeon-lines-remove" aria-label="حذف العنصر"><span class="dashicons dashicons-no-alt"></span></button>';
+	$out .= '</li>';
+
+	return $out;
 }
 
 /**
@@ -212,6 +262,30 @@ function aeon_save_fields( $fields, $term_id ) {
 					delete_term_meta( $term_id, $meta );
 				}
 				break;
+			case 'textarea':
+				$clean = sanitize_textarea_field( $raw );
+				if ( '' === trim( $clean ) ) {
+					delete_term_meta( $term_id, $meta );
+				} else {
+					update_term_meta( $term_id, $meta, $clean );
+				}
+				break;
+
+			case 'lines':
+				// Stored as one item per line; blank rows are dropped rather than
+				// saved as empty bullets.
+				$items = is_array( $raw ) ? $raw : preg_split( '/\r\n|\r|\n/', (string) $raw );
+				$items = array_filter( array_map( static function ( $v ) {
+					return sanitize_text_field( trim( (string) $v ) );
+				}, (array) $items ), 'strlen' );
+
+				if ( $items ) {
+					update_term_meta( $term_id, $meta, implode( "\n", array_values( $items ) ) );
+				} else {
+					delete_term_meta( $term_id, $meta );
+				}
+				break;
+
 			case 'text':
 			default:
 				update_term_meta( $term_id, $meta, sanitize_text_field( $raw ) );
@@ -250,6 +324,19 @@ function aeon_fields_admin_assets( $hook ) {
 		wp_enqueue_media();
 	}
 
+	$has_lines = ! empty( array_filter( $section['fields'], static function ( $f ) {
+		return 'lines' === $f['type'];
+	} ) );
+	if ( $has_lines ) {
+		wp_enqueue_script(
+			'aeon-section-fields',
+			AEON_URI . '/assets/admin/section-fields.js',
+			array( 'jquery', 'jquery-ui-sortable' ),
+			AEON_VERSION,
+			true
+		);
+	}
+
 	$hide_desc = empty( $section['show_desc'] ) ? '.term-description-wrap{display:none;}' : '';
 	$css = '
 		.aeon-icon-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;max-width:560px;}
@@ -268,6 +355,18 @@ function aeon_fields_admin_assets( $hook ) {
 		.aeon-image-preview img{max-width:96px;height:auto;border-radius:8px;display:block;margin:.4em 0;background:#f6f7f7;padding:6px;}
 		.aeon-url{width:100%;max-width:520px;}
 		.term-slug-wrap{display:none;}
+		/* Repeatable list rows (service highlights, "what is included"). */
+		.aeon-textarea{max-width:640px;}
+		.aeon-lines{max-width:640px;}
+		.aeon-lines-list{margin:0 0 8px;padding:0;list-style:none;}
+		.aeon-lines-row{display:flex;align-items:center;gap:4px;margin-bottom:6px;}
+		.aeon-lines-row input[type=text]{flex:1 1 auto;min-width:0;}
+		.aeon-lines-handle{flex:0 0 auto;color:#a7aaad;cursor:move;}
+		.aeon-lines-row .button{flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:28px;min-width:28px;height:28px;padding:0;}
+		.aeon-lines-row .button .dashicons{width:16px;height:16px;font-size:16px;line-height:1;}
+		.aeon-lines-remove:hover,.aeon-lines-remove:focus{border-color:#d63638;color:#d63638;}
+		.aeon-lines-add .dashicons{margin-inline-end:4px;vertical-align:text-top;font-size:16px;line-height:1.4;}
+		.aeon-lines-row--drop{outline:2px dashed #2271b1;outline-offset:2px;}
 		' . $hide_desc . '
 		body.rtl .aeon-field input[type=text],body.rtl .aeon-field input[type=number]{text-align:right;}
 	';

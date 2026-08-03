@@ -1,0 +1,230 @@
+/**
+ * Services page galleries — admin screens.
+ *
+ * Sticks to core admin tokens (#2271b1, #dcdcde, #d63638) so the screen reads as
+ * part of WordPress rather than as a themed island.
+ *
+ * @package AEON
+ */
+
+.aeon-svc__lead {
+	max-width: 760px;
+	font-size: 14px;
+}
+
+/* --- Overview table --- */
+
+.aeon-svc__overview {
+	max-width: 760px;
+	margin-block: 16px;
+}
+
+.aeon-svc__overview th,
+.aeon-svc__overview td {
+	vertical-align: middle;
+}
+
+.aeon-svc__badge {
+	display: inline-block;
+	padding: 2px 10px;
+	border-radius: 999px;
+	background: #f0f0f1;
+	color: #646970;
+	font-size: 12px;
+	line-height: 1.8;
+}
+
+.aeon-svc__badge--on {
+	background: #edf6ff;
+	color: #0a4b78;
+}
+
+.aeon-svc__note {
+	max-width: 760px;
+}
+
+/* --- Toolbar --- */
+
+.aeon-svc-toolbar {
+	margin-block: 16px 12px;
+}
+
+.aeon-svc-toolbar .button .dashicons {
+	margin-inline-end: 4px;
+	vertical-align: text-top;
+	font-size: 18px;
+	line-height: 1.2;
+}
+
+/* --- Tile grid --- */
+
+.aeon-svc-grid {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 14px;
+	margin: 0 0 14px;
+	padding: 14px;
+	min-height: 60px;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	background: #fff;
+	list-style: none;
+}
+
+.aeon-svc-grid.is-empty {
+	display: none;
+}
+
+.aeon-svc-tile {
+	position: relative;
+	width: 120px;
+	margin: 0;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	background: #f6f7f7;
+	cursor: move;
+}
+
+.aeon-svc-tile img {
+	display: block;
+	width: 100%;
+	height: 120px;
+	border-radius: 3px 3px 0 0;
+	object-fit: cover;
+}
+
+/* A video with no featured image set: film glyph instead of tile art. */
+.aeon-svc-tile__ph {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 120px;
+	border-radius: 3px 3px 0 0;
+	background: #1d2327;
+	color: #c3c4c7;
+}
+
+.aeon-svc-tile__ph .dashicons {
+	width: 34px;
+	height: 34px;
+	font-size: 34px;
+}
+
+.aeon-svc-tile--video .aeon-svc-tile__alt {
+	color: #1d2327;
+}
+
+/* An item whose file no longer resolves: shown rather than quietly dropped. */
+.aeon-svc-tile--broken {
+	border-color: #d63638;
+}
+
+.aeon-svc-tile--broken .aeon-svc-tile__ph {
+	background: #fcf0f1;
+	color: #d63638;
+}
+
+.aeon-svc-tile--drop {
+	border: 2px dashed #2271b1;
+	background: #f0f6fc;
+	visibility: visible !important;
+}
+
+.aeon-svc-tile__num {
+	position: absolute;
+	inset-block-start: 4px;
+	inset-inline-start: 4px;
+	z-index: 2;
+	min-width: 20px;
+	padding: 1px 5px;
+	border-radius: 3px;
+	background: rgba(0, 0, 0, .62);
+	color: #fff;
+	font-size: 11px;
+	line-height: 1.7;
+	text-align: center;
+}
+
+/* --- Per-tile actions --- */
+
+.aeon-svc-tile__actions {
+	position: absolute;
+	inset-block-start: 4px;
+	inset-inline-end: 4px;
+	z-index: 2;
+	display: flex;
+	gap: 2px;
+	opacity: 0;
+	transition: opacity .15s ease-in-out;
+}
+
+.aeon-svc-tile:hover .aeon-svc-tile__actions,
+.aeon-svc-tile:focus-within .aeon-svc-tile__actions {
+	opacity: 1;
+}
+
+.aeon-svc-tile__actions .button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	min-width: 24px;
+	height: 24px;
+	padding: 0;
+	border-radius: 3px;
+}
+
+.aeon-svc-tile__actions .dashicons {
+	width: 15px;
+	height: 15px;
+	font-size: 15px;
+	line-height: 1;
+}
+
+.aeon-svc-remove:hover,
+.aeon-svc-remove:focus {
+	border-color: #d63638;
+	color: #d63638;
+}
+
+/* --- Alt text --- */
+
+.aeon-svc-tile__alt {
+	display: block;
+	overflow: hidden;
+	padding: 4px 6px;
+	color: #50575e;
+	font-size: 11px;
+	line-height: 1.5;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.aeon-svc-tile__alt--missing {
+	color: #b32d2e;
+	text-decoration: underline;
+}
+
+/* --- Empty state --- */
+
+.aeon-svc-empty {
+	max-width: 760px;
+	margin-block-end: 14px;
+	padding: 14px 16px;
+	border: 1px solid #dcdcde;
+	border-inline-start: 4px solid #dba617;
+	border-radius: 4px;
+	background: #fff;
+}
+
+.aeon-svc-empty p {
+	margin-block: 0 10px;
+}
+
+.aeon-svc-empty p:last-child {
+	margin-block-end: 0;
+}
+
+.aeon-svc-hint {
+	max-width: 760px;
+}
