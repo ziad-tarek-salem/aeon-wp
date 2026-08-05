@@ -675,6 +675,34 @@ a.contact__detail-value:hover { color: var(--violet); }
 .form-status { margin-block-start: 14px; font-weight: 600; text-align: center; min-height: 1.4em; }
 .form-status.is-success { color: #1f9d55; }
 .form-status.is-error { color: #d23c3c; }
+/* Success mark, shown in place of the confirmation text that is commented out in
+   app.js. The empty .form-status above already carries the gap under the button,
+   so this adds no margin of its own. Colour is the same green .is-success uses.
+   The global reduced-motion rule zeroes the pop-in for anyone who asks for it. */
+/* The badge is the wrapper, not the <svg> — padding on an SVG does not grow its
+   replaced box, so the circle would hug the tick. Same split the icon wrappers
+   elsewhere use: parent carries the shape, .aeon-icon only carries a size. */
+.form-done {
+	display: none; align-items: center; justify-content: center;
+	width: 48px; height: 48px; margin-inline: auto; border-radius: 50%; color: #1f9d55;
+	background: rgba(31, 157, 85, .1); border: 1.5px solid rgba(31, 157, 85, .28);
+	box-shadow: 0 0 0 7px rgba(31, 157, 85, .05);
+}
+/* No fill-mode anywhere below, on purpose. With `both` the mark would rest on
+   its from-frame — an invisible circle around an undrawn tick — whenever the
+   animation does not actually run, hiding the one thing that confirms the send.
+   Unfilled, the resting state is a finished check and the motion is garnish. */
+.form-done.is-visible { display: flex; animation: formDoneIn .42s cubic-bezier(.34, 1.56, .64, 1); }
+.form-done .aeon-icon { width: 24px; height: 24px; stroke-width: 2.6; }
+/* 22 clears the tick path's own 21.28 length, so at offset 0 it reads as whole. */
+.form-done .aeon-icon path { stroke-dasharray: 22; stroke-dashoffset: 0; }
+.form-done.is-visible .aeon-icon path { animation: formDoneDraw .55s var(--ease); }
+/* The circle overshoots very slightly on the way in, which is what stops it
+   reading as a flat toggle. */
+@keyframes formDoneIn { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
+/* Draws alongside the pop rather than after it: a delay would need fill-mode to
+   hold the tick undrawn, and undrawn is the state we must never rest on. */
+@keyframes formDoneDraw { from { stroke-dashoffset: 22; } to { stroke-dashoffset: 0; } }
 .btn.is-loading { opacity: .7; pointer-events: none; }
 .contact-map { margin-block-start: 0; line-height: 0; }
 .contact-map iframe { filter: grayscale(.2); }

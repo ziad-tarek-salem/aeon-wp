@@ -627,10 +627,14 @@
 
 		forms.forEach(function (form) {
 			var status = $('[data-form-status]', form);
+			var done = $('[data-form-done]', form);
 			form.addEventListener('submit', function (e) {
 				e.preventDefault();
 				status.textContent = '';
 				status.className = 'form-status';
+				// Clear last time's tick: a submission that now fails validation
+				// must not leave a success mark sitting under the error.
+				if (done) { done.classList.remove('is-visible'); }
 
 				// Use form.elements: form.name would return the form's own name property.
 				var name = val(form, 'name');
@@ -668,8 +672,32 @@
 				// Deliberately not calling form.reset(): a device with no mailto:
 				// handler shows nothing at all, and clearing the fields would throw
 				// away everything the visitor just typed.
-				status.textContent = t.mailOpened + ' ' + t.mailFallback + ' ' + window.AEON.leadEmail;
-				status.classList.add('is-success');
+
+				/* --- Post-submit confirmation message: disabled on request ---
+				 * Uncomment the two lines below to bring it back. Nothing it needs
+				 * was removed: `mailOpened` and `mailFallback` are still localized
+				 * in inc/enqueue.php, their strings still live in inc/i18n.php, and
+				 * `leadEmail` is still there because the mailto: above uses it.
+				 *
+				 * The <p data-form-status> element stays in contact.php on purpose.
+				 * The required-fields branch above still writes its error into it,
+				 * and taking it out would leave `status` null and throw on the first
+				 * line of this handler. Its min-height also reserves the space, so
+				 * leaving it empty costs no layout shift.
+				 */
+				// status.textContent = t.mailOpened + ' ' + t.mailFallback + ' ' + window.AEON.leadEmail;
+				// status.classList.add('is-success');
+
+				// The tick stands in for that message. Dropping the class and
+				// re-adding it either side of a forced reflow is what makes the
+				// pop-in replay on a second submission — toggling it twice in the
+				// same tick would otherwise go unnoticed and the mark would just
+				// sit there.
+				if (done) {
+					done.classList.remove('is-visible');
+					void done.offsetWidth;
+					done.classList.add('is-visible');
+				}
 			});
 		});
 	}

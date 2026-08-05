@@ -18,6 +18,7 @@ require_once AEON_DIR . '/inc/i18n.php';
 require_once AEON_DIR . '/inc/enqueue.php';
 require_once AEON_DIR . '/inc/brand-icons.php';
 require_once AEON_DIR . '/inc/svg-support.php';
+require_once AEON_DIR . '/inc/favicon.php';
 require_once AEON_DIR . '/inc/cpt.php';
 require_once AEON_DIR . '/inc/customizer.php';
 require_once AEON_DIR . '/inc/template-functions.php';

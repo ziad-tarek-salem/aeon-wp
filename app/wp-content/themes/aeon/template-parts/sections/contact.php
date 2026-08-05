@@ -77,6 +77,15 @@
 				<?php echo aeon_icon( 'arrow' ); ?>
 			</button>
 			<p class="form-status" data-form-status role="status" aria-live="polite"></p>
+			<?php
+			// Stands in for the confirmation text that is commented out in
+			// initContactForm(). Hidden until a submission goes through. It is a
+			// tick and nothing else on screen, so role="img" plus a label is what
+			// carries the meaning to anyone who cannot see it.
+			?>
+			<span class="form-done" data-form-done role="img" aria-label="<?php echo esc_attr( aeon_t( 'form_done' ) ); ?>">
+				<?php echo aeon_icon( 'check' ); ?>
+			</span>
 		</form>
 
 	</div>

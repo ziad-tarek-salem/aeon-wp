@@ -80,6 +80,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   sanitizes or requires either field — note this also means a stored lead now
   holds no contact details, so a visitor whose mail app never opened cannot be
   reached from the Leads screen alone.
+- **A green tick replaces the post-submit confirmation text.** The two lines that
+  wrote the message are commented out rather than deleted, with a note on
+  restoring them, and everything they depend on is still in place. In their
+  place `.form-done` shows a 48px circular mark built from the theme's existing
+  `check` icon: the circle scales in with a slight overshoot while the tick
+  draws itself on via `stroke-dashoffset`. Neither animation carries a
+  fill-mode, so the state it rests on is always a finished, visible check even
+  if the motion never runs. It clears at the start of every submission, so a
+  submission that fails validation cannot leave a tick above the error. The
+  `<p data-form-status>` element stays in the markup: the validation branch
+  writes into it, and removing it would leave `status` null and throw on the
+  handler's first line.
 - The form is no longer cleared on submit. A device with no `mailto:` handler
   shows nothing at all, and resetting would have thrown away everything typed.
 - `aeon_handle_contact()` keeps storing every submission as a private

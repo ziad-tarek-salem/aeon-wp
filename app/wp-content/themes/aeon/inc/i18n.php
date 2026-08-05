@@ -236,6 +236,7 @@ function aeon_strings() {
 		'form_success'      => array( 'ar' => 'شكراً لك! تم استلام رسالتك وسنتواصل معك قريباً.', 'en' => 'Thank you! Your message was received and we will be in touch soon.' ),
 		'form_error'        => array( 'ar' => 'حدث خطأ ما. يرجى المحاولة مرة أخرى.', 'en' => 'Something went wrong. Please try again.' ),
 		'form_required'     => array( 'ar' => 'يرجى تعبئة الحقول المطلوبة.', 'en' => 'Please fill in the required fields.' ),
+		'form_done'         => array( 'ar' => 'تم الإرسال بنجاح', 'en' => 'Sent successfully' ),
 		// Strings for the mailto: handoff. 'mail_subject' carries a %s that the
 		// front end swaps for the service the visitor picked; when the field is
 		// left blank 'mail_subject_gen' is used instead, so the subject never
