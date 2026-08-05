@@ -19,11 +19,19 @@
  * @package AEON
  */
 
+// Off from the dashboard (محتوى الموقع → النافذة الترحيبية) means no markup at
+// all, not a hidden dialog: nothing to reveal, nothing for JS to find.
+if ( ! aeon_popup_enabled() ) {
+	return;
+}
+
 $aeon_welcome_wa = aeon_whatsapp_number();
 
 if ( ! $aeon_welcome_wa ) {
 	return;
 }
+
+$aeon_welcome_img = aeon_popup_image();
 ?>
 
 <div class="welcome-modal" data-welcome-modal hidden>
@@ -40,8 +48,11 @@ if ( ! $aeon_welcome_wa ) {
 		<?php // Soft brand bloom behind the lockup — keeps the white card from reading empty. ?>
 		<span class="welcome-card__bloom" aria-hidden="true"></span>
 
-		<img class="welcome-card__logo" src="<?php echo esc_url( aeon_image_url( 'logo_lockup', 'full' ) ); ?>"
-			alt="<?php bloginfo( 'name' ); ?>" width="816" height="294" decoding="async">
+		<?php // Same class and CSS as before — only the source is now dashboard-managed. ?>
+		<img class="welcome-card__logo" src="<?php echo esc_url( $aeon_welcome_img['url'] ); ?>"
+			alt="<?php bloginfo( 'name' ); ?>"
+			width="<?php echo esc_attr( $aeon_welcome_img['width'] ); ?>"
+			height="<?php echo esc_attr( $aeon_welcome_img['height'] ); ?>" decoding="async">
 
 		<?php // Real wa.me link, so the button still works with JS disabled. ?>
 		<a class="welcome-cta" href="https://wa.me/<?php echo esc_attr( $aeon_welcome_wa ); ?>"

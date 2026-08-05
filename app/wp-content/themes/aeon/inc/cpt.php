@@ -24,6 +24,7 @@ require_once AEON_DIR . '/inc/content/taxonomies.php';
 require_once AEON_DIR . '/inc/content/fields.php';
 require_once AEON_DIR . '/inc/content/works.php';
 require_once AEON_DIR . '/inc/content/settings.php';
+require_once AEON_DIR . '/inc/content/popup.php';
 require_once AEON_DIR . '/inc/content/images.php';
 require_once AEON_DIR . '/inc/content/services-page.php';
 require_once AEON_DIR . '/inc/content/service-galleries.php';
