@@ -50,6 +50,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   arrives by.
 
 ### Fixed
+- The contact endpoint returned HTTP 500 whenever `wp_mail()` failed, even
+  though the lead had been stored perfectly well. On any host without a
+  configured mail path that meant a red error for every submission. Success is
+  now tied to the lead being stored, and an error is returned only when
+  `wp_insert_post()` itself fails.
 - A gallery item whose file could not be previewed was rendered as nothing while
   staying in the saved list — and since the next save is built from the rendered
   tiles, it disappeared as soon as anything else on the screen was touched. Such
@@ -57,6 +62,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   deliberately.
 
 ### Changed
+- **The contact form now composes the inquiry in the visitor's own email app.**
+  Submitting builds a `mailto:` handoff addressed to a fixed inbox, with the
+  subject naming the service the visitor picked (`الاستفسار عن خدمة "…"`, or a
+  general-inquiry wording when the optional field is left blank) and the body
+  laid out from the form fields. Subject and body labels follow the visitor's
+  language; blank optional fields are omitted rather than printed empty. The
+  site itself no longer sends mail, so no SMTP relay, mailbox, App Password or
+  SPF/DKIM records are needed. Note that `mailto:` cannot set the From address —
+  no mail client honours a page-supplied one — so the address the visitor typed
+  is written into the body instead.
+- **The email and phone fields were removed from the contact form.** The inquiry
+  is sent from the visitor's own mail client, which attaches their address by
+  itself, so asking for it again was redundant. The form is now name, service
+  and message; name and service share the one `.form-row` so its two-column grid
+  stays filled and the layout is unchanged. `aeon_handle_contact()` no longer
+  sanitizes or requires either field — note this also means a stored lead now
+  holds no contact details, so a visitor whose mail app never opened cannot be
+  reached from the Leads screen alone.
+- The form is no longer cleared on submit. A device with no `mailto:` handler
+  shows nothing at all, and resetting would have thrown away everything typed.
+- `aeon_handle_contact()` keeps storing every submission as a private
+  `aeon_lead`, which is what catches a visitor whose mail app never opened or
+  who never pressed Send.
 - `aeon_service_gallery()` now reads nothing but media-library attachments —
   there is no theme-file fallback left in the render path, and each shot carries
   a resolved `url` instead of a theme-relative `file`. Attachments are served at

@@ -75,7 +75,8 @@ This produces `dist/aeon.zip` — a clean package containing a single top-level
 - 🎨 On-brand design system (purple→violet→orange gradients, Cairo + Poppins).
 - 🧩 Custom post types: **Services**, **Work/Portfolio** (+ categories & filter),
   **Testimonials**, plus a private **Leads** store for form submissions.
-- 📨 Custom AJAX contact form (nonce-protected, honeypot, `wp_mail`).
+- 📨 Custom AJAX contact form (nonce-protected, honeypot) that hands the composed
+  inquiry to the visitor's own email app — no SMTP setup required.
 - ⚙️ Customizer panels for stats, contact info, and social links.
 - ✨ Animations: hero reveal, scroll reveals, count-up stats, hover effects,
   partner marquee, magnetic buttons — all disabled under `prefers-reduced-motion`.
@@ -124,8 +125,11 @@ This produces `dist/aeon.zip` — a clean package containing a single top-level
   (categories become the front-end filter buttons). Placeholders show until then.
 - **Testimonials** → *Testimonials* menu. Quote in the body, name as title,
   role/company in the side meta box.
-- **Leads** → form submissions are emailed to your Contact email **and** stored
-  privately under *Leads* so nothing is lost if mail delivery fails.
+- **Leads** → submitting the form opens the visitor's own email app with the
+  inquiry already composed and addressed, so they send it themselves. Every
+  submission is **also** stored privately under *Leads*, which is what catches
+  the visitor whose mail app never opened or who never pressed Send.
+  The destination address lives in `inc/enqueue.php` (`leadEmail`).
 
 ## Bilingual notes
 
@@ -170,6 +174,13 @@ Check the browser console. Libraries are vendored locally; if you removed
 `assets/js/lib/*`, the theme falls back to the jsDelivr CDN (needs outbound
 internet / a CSP that allows it).
 
-**Contact form doesn't email.**
-`wp_mail` needs a working mail path. Install an SMTP plugin (e.g. WP Mail SMTP).
-Submissions are also stored under *Leads* in wp-admin, so nothing is lost.
+**Nothing happens when the form is submitted.**
+The theme hands the message to whatever app the device registers for `mailto:`.
+A desktop that uses only webmail may have no handler, in which case nothing
+opens. The on-screen status names the address as a fallback, and the submission
+is stored under *Leads* in wp-admin regardless, so it is never lost.
+
+**The email arrives from the wrong address.**
+`mailto:` cannot set the From address — every mail client uses whichever account
+it is signed into, deliberately, since honouring a page-supplied From would
+allow forgery. The address the visitor typed is included in the body instead.

@@ -44,20 +44,15 @@
 		</div>
 
 		<form class="contact-form" data-contact-form data-reveal novalidate>
+			<?php
+			// Name and service share the one row so the two-column .form-row grid
+			// stays filled. The visitor's address is not asked for: the inquiry is
+			// sent from their own mail client, which attaches it automatically.
+			?>
 			<div class="form-row">
 				<label class="field">
 					<span class="field__label"><?php aeon_e( 'form_name' ); ?> *</span>
 					<input type="text" name="name" required>
-				</label>
-				<label class="field">
-					<span class="field__label"><?php aeon_e( 'form_email' ); ?> *</span>
-					<input type="email" name="email" required>
-				</label>
-			</div>
-			<div class="form-row">
-				<label class="field">
-					<span class="field__label"><?php aeon_e( 'form_phone' ); ?></span>
-					<input type="tel" name="phone">
 				</label>
 				<label class="field">
 					<span class="field__label"><?php aeon_e( 'form_service' ); ?></span>

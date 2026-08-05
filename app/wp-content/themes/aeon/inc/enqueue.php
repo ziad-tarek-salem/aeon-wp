@@ -79,11 +79,20 @@ function aeon_assets() {
 		'nonce'   => wp_create_nonce( 'aeon_contact' ),
 		'lang'    => aeon_lang(),
 		'rtl'     => aeon_is_rtl() ? 1 : 0,
+		// Fixed destination for form inquiries. Kept here rather than in the JS so
+		// the address lives in exactly one place.
+		'leadEmail' => 'egyptsohail@gmail.com',
 		'i18n'    => array(
-			'sending'  => aeon_t( 'form_sending' ),
-			'success'  => aeon_t( 'form_success' ),
-			'error'    => aeon_t( 'form_error' ),
-			'required' => aeon_t( 'form_required' ),
+			'required'           => aeon_t( 'form_required' ),
+			'mailSubject'        => aeon_t( 'mail_subject' ),
+			'mailSubjectGeneral' => aeon_t( 'mail_subject_gen' ),
+			'mailOpened'         => aeon_t( 'form_mail_opened' ),
+			'mailFallback'       => aeon_t( 'form_mail_fallback' ),
+			// Body labels reuse the form's own strings so the email reads in the
+			// same wording, and the same language, the visitor just filled in.
+			'labelName'          => aeon_t( 'form_name' ),
+			'labelService'       => aeon_t( 'form_service' ),
+			'labelMessage'       => aeon_t( 'form_message' ),
 		),
 	) );
 

@@ -229,8 +229,6 @@ function aeon_strings() {
 		'contact_title'     => array( 'ar' => 'جاهزون لبدء مشروعك القادم', 'en' => 'Ready to Start Your Next Project' ),
 		'contact_sub'       => array( 'ar' => 'أخبرنا عن مشروعك وسنعود إليك خلال 24 ساعة.', 'en' => 'Tell us about your project and we will get back within 24 hours.' ),
 		'form_name'         => array( 'ar' => 'الاسم', 'en' => 'Name' ),
-		'form_email'        => array( 'ar' => 'البريد الإلكتروني', 'en' => 'Email' ),
-		'form_phone'        => array( 'ar' => 'رقم الهاتف', 'en' => 'Phone' ),
 		'form_service'      => array( 'ar' => 'الخدمة المطلوبة', 'en' => 'Service Needed' ),
 		'form_message'      => array( 'ar' => 'رسالتك', 'en' => 'Your Message' ),
 		'form_send'         => array( 'ar' => 'إرسال الطلب', 'en' => 'Send Request' ),
@@ -238,6 +236,14 @@ function aeon_strings() {
 		'form_success'      => array( 'ar' => 'شكراً لك! تم استلام رسالتك وسنتواصل معك قريباً.', 'en' => 'Thank you! Your message was received and we will be in touch soon.' ),
 		'form_error'        => array( 'ar' => 'حدث خطأ ما. يرجى المحاولة مرة أخرى.', 'en' => 'Something went wrong. Please try again.' ),
 		'form_required'     => array( 'ar' => 'يرجى تعبئة الحقول المطلوبة.', 'en' => 'Please fill in the required fields.' ),
+		// Strings for the mailto: handoff. 'mail_subject' carries a %s that the
+		// front end swaps for the service the visitor picked; when the field is
+		// left blank 'mail_subject_gen' is used instead, so the subject never
+		// ends up with a pair of empty quotes in it.
+		'mail_subject'      => array( 'ar' => 'الاستفسار عن خدمة "%s"', 'en' => 'Inquiry about "%s" service' ),
+		'mail_subject_gen'  => array( 'ar' => 'استفسار عام من الموقع', 'en' => 'General inquiry from the website' ),
+		'form_mail_opened'  => array( 'ar' => 'تم فتح تطبيق البريد لديك. راجع الرسالة ثم اضغط إرسال.', 'en' => 'Your email app is opening. Review the message, then press Send.' ),
+		'form_mail_fallback' => array( 'ar' => 'إذا لم يفتح تطبيق البريد، راسلنا مباشرة على', 'en' => 'If your email app did not open, write to us directly at' ),
 		'contact_email_l'   => array( 'ar' => 'البريد الإلكتروني', 'en' => 'Email' ),
 		'contact_phone_l'   => array( 'ar' => 'الهاتف', 'en' => 'Phone' ),
 		'contact_addr_l'    => array( 'ar' => 'العنوان', 'en' => 'Address' ),

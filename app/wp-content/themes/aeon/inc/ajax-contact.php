@@ -1,6 +1,10 @@
 <?php
 /**
- * AJAX contact form handler (nonce-protected, wp_mail).
+ * AJAX contact form handler (nonce-protected).
+ *
+ * Records inquiries as private `aeon_lead` posts. Delivery itself happens in
+ * the visitor's own mail client via a mailto: handoff on the front end, so
+ * this file no longer sends anything and the site needs no SMTP transport.
  *
  * @package AEON
  */
@@ -13,8 +17,6 @@ function aeon_handle_contact() {
 	check_ajax_referer( 'aeon_contact', 'nonce' );
 
 	$name    = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
-	$email   = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
-	$phone   = isset( $_POST['phone'] ) ? sanitize_text_field( wp_unslash( $_POST['phone'] ) ) : '';
 	$service = isset( $_POST['service'] ) ? sanitize_text_field( wp_unslash( $_POST['service'] ) ) : '';
 	$message = isset( $_POST['message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message'] ) ) : '';
 
@@ -23,47 +25,35 @@ function aeon_handle_contact() {
 		wp_send_json_success( array( 'message' => aeon_t( 'form_success' ) ) ); // pretend success.
 	}
 
-	if ( empty( $name ) || empty( $email ) || empty( $message ) || ! is_email( $email ) ) {
+	if ( empty( $name ) || empty( $message ) ) {
 		wp_send_json_error( array( 'message' => aeon_t( 'form_required' ) ), 400 );
 	}
 
+	$body  = "Name: {$name}\n";
+	$body .= "Service: {$service}\n\n";
+	$body .= "Message:\n{$message}\n";
+
 	/**
-	 * Destination for contact-form leads. Decoupled from the public contact
-	 * address ( aeon_email ) so inquiries always reach the sales inbox.
-	 * Filterable for staging/overrides.
+	 * Delivery is the visitor's own mail client — see initContactForm() in
+	 * app.js, which hands the composed message to whatever app the device
+	 * registers for mailto:. The server sends nothing, so no SMTP transport is
+	 * needed; it only keeps the record so a lead survives the visitor's mail
+	 * app failing to open, or opening and never being sent.
+	 *
+	 * Success is therefore tied to storage. Reporting failure on a mail
+	 * transport that is no longer used would show an error for a lead that
+	 * saved perfectly well.
 	 */
-	$to      = apply_filters( 'aeon_lead_recipient', 'sales@uaeaeon.com' );
-	$subject = sprintf( '[%s] New inquiry from %s', get_bloginfo( 'name' ), $name );
-	$body    = "Name: {$name}\n";
-	$body   .= "Email: {$email}\n";
-	$body   .= "Phone: {$phone}\n";
-	$body   .= "Service: {$service}\n\n";
-	$body   .= "Message:\n{$message}\n";
-
-	// Send "From" the site's own domain (SPF/DMARC-aligned) and route replies
-	// back to the person who submitted the form.
-	$from_domain = preg_replace( '/^www\./', '', (string) wp_parse_url( home_url(), PHP_URL_HOST ) );
-	$headers = array(
-		'Content-Type: text/plain; charset=UTF-8',
-		'From: ' . get_bloginfo( 'name' ) . ' <no-reply@' . $from_domain . '>',
-		'Reply-To: ' . $name . ' <' . $email . '>',
-	);
-
-	$sent = wp_mail( $to, $subject, $body, $headers );
-
-	// Store a copy as a private record so nothing is lost if mail fails.
-	wp_insert_post( array(
-		'post_type'   => 'aeon_lead',
-		'post_status' => 'private',
-		'post_title'  => $name . ' — ' . $service,
-		'post_content'=> $body,
+	$stored = wp_insert_post( array(
+		'post_type'    => 'aeon_lead',
+		'post_status'  => 'private',
+		'post_title'   => $service ? $name . ' — ' . $service : $name,
+		'post_content' => $body,
 	) );
 
-	if ( $sent ) {
+	if ( $stored && ! is_wp_error( $stored ) ) {
 		wp_send_json_success( array( 'message' => aeon_t( 'form_success' ) ) );
 	}
-	// Even if mail transport is down we kept the lead; report soft success
-	// only when stored, but surface error if storage also failed.
 	wp_send_json_error( array( 'message' => aeon_t( 'form_error' ) ), 500 );
 }
 add_action( 'wp_ajax_aeon_contact', 'aeon_handle_contact' );

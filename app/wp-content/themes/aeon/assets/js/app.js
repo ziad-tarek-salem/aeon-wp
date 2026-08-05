@@ -116,6 +116,128 @@
 		}
 	}
 
+	/* ---------- Active nav item (scroll spy) ---------- */
+	/**
+	 * The menu item for whichever section is on screen carries the same
+	 * `current-menu-item` class WordPress prints server-side, so the underline in
+	 * main.css already covers it and no second "active" style has to exist.
+	 *
+	 * Pairs are read off the rendered menus rather than a list kept in here: any
+	 * item whose href points at a section of the page we are already on. That is
+	 * the test initSectionLinks() uses for the smooth scroll, so the highlight and
+	 * the scrolling can never disagree about what the menu covers. A section
+	 * commented out of front-page.php drops out on its own — no element, no pair —
+	 * and on the Services page, where those one-page hrefs resolve to a different
+	 * path, nothing matches and the spy stays out of the way entirely.
+	 *
+	 * Nothing here writes to history or location: the address bar is left exactly
+	 * as initSectionLinks() leaves it, section or no section.
+	 */
+	var CURRENT_CLASS = 'current-menu-item';
+
+	// A click sends the page gliding past every section in between, and following
+	// that with the highlight would read as flicker. So the clicked item is lit
+	// straight away and the spy holds still until the glide is over — a shade
+	// longer than Lenis' 1.1s, and cut short the moment a real scroll comes in.
+	var SPY_HOLD_MS = 1200;
+
+	function initScrollSpy() {
+		var pairs = [];
+		var sections = [];
+
+		$$('.site-nav__menu a[href*="#"], .mobile-menu__list a[href*="#"]').forEach(function (a) {
+			var url;
+			try { url = new URL(a.href, window.location.href); } catch (err) { return; }
+			if (url.hash.length < 2) return;
+			if (url.host !== window.location.host || url.pathname !== window.location.pathname) return;
+			var section = document.getElementById(decodeURIComponent(url.hash.slice(1)));
+			if (!section) return;
+			pairs.push({ link: a, item: a.closest('li') || a, section: section });
+			if (sections.indexOf(section) === -1) sections.push(section);
+		});
+		if (!sections.length) return;
+
+		// Document order, not measured tops: the page is still laying itself out at
+		// boot, and the sections are siblings in <main>, so source order is the
+		// order they are scrolled through.
+		sections.sort(function (a, b) {
+			return (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1;
+		});
+
+		var active = null;
+		var holdUntil = 0;
+		var ticking = false;
+
+		function setActive(section) {
+			if (section === active) return;
+			active = section;
+			pairs.forEach(function (p) {
+				var on = p.section === section;
+				p.item.classList.toggle(CURRENT_CLASS, on);
+				// "true" rather than "page": every item leads to the page we are on,
+				// so what is current is the item within the set, not the page. This
+				// also clears the aria-current WordPress prints on the Home item once
+				// the reader has scrolled past the hero.
+				if (on) p.link.setAttribute('aria-current', 'true');
+				else p.link.removeAttribute('aria-current');
+			});
+		}
+
+		function currentSection() {
+			var y = window.scrollY || document.documentElement.scrollTop;
+
+			// A closing section shorter than the viewport can never reach the line
+			// below, so the foot of the page counts as being inside it.
+			if (y + window.innerHeight >= document.documentElement.scrollHeight - 2) {
+				return sections[sections.length - 1];
+			}
+
+			// sectionOffset() is negative, so this is the y just below the bar —
+			// the very line a clicked section is parked on. Reusing it is what makes
+			// the highlight flip exactly as a section settles into place.
+			var line = y - sectionOffset();
+			var found = sections[0];
+			for (var i = 0; i < sections.length; i++) {
+				if (sections[i].getBoundingClientRect().top + y > line) break;
+				found = sections[i];
+			}
+			return found;
+		}
+
+		function update() {
+			if (ticking) return;
+			ticking = true;
+			requestAnimationFrame(function () {
+				ticking = false;
+				if (Date.now() < holdUntil) return;
+				setActive(currentSection());
+			});
+		}
+
+		pairs.forEach(function (p) {
+			p.link.addEventListener('click', function (e) {
+				// Modified clicks open a new tab and leave this page where it is, so
+				// the highlight must stay put too — same bail as initSectionLinks().
+				if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+				setActive(p.section);
+				holdUntil = Date.now() + SPY_HOLD_MS;
+			});
+		});
+
+		// Scrolling by hand outranks the hold: whatever the click was heading for,
+		// the reader is now driving.
+		['wheel', 'touchstart', 'keydown'].forEach(function (type) {
+			window.addEventListener(type, function () { holdUntil = 0; }, { passive: true });
+		});
+
+		window.addEventListener('scroll', update, { passive: true });
+		window.addEventListener('resize', update);
+		// Late images and fonts move the sections under the line; re-read once the
+		// page has finished settling.
+		window.addEventListener('load', update);
+		setActive(currentSection());
+	}
+
 	/* ---------- Header on scroll + progress bar ---------- */
 	function initHeader() {
 		var header = $('[data-header]');
@@ -479,57 +601,75 @@
 		});
 	}
 
-	/* ---------- Contact form (AJAX) ---------- */
+	/* ---------- Contact form → the visitor's own mail app ---------- */
+	// Submitting composes the inquiry and hands it to whatever client the device
+	// registers for mailto:, so the site itself never sends mail — no SMTP, no
+	// relay, no DNS records. The AJAX POST still fires so the lead is recorded in
+	// wp-admin even when the mail app never opens, or opens and is never sent.
 	function initContactForm() {
 		var forms = $$('[data-contact-form]');
 		if (!forms.length || typeof window.AEON === 'undefined') return;
+
+		function val(form, field) {
+			return form.elements[field] ? form.elements[field].value.trim() : '';
+		}
+
+		// Blank optional fields are dropped rather than printed empty, so an
+		// inquiry with no service picked does not arrive with a dangling label.
+		function buildBody(rows, messageLabel, message) {
+			var lines = [];
+			rows.forEach(function (row) {
+				if (row.value) { lines.push(row.label + ': ' + row.value); }
+			});
+			// mailto: expects CRLF between lines.
+			return lines.join('\r\n') + '\r\n\r\n' + messageLabel + ':\r\n' + message;
+		}
+
 		forms.forEach(function (form) {
 			var status = $('[data-form-status]', form);
-			var btn = form.querySelector('button[type="submit"]');
-			var label = btn ? btn.querySelector('.btn__label') : null;
-			var original = label ? label.textContent : '';
 			form.addEventListener('submit', function (e) {
 				e.preventDefault();
 				status.textContent = '';
 				status.className = 'form-status';
 
 				// Use form.elements: form.name would return the form's own name property.
-				var name = form.elements['name'].value.trim();
-				var email = form.elements['email'].value.trim();
-				var message = form.elements['message'].value.trim();
-				if (!name || !email || !message) {
+				var name = val(form, 'name');
+				var message = val(form, 'message');
+				var service = val(form, 'service');
+
+				// Honeypot before anything else: bots get silence, not a mail app.
+				if (val(form, 'website')) { return; }
+
+				if (!name || !message) {
 					status.textContent = window.AEON.i18n.required;
 					status.classList.add('is-error');
 					return;
 				}
 
+				var t = window.AEON.i18n;
+				var subject = service ? t.mailSubject.replace('%s', service) : t.mailSubjectGeneral;
+				var body = buildBody([
+					{ label: t.labelName, value: name },
+					{ label: t.labelService, value: service }
+				], t.labelMessage, message);
+
+				// Record the lead, but do not await it: the mailto: handoff has to
+				// happen inside the user gesture or Safari blocks the navigation.
 				var data = new FormData(form);
 				data.append('action', 'aeon_contact');
 				data.append('nonce', window.AEON.nonce);
-
-				if (btn) { btn.classList.add('is-loading'); }
-				if (label) { label.textContent = window.AEON.i18n.sending; }
-
 				fetch(window.AEON.ajaxUrl, { method: 'POST', body: data, credentials: 'same-origin' })
-					.then(function (r) { return r.json(); })
-					.then(function (res) {
-						if (res && res.success) {
-							status.textContent = (res.data && res.data.message) || window.AEON.i18n.success;
-							status.classList.add('is-success');
-							form.reset();
-						} else {
-							status.textContent = (res && res.data && res.data.message) || window.AEON.i18n.error;
-							status.classList.add('is-error');
-						}
-					})
-					.catch(function () {
-						status.textContent = window.AEON.i18n.error;
-						status.classList.add('is-error');
-					})
-					.finally(function () {
-						if (btn) { btn.classList.remove('is-loading'); }
-						if (label) { label.textContent = original; }
-					});
+					.catch(function () { /* the mail app is the delivery path; a lost record is not worth alarming anyone over */ });
+
+				window.location.href = 'mailto:' + window.AEON.leadEmail +
+					'?subject=' + encodeURIComponent(subject) +
+					'&body=' + encodeURIComponent(body);
+
+				// Deliberately not calling form.reset(): a device with no mailto:
+				// handler shows nothing at all, and clearing the fields would throw
+				// away everything the visitor just typed.
+				status.textContent = t.mailOpened + ' ' + t.mailFallback + ' ' + window.AEON.leadEmail;
+				status.classList.add('is-success');
 			});
 		});
 	}
@@ -555,6 +695,7 @@
 		if (hasGSAP && window.ScrollTrigger) { window.gsap.registerPlugin(window.ScrollTrigger); }
 		initSmoothScroll();
 		initSectionLinks();
+		initScrollSpy();
 		initHeader();
 		initWelcome();
 		initMobileMenu();
